@@ -3,212 +3,71 @@ import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { LARAVEL_ARCHITECTURES, NEXTJS_ROUTER_MODES, STACKS, getAvailableArchitectures, loadKitConfig } from './utils/config.js';
+import { copyRuleGroup, wrapMdToMdc } from './utils/file-helpers.js';
+import { copyArchitectureRules } from './utils/nextjs-helpers.js';
+import { copyStack } from './utils/stack-helpers.js';
 import * as versionDetector from './version-detector.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, '../templates');
 
-const stacks = ['laravel', 'nextjs', 'nestjs', 'react', 'angular', 'astro', 'generic'];
-console.log(`Available stacks: ${stacks.join(', ')}`);
+console.log(`Available stacks: ${STACKS.join(', ')}`);
 
-// Laravel architecture options
-const laravelArchitectures = [
-    { name: 'Standard Laravel (MVC with Repositories)', value: 'standard' },
-    { name: 'Domain-Driven Design (DDD)', value: 'ddd' },
-    { name: 'Hexagonal Architecture (Ports and Adapters)', value: 'hexagonal' },
-];
+/**
+ * Display information about the detected version and allow manual override
+ * @param {string} stack - Selected stack
+ * @param {string} projectPath - Path to the project
+ * @returns {Promise<number|null>} - Selected version
+ */
+const handleVersionSelection = async (stack, projectPath) => {
+    const detectedVersion = versionDetector.detectVersion(stack, projectPath);
 
-// Next.js router mode options
-const nextjsRouterModes = [
-    { name: 'App Router (for Next.js 13+)', value: 'app' },
-    { name: 'Pages Router (traditional)', value: 'pages' },
-    { name: 'Both Routers (hybrid app)', value: 'hybrid' },
-];
+    if (detectedVersion) {
+        const versionRange = versionDetector.mapVersionToRange(stack, detectedVersion, templatesDir);
+        console.log(`\nDetected ${stack} version: ${detectedVersion} (compatibility: ${versionRange})`);
 
-// Add front matter to markdown files
-const addFrontMatter = (body, meta) =>
-    `---\n${Object.entries(meta).map(([k, v]) => `${k}: ${v}`).join('\n')}\n---\n${body}`;
+        const confirm = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'useDetected',
+                message: `Use detected version ${detectedVersion}?`,
+                default: true
+            }
+        ]);
 
-// Convert markdown to markdown with front matter
-const wrapMdToMdc = (src, destFile, meta = {}) => {
-    const md = fs.readFileSync(src, 'utf8');
-    fs.outputFileSync(destFile, addFrontMatter(md, meta));
-};
-
-// Copy rule groups - this is only used for mirror docs now
-const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
-    if (!fs.existsSync(tmplDir)) {
-        return;
-    }
-
-    fs.readdirSync(tmplDir).forEach(f => {
-        const srcFile = path.join(tmplDir, f);
-        const destFile = path.join(destDir, f);
-
-        // For documentation mirroring, we want to preserve the original file extension
-        if (destDir.includes('docs/')) {
-            fs.copyFileSync(srcFile, destFile);
-        } else {
-            // This should not normally be used for rules anymore
-            // But kept for backward compatibility
-            const mdcFile = path.join(destDir, f.replace(/\.md$/, '.mdc'));
-            wrapMdToMdc(srcFile, mdcFile, meta);
+        if (confirm.useDetected) {
+            return detectedVersion;
         }
-    });
-};
-
-// Copy version-specific overlay
-const copyVersionOverlay = (stack, versionDir, targetRules) => {
-    if (!versionDir) return;
-
-    const overlayDir = path.join(templatesDir, 'stacks', stack, versionDir);
-    if (fs.existsSync(overlayDir)) {
-        fs.readdirSync(overlayDir).forEach(f => {
-            const srcFile = path.join(overlayDir, f);
-            // Write directly to rules directory with a prefixed filename for organization
-            const fileName = `${f}`.replace(/\.md$/, '.mdc');
-            // Store in stack-specific subfolder
-            const stackFolder = path.join(targetRules, stack);
-            fs.ensureDirSync(stackFolder); // Ensure stack folder exists
-            const destFile = path.join(stackFolder, fileName);
-            wrapMdToMdc(srcFile, destFile);
-        });
-        console.log(`→ Applied ${stack} ${versionDir} overlay`);
-    }
-};
-
-// Copy architecture-specific rules
-const copyArchitectureRules = (stack, architecture, targetRules) => {
-    if (!architecture || stack !== 'laravel') return;
-
-    const archDir = path.join(templatesDir, 'architectures', stack, architecture);
-    if (fs.existsSync(archDir)) {
-        fs.readdirSync(archDir).forEach(f => {
-            const srcFile = path.join(archDir, f);
-            // Write to stack folder with architecture prefix
-            const fileName = `architecture-${architecture}-${f}`.replace(/\.md$/, '.mdc');
-            // Store in stack folder
-            const stackFolder = path.join(targetRules, stack);
-            fs.ensureDirSync(stackFolder); // Ensure stack folder exists
-            const destFile = path.join(stackFolder, fileName);
-            wrapMdToMdc(srcFile, destFile);
-        });
-        console.log(`→ Applied ${stack} ${architecture} architecture rules`);
-    }
-};
-
-// Copy router-specific rules for Next.js
-const copyRouterRules = (routerMode, targetRules) => {
-    if (!routerMode) return;
-
-    const routerDirs = [];
-    if (routerMode === 'app' || routerMode === 'hybrid') {
-        routerDirs.push(path.join(templatesDir, 'stacks/nextjs/routers/app'));
-    }
-    if (routerMode === 'pages' || routerMode === 'hybrid') {
-        routerDirs.push(path.join(templatesDir, 'stacks/nextjs/routers/pages'));
+    } else {
+        console.log(`\nCould not automatically detect ${stack} version.`);
     }
 
-    routerDirs.forEach(dirPath => {
-        if (fs.existsSync(dirPath)) {
-            const routerType = path.basename(dirPath);
-            fs.readdirSync(dirPath).forEach(f => {
-                const srcFile = path.join(dirPath, f);
-                // Write to router subfolder
-                const fileName = `${f}`.replace(/\.md$/, '.mdc');
-                // Store in nextjs/router subfolder
-                const routerFolder = path.join(targetRules, 'nextjs', 'router', routerType);
-                fs.ensureDirSync(routerFolder); // Ensure router folder exists
-                const destFile = path.join(routerFolder, fileName);
-                wrapMdToMdc(srcFile, destFile);
-            });
-            console.log(`→ Applied Next.js ${routerType} router rules`);
+    // Get available versions from kit-config.json
+    const config = loadKitConfig(templatesDir);
+    const versionRanges = config.version_ranges?.[stack] || {};
+    const availableVersions = Object.keys(versionRanges).map(Number).sort((a, b) => b - a);
+
+    if (availableVersions.length === 0) {
+        console.log(`No versions configured for ${stack}.`);
+        return null;
+    }
+
+    // Ask user to select version
+    const versionAnswer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'version',
+            message: 'Select version:',
+            choices: availableVersions.map(v => ({
+                name: `${v} (${versionRanges[v] || 'not configured'})`,
+                value: v
+            })),
+            default: availableVersions[0]
         }
-    });
-};
+    ]);
 
-// Copy stack rules with version detection
-const copyStack = async (stack, targetRules, projectPath, options = {}) => {
-    console.log(`\n----- Copying rules for ${stack} -----`);
-    console.log(`Target rules directory: ${targetRules}`);
-    console.log(`Project path: ${projectPath}`);
-
-    // Copy base rules
-    const baseDir = path.join(templatesDir, 'stacks', stack, 'base');
-    console.log(`Looking for base rules at: ${baseDir}`);
-
-    // Check if base directory exists
-    if (!fs.existsSync(baseDir)) {
-        console.error(`Base directory not found: ${baseDir}`);
-    } else {
-        console.log(`Found base directory with ${fs.readdirSync(baseDir).length} files`);
-    }
-
-    // Add version information to base rules
-    let versionMeta = {};
-    const version = versionDetector.detectVersion(stack, projectPath);
-    if (version) {
-        const versionRange = versionDetector.mapVersionToRange(stack, version, templatesDir) || `v${version}`;
-        console.log(`Using version metadata: ${version} (${versionRange})`);
-        versionMeta = {
-            detectedVersion: version,
-            versionRange: versionRange
-        };
-    } else {
-        console.log(`No version detected for ${stack}, using base rules only`);
-    }
-
-    // Iterate over base files and add project path and version info
-    if (fs.existsSync(baseDir)) {
-        const baseFiles = fs.readdirSync(baseDir);
-        console.log(`Processing ${baseFiles.length} base files for ${stack}`);
-
-        // Create stack directory if it doesn't exist
-        const stackFolder = path.join(targetRules, stack);
-        fs.ensureDirSync(stackFolder);
-
-        baseFiles.forEach(f => {
-            const srcFile = path.join(baseDir, f);
-            // Store in stack folder with original filename
-            const fileName = `${f}`.replace(/\.md$/, '.mdc');
-            const destFile = path.join(stackFolder, fileName);
-
-            console.log(`Copying ${f} to ${fileName}`);
-
-            // Custom metadata for each file
-            const fileMeta = {
-                ...versionMeta,
-                stack: stack,
-                projectPath: projectPath !== '.' ? projectPath : '',
-            };
-
-            wrapMdToMdc(srcFile, destFile, fileMeta);
-        });
-        console.log(`Finished copying base rules for ${stack}`);
-    }
-
-    // Apply version-specific rules
-    const versionDir = versionDetector.getVersionDirectory(templatesDir, stack, projectPath);
-    if (versionDir) {
-        console.log(`Applying version-specific rules from ${versionDir}`);
-        copyVersionOverlay(stack, versionDir, targetRules);
-    } else {
-        console.log(`No version-specific rules to apply for ${stack}`);
-    }
-
-    // Apply architecture-specific rules for Laravel
-    if (stack === 'laravel' && options.architecture) {
-        console.log(`Applying architecture rules for ${options.architecture}`);
-        copyArchitectureRules(stack, options.architecture, targetRules);
-    }
-
-    // Apply router-specific rules for Next.js
-    if (stack === 'nextjs' && options.routerMode) {
-        console.log(`Applying router rules for ${options.routerMode}`);
-        copyRouterRules(options.routerMode, targetRules);
-    }
-
-    console.log(`----- Finished processing ${stack} -----\n`);
+    return versionAnswer.version;
 };
 
 const main = async () => {
@@ -220,7 +79,7 @@ const main = async () => {
             type: 'list',
             name: 'selected',
             message: 'Select a stack to install:',
-            choices: stacks,
+            choices: STACKS,
             default: 'laravel'
         },
         {
@@ -249,40 +108,57 @@ const main = async () => {
         }
     ]);
 
+    // Handle version selection
+    const selectedVersion = await handleVersionSelection(answers.selected, answers.projectPath);
+
+    // Load config to get default architectures
+    const config = loadKitConfig(templatesDir);
+
     // Ask for framework-specific options
     let architecture = null;
-    let routerMode = null;
 
-    // Convert single selection to array format for backward compatibility
-    const selectedStacks = [answers.selected];
-    console.log(`Selected stack: ${answers.selected}`);
-
+    // Ask for Laravel architecture options
     if (answers.selected === 'laravel') {
-        console.log(`Laravel selected, asking for architecture...`);
+        // Get available architectures
+        const availableArchitectures = getAvailableArchitectures('laravel', templatesDir);
+
+        // Use predefined options if no architectures found
+        const architectureChoices = availableArchitectures.length > 0
+            ? availableArchitectures
+            : LARAVEL_ARCHITECTURES;
+
+        // Set default architecture from config or use 'standard'
+        const defaultArchitecture = config.laravel?.default_architecture || 'standard';
+
+        console.log(`\nLaravel selected, asking for architecture...`);
         const archAnswer = await inquirer.prompt([
             {
                 type: 'list',
                 name: 'architecture',
                 message: 'Select Laravel architecture style:',
-                choices: laravelArchitectures
+                choices: architectureChoices,
+                default: defaultArchitecture
             }
         ]);
         architecture = archAnswer.architecture;
         console.log(`Selected Laravel architecture: ${architecture}`);
-    } else {
-        console.log(`Laravel not selected, skipping architecture prompt`);
     }
 
+    // Ask for Next.js architecture (previously router mode)
     if (answers.selected === 'nextjs') {
+        // Set default architecture from config or use 'app'
+        const defaultArchitecture = config.nextjs?.default_architecture || 'app';
+
         const routerAnswer = await inquirer.prompt([
             {
                 type: 'list',
-                name: 'routerMode',
-                message: 'Select Next.js router mode:',
-                choices: nextjsRouterModes
+                name: 'architecture',
+                message: 'Select Next.js architecture:',
+                choices: NEXTJS_ROUTER_MODES,
+                default: defaultArchitecture
             }
         ]);
-        routerMode = routerAnswer.routerMode;
+        architecture = routerAnswer.architecture;
     }
 
     // Use rules-kit subfolder instead of putting everything in rules/
@@ -313,90 +189,119 @@ const main = async () => {
     }
 
     // Copy selected stack rules
-    await copyStack(answers.selected, targetRules, answers.projectPath, { architecture, routerMode });
+    await copyStack(
+        templatesDir,
+        answers.selected,
+        targetRules,
+        answers.projectPath,
+        {
+            architecture,
+            selectedVersion
+        }
+    );
 
-    // Copy mirror docs if requested
+    // Apply Next.js specific architecture rules if needed
+    if (answers.selected === 'nextjs' && architecture) {
+        console.log(`Applying Next.js architecture rules for ${architecture}`);
+        copyArchitectureRules(templatesDir, architecture, targetRules);
+    }
+
+    // Generate mirror documentation
     if (answers.mirrorDocs) {
+        fs.ensureDirSync(targetDocs);
+        const globalDocsDir = path.join(targetDocs, 'global');
+        fs.ensureDirSync(globalDocsDir);
+
+        // Copy global docs
         if (answers.global) {
-            fs.copySync(path.join(templatesDir, 'global'), path.join(targetDocs, 'global'));
+            const globalDir = path.join(templatesDir, 'global');
+            if (fs.existsSync(globalDir)) {
+                copyRuleGroup(globalDir, globalDocsDir);
+                console.log(`→ Global documentation copied to ${globalDocsDir}`);
+            }
         }
 
-        // Copy base docs directly
-        copyRuleGroup(
-            path.join(templatesDir, 'stacks', answers.selected, 'base'),
-            path.join(targetDocs, answers.selected)
-        );
+        // Copy stack docs
+        const stackDocsDir = path.join(targetDocs, answers.selected);
+        fs.ensureDirSync(stackDocsDir);
+
+        // Copy base docs
+        const baseDir = path.join(templatesDir, 'stacks', answers.selected, 'base');
+        if (fs.existsSync(baseDir)) {
+            copyRuleGroup(baseDir, stackDocsDir);
+            console.log(`→ Base ${answers.selected} documentation copied to ${stackDocsDir}`);
+        }
 
         // Copy version-specific docs
         const versionDir = versionDetector.getVersionDirectory(templatesDir, answers.selected, answers.projectPath);
         if (versionDir) {
-            const versionDirPath = path.join(templatesDir, 'stacks', answers.selected, versionDir);
-            if (fs.existsSync(versionDirPath)) {
-                copyRuleGroup(
-                    versionDirPath,
-                    path.join(targetDocs, answers.selected, 'version-specific')
-                );
+            const versionDocsDir = path.join(stackDocsDir, versionDir);
+            fs.ensureDirSync(versionDocsDir);
+            const versionSrcDir = path.join(templatesDir, 'stacks', answers.selected, versionDir);
+            if (fs.existsSync(versionSrcDir)) {
+                copyRuleGroup(versionSrcDir, versionDocsDir);
+                console.log(`→ ${answers.selected} ${versionDir} documentation copied to ${versionDocsDir}`);
             }
         }
 
         // Copy architecture docs for Laravel
         if (answers.selected === 'laravel' && architecture) {
-            const archDirPath = path.join(templatesDir, 'stacks', answers.selected, 'architectures', architecture);
-            if (fs.existsSync(archDirPath)) {
-                copyRuleGroup(
-                    archDirPath,
-                    path.join(targetDocs, answers.selected, 'architecture')
-                );
+            // Check new directory structure first
+            const newArchDocsDir = path.join(stackDocsDir, 'architectures', architecture);
+            fs.ensureDirSync(newArchDocsDir);
+            const newArchSrcDir = path.join(templatesDir, 'stacks', 'laravel', 'architectures', architecture);
+
+            // Fallback to old directory structure
+            const oldArchDocsDir = path.join(stackDocsDir, 'architectures', architecture);
+            fs.ensureDirSync(oldArchDocsDir);
+            const oldArchSrcDir = path.join(templatesDir, 'architectures', 'laravel', architecture);
+
+            if (fs.existsSync(newArchSrcDir)) {
+                copyRuleGroup(newArchSrcDir, newArchDocsDir);
+                console.log(`→ ${architecture} architecture documentation copied to ${newArchDocsDir}`);
+            } else if (fs.existsSync(oldArchSrcDir)) {
+                copyRuleGroup(oldArchSrcDir, oldArchDocsDir);
+                console.log(`→ ${architecture} architecture documentation copied to ${oldArchDocsDir}`);
             }
         }
 
-        // Copy router docs for Next.js
-        if (answers.selected === 'nextjs' && routerMode) {
-            if (routerMode === 'app' || routerMode === 'hybrid') {
-                const appRouterPath = path.join(templatesDir, 'stacks/nextjs/routers/app');
-                if (fs.existsSync(appRouterPath)) {
-                    copyRuleGroup(
-                        appRouterPath,
-                        path.join(targetDocs, answers.selected, 'router/app')
-                    );
+        // Copy architecture docs for Next.js
+        if (answers.selected === 'nextjs' && architecture) {
+            const archDocsDir = path.join(stackDocsDir, 'architectures', architecture);
+            fs.ensureDirSync(archDocsDir);
+
+            // For hybrid, we need to copy both app and pages
+            if (architecture === 'hybrid') {
+                ['app', 'pages'].forEach(archType => {
+                    const archSrcDir = path.join(templatesDir, 'stacks', 'nextjs', 'architectures', archType);
+                    const typeDocsDir = path.join(archDocsDir, archType);
+                    fs.ensureDirSync(typeDocsDir);
+
+                    if (fs.existsSync(archSrcDir)) {
+                        copyRuleGroup(archSrcDir, typeDocsDir);
+                        console.log(`→ Next.js ${archType} architecture documentation copied to ${typeDocsDir}`);
+                    }
+                });
+            } else {
+                const archSrcDir = path.join(templatesDir, 'stacks', 'nextjs', 'architectures', architecture);
+                if (fs.existsSync(archSrcDir)) {
+                    copyRuleGroup(archSrcDir, archDocsDir);
+                    console.log(`→ Next.js ${architecture} architecture documentation copied to ${archDocsDir}`);
                 }
             }
-            if (routerMode === 'pages' || routerMode === 'hybrid') {
-                const pagesRouterPath = path.join(templatesDir, 'stacks/nextjs/routers/pages');
-                if (fs.existsSync(pagesRouterPath)) {
-                    copyRuleGroup(
-                        pagesRouterPath,
-                        path.join(targetDocs, answers.selected, 'router/pages')
-                    );
-                }
-            }
-        }
-    }
-
-    console.log('✅  Rules installed successfully in .cursor/rules/rules-kit/ directory');
-    console.log('   Global rules: .cursor/rules/rules-kit/global/');
-    console.log(`   Stack rules: .cursor/rules/rules-kit/${answers.selected}/`);
-
-    // Detect and report versions
-    const version = versionDetector.detectVersion(answers.selected, answers.projectPath);
-    if (version) {
-        console.log(`→ Detected ${answers.selected} version ${version}`);
-        const versionRange = versionDetector.mapVersionToRange(answers.selected, version, templatesDir);
-        if (versionRange) {
-            console.log(`  Applied ${versionRange} rules`);
         }
     }
 
     // Report architecture for Laravel
     if (answers.selected === 'laravel' && architecture) {
-        const archName = laravelArchitectures.find(a => a.value === architecture)?.name || architecture;
+        const archName = LARAVEL_ARCHITECTURES.find(a => a.value === architecture)?.name || architecture;
         console.log(`→ Using ${archName} for Laravel`);
     }
 
-    // Report router mode for Next.js
-    if (answers.selected === 'nextjs' && routerMode) {
-        const routerName = nextjsRouterModes.find(r => r.value === routerMode)?.name || routerMode;
-        console.log(`→ Using ${routerName} for Next.js`);
+    // Report architecture for Next.js
+    if (answers.selected === 'nextjs' && architecture) {
+        const architectureName = NEXTJS_ROUTER_MODES.find(r => r.value === architecture)?.name || architecture;
+        console.log(`→ Using ${architectureName} for Next.js`);
     }
 
     console.log('\nTo install rules for another stack, run this tool again.');

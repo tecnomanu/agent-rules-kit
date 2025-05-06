@@ -32,6 +32,7 @@
 		]
 	},
 	"laravel": {
+		"default_architecture": "standard",
 		"globs": [
 			"<root>/app/**/*.php",
 			"<root>/bootstrap/**/*.php",
@@ -52,9 +53,53 @@
 				"stacks/laravel/v8-11/routes.md",
 				"stacks/laravel/v12/routes.md"
 			]
+		},
+		"architectures": {
+			"standard": {
+				"globs": ["<root>/app/**/*.php", "<root>/routes/**/*.php"],
+				"pattern_rules": {
+					"<root>/app/Models/**/*.php": [
+						"stacks/laravel/architectures/standard/models.md"
+					],
+					"<root>/app/Http/Controllers/**/*.php": [
+						"stacks/laravel/architectures/standard/controllers.md"
+					]
+				}
+			},
+			"ddd": {
+				"globs": [
+					"<root>/app/Domain/**/*.php",
+					"<root>/app/Application/**/*.php",
+					"<root>/app/Infrastructure/**/*.php"
+				],
+				"pattern_rules": {
+					"<root>/app/Domain/**/*.php": [
+						"stacks/laravel/architectures/ddd/domain.md"
+					],
+					"<root>/app/Application/**/*.php": [
+						"stacks/laravel/architectures/ddd/application.md"
+					]
+				}
+			},
+			"hexagonal": {
+				"globs": [
+					"<root>/app/Core/**/*.php",
+					"<root>/app/Adapters/**/*.php",
+					"<root>/app/Ports/**/*.php"
+				],
+				"pattern_rules": {
+					"<root>/app/Core/**/*.php": [
+						"stacks/laravel/architectures/hexagonal/core.md"
+					],
+					"<root>/app/Ports/**/*.php": [
+						"stacks/laravel/architectures/hexagonal/ports.md"
+					]
+				}
+			}
 		}
 	},
 	"nextjs": {
+		"default_architecture": "app",
 		"globs": [
 			"<root>/app/**/*.{ts,tsx}",
 			"<root>/src/**/*.{ts,tsx}",
@@ -70,6 +115,38 @@
 				"stacks/nextjs/v12/pages-router.md",
 				"stacks/nextjs/v13/pages-router.md"
 			]
+		},
+		"architectures": {
+			"app": {
+				"globs": ["<root>/app/**/*.{ts,tsx}"],
+				"pattern_rules": {
+					"<root>/app/**/*.{ts,tsx}": [
+						"stacks/nextjs/architectures/app/app-router.md"
+					]
+				}
+			},
+			"pages": {
+				"globs": ["<root>/pages/**/*.{ts,tsx}"],
+				"pattern_rules": {
+					"<root>/pages/**/*.{ts,tsx}": [
+						"stacks/nextjs/architectures/pages/pages-router.md"
+					]
+				}
+			},
+			"hybrid": {
+				"globs": [
+					"<root>/app/**/*.{ts,tsx}",
+					"<root>/pages/**/*.{ts,tsx}"
+				],
+				"pattern_rules": {
+					"<root>/app/**/*.{ts,tsx}": [
+						"stacks/nextjs/architectures/app/app-router.md"
+					],
+					"<root>/pages/**/*.{ts,tsx}": [
+						"stacks/nextjs/architectures/pages/pages-router.md"
+					]
+				}
+			}
 		}
 	},
 	"nestjs": {
@@ -95,50 +172,5 @@
 	},
 	"generic": {
 		"globs": ["<root>/**/*.*"]
-	},
-	"architectures": {
-		"laravel": {
-			"standard": {
-				"globs": ["<root>/app/**/*.php", "<root>/routes/**/*.php"],
-				"pattern_rules": {
-					"<root>/app/Models/**/*.php": [
-						"architectures/laravel/standard/models.md"
-					],
-					"<root>/app/Http/Controllers/**/*.php": [
-						"architectures/laravel/standard/controllers.md"
-					]
-				}
-			},
-			"ddd": {
-				"globs": [
-					"<root>/app/Domain/**/*.php",
-					"<root>/app/Application/**/*.php",
-					"<root>/app/Infrastructure/**/*.php"
-				],
-				"pattern_rules": {
-					"<root>/app/Domain/**/*.php": [
-						"architectures/laravel/ddd/domain.md"
-					],
-					"<root>/app/Application/**/*.php": [
-						"architectures/laravel/ddd/application.md"
-					]
-				}
-			},
-			"hexagonal": {
-				"globs": [
-					"<root>/app/Core/**/*.php",
-					"<root>/app/Adapters/**/*.php",
-					"<root>/app/Ports/**/*.php"
-				],
-				"pattern_rules": {
-					"<root>/app/Core/**/*.php": [
-						"architectures/laravel/hexagonal/core.md"
-					],
-					"<root>/app/Ports/**/*.php": [
-						"architectures/laravel/hexagonal/ports.md"
-					]
-				}
-			}
-		}
 	}
 }

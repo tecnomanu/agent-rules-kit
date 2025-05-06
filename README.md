@@ -1,113 +1,138 @@
 # Agent Rules Kit
 
-A modular rules system for Cursor AI to follow best practices in your projects across multiple frameworks and architectures.
+<p align="center">
+  <img src="banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="300" />
+</p>
 
-## Overview
+> Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.
 
-Agent Rules Kit provides a collection of rules organized by:
+## What is Agent Rules Kit?
 
--   **Global rules**: Best practices that apply to any project
--   **Framework-specific rules**: Patterns, conventions and best practices for specific frameworks
--   **Version-specific rules**: Guidelines that apply to specific versions of a framework
--   **Architecture-specific rules**: Rules tailored to different architectural patterns (coming soon)
+Agent Rules Kit is a CLI tool that facilitates the installation and configuration of rules for Cursor AI, the AI-powered IDE. The rules help AI agents better understand the structure, patterns, and best practices of different technology stacks.
+
+## Main Features
+
+-   🚀 Quick setup of rules for different frameworks and stacks
+-   🔍 Automatic framework version detection
+-   🏗️ Support for multiple architectural styles
+-   📚 Mirror documentation generation for human reference
+-   🧩 Modular system for easy expansion to new frameworks
+
+## Supported Stacks
+
+-   Laravel (v8-12)
+-   Next.js (v12-14)
+-   React (v17-18)
+-   Angular (v14-17)
+-   NestJS
+-   Astro
+-   Generic (for any project)
 
 ## Installation
 
 ```bash
-# Install the rule set
-npx agent-rules-kit
-
-# Select your frameworks and preferences through the CLI wizard
+npm install -g agent-rules-kit
 ```
 
-## Structure
+## Basic Usage
 
-```
-.cursor/rules/
-├── global/                  # Global best practices for any project
-│   ├── best-practices.md    # General best practices
-│   ├── code-standards.md    # Code style standards
-│   ├── file-guard.md        # File modification guidelines
-│   └── log-process.md       # Process documentation guidelines
-│
-├── laravel/                 # Laravel-specific rules
-│   ├── laravel-best.md      # Core Laravel best practices
-│   ├── model-casting.md     # Laravel model casting guidelines
-│   ├── providers.md         # Service provider registration guidelines
-│   └── routes.md            # Routing best practices
-│
-├── nextjs/                  # Next.js-specific rules
-│   └── ...                  # Next.js rules files
-│
-├── angular/                 # Angular-specific rules
-│   └── ...                  # Angular rules files
-│
-└── ...                      # Other framework rules
+Run the command in your project root:
+
+```bash
+agent-rules-kit
 ```
 
-## Version Detection
+Follow the interactive instructions to select the stack, architecture, and other options.
 
-The system automatically detects your project's framework version:
+### Available Options
 
--   **Laravel**: Reads `composer.json` for Laravel version
--   **Next.js**: Reads `package.json` for Next.js version
--   **Angular**: Reads `package.json` for Angular version
--   **React**: Reads `package.json` for React version
+-   **Stack Selection**: Choose the main framework or technology for your project
+-   **Global Rules**: Include general best practice rules
+-   **Cursor Directory**: Specify the location of the Cursor directory
+-   **Project Path**: Define the relative path if the project is not in the root
+-   **Mirror Documentation**: Generate .md files that reflect the rules for human reference
 
-Based on the detected version, appropriate rules are applied:
+### Supported Architectures (Laravel)
 
--   **Laravel 8-9**: Uses the v8-9 specific rules
--   **Laravel 10-11**: Uses the v10-11 specific rules
--   **Laravel 12**: Uses the v12 specific rules
--   **Next.js 13**: Uses the v13 specific rules
--   **Next.js 14**: Uses the v14 specific rules
--   **Angular 16+**: Uses modern Angular rules
+-   **Standard**: Traditional MVC structure with Repositories
+-   **DDD (Domain-Driven Design)**: Business domain organization
+-   **Hexagonal**: Ports and adapters architecture
 
-The version detection system is being enhanced to better support version ranges and specific rule selection.
+### Router Modes (Next.js)
 
-## Rule Assignment
+-   **App Router**: For Next.js 13+ projects
+-   **Pages Router**: Traditional router
+-   **Hybrid**: Both router types
 
-Rules are assigned to files using patterns in `kit-config.json`:
+## File Structure
 
-```json
-"laravel": {
-  "pattern_rules": {
-    "<root>/app/Models/**/*.php": [
-      "stacks/laravel/base/laravel-best.md",
-      "stacks/laravel/v8-9/model-casting.md",
-      "stacks/laravel/v10-11/model-casting.md"
-    ]
-  }
-}
+Rules are installed in:
+
+```
+.cursor/rules/rules-kit/
+├── global/     # Global best practice rules
+└── [stack]/    # Stack-specific rules
 ```
 
-Only the appropriate version-specific rules will be applied based on detected version.
+Mirror documentation is generated in:
 
-## Extending
+```
+docs/
+├── global/
+└── [stack]/
+```
 
-You can add your own rules by creating additional markdown files in the `.cursor/rules` directory, following the standard format.
+## Advanced Configuration
 
-## Available Frameworks
+### Template Files
 
--   Laravel (versions 8-12)
--   Next.js (versions 12-14)
--   NestJS (latest versions)
--   React (versions 17-18)
--   Angular (versions 14-17)
--   Astro (latest versions)
--   Generic (for any other project type)
+Templates for all stacks are located in:
 
-## Coming Soon
+```
+templates/
+├── global/              # Global rules
+└── stacks/
+    ├── laravel/
+    │   ├── base/        # Laravel base rules
+    │   ├── v8-9/        # Laravel 8-9 specific rules
+    │   ├── v10-11/      # Laravel 10-11 specific rules
+    │   └── v12/         # Laravel 12 specific rules
+    ├── nextjs/
+    │   └── ...
+    └── ...
+```
 
--   Architecture-specific rules (DDD, Hexagonal, CQRS, etc.)
--   More framework supports
--   Multilingual rule sets
--   Custom rule creation wizard
+### Kit Configuration
 
-## Contributing
+The main configuration is in `templates/kit-config.json`, where it defines:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+-   Version ranges for each stack
+-   File patterns for specific rules
+-   Architecture configurations
+
+## Development
+
+### Prerequisites
+
+-   Node.js 14+
+-   npm or pnpm
+
+### Development Installation
+
+```bash
+git clone https://github.com/tecnomanu/agent-rules-kit.git
+cd agent-rules-kit
+npm install
+```
+
+### Available Commands
+
+```bash
+npm start           # Run the CLI
+npm test            # Run tests
+npm run test -- --update  # Update snapshots
+```
 
 ## License
 
-MIT
+ISC
