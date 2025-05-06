@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.0...v0.3.1) (2025-05-06)
+
+
+### Performance Improvements
+
+* :zap: Adapting rules and new todos ([2fe7409](https://github.com/tecnomanu/agent-rules-kit/commit/2fe740922e6eb99e18be208e892437dd7b65d743))
+
 # [0.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.2.1...v0.3.0) (2025-05-06)
 
 
