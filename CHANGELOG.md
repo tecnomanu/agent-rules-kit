@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.1...v0.3.2) (2025-05-06)
+
+
+### Bug Fixes
+
+* :ambulance: add glob rules always and files from configs ([b7252ae](https://github.com/tecnomanu/agent-rules-kit/commit/b7252ae952959498f7e226d2ee89b3ab55bfd6b3))
+
 ## [0.3.1](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.0...v0.3.1) (2025-05-06)
 
 
