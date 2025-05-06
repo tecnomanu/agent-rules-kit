@@ -5,6 +5,8 @@ on:
         branches: [main]
 
 permissions:
+    id-token: write
+    pull-requests: write
     contents: write
     issues: write
 
@@ -26,4 +28,4 @@ jobs:
             - run: pnpm exec semantic-release
               env:
                   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-                  NPM_TOKEN: ${{ secrets.npm_token }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
