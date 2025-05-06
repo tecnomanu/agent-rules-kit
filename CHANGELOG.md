@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2023-10-25
+
+### Added
+
+-   Architecture management for Next.js (app, pages, hybrid)
+-   Template variable processing for all files
+-   Improved replacement of template variables using array-based approach
+-   Status badges in README showing implementation progress
+-   Pre-commit and pre-push hooks with Husky
+-   Additional Cursor rules for architecture and template processing
+
+### Changed
+
+-   Reorganized Next.js specific code into separate helper file
+-   Updated CLI to use architecture selection for Next.js
+-   Improved README with direct execution instructions (npx/pnpx)
+-   Refactored file helper methods for better maintainability
+-   Enhanced test suite with additional tests for Next.js helpers
+
+### Fixed
+
+-   Template variables not being replaced in mirror documentation
+-   Default architecture selection in prompts
+-   Router/architecture terminology consistency
+
 ## [0.2.0] - 2023-10-15
 
 ### Added

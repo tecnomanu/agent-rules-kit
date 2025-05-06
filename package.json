@@ -1,6 +1,6 @@
 {
 	"name": "agent-rules-kit",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.",
 	"type": "module",
 	"bin": {
@@ -12,7 +12,8 @@
 		"start": "node cli/index.js",
 		"dev": "node cli/index.js",
 		"lint": "eslint \"**/*.js\"",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"release": "node scripts/release.js"
 	},
 	"dependencies": {
 		"fs-extra": "^11.0.0",
