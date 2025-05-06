@@ -26,7 +26,7 @@ export const processTemplateVariables = (content, meta = {}) => {
     const templateVariables = [
         { value: meta?.detectedVersion, replace: 'detectedVersion' },
         { value: meta?.versionRange, replace: 'versionRange' },
-        { value: meta?.projectPath, replace: 'projectPath' },
+        { value: meta?.projectPath ?? '.', replace: 'projectPath' },
         { value: meta?.stack, replace: 'stack' }
     ];
 

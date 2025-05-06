@@ -180,7 +180,7 @@ const main = async () => {
                 const srcFile = path.join(globalDir, f);
                 const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
                 const meta = {
-                    projectPath: answers.projectPath !== '.' ? answers.projectPath : '',
+                    projectPath: answers.projectPath !== '.' ? answers.projectPath : '.',
                 };
                 wrapMdToMdc(srcFile, destFile, meta);
             });
