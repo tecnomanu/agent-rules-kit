@@ -1,11 +1,13 @@
 ---
-type: Agent
+description: 
 globs: **/*
-alwaysApply: True
+alwaysApply: false
 ---
 # File Operations Guidelines
 
 These guidelines apply to all file operations in the Agent Rules Kit project.
+!Important: Al the system and files most be in english 
+ <!-- In the future: or using the translations system -->
 
 ## File Creation and Modification
 

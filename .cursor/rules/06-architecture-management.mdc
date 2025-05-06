@@ -1,0 +1,84 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Architecture Management
+
+This document explains how different architecture styles are managed for each stack in Agent Rules Kit.
+
+## Architecture Structure
+
+Each stack can have multiple architecture styles organized in the following way:
+
+```
+templates/
+└── stacks/
+    ├── laravel/
+    │   ├── base/              # Common rules for all Laravel projects
+    │   ├── architectures/     # Architecture-specific rules
+    │   │   ├── standard/      # Standard MVC architecture
+    │   │   ├── ddd/           # Domain-Driven Design architecture
+    │   │   └── hexagonal/     # Hexagonal (Ports & Adapters) architecture
+    │   └── v10-11/            # Version-specific overlays
+    │
+    └── nextjs/
+        ├── base/              # Common rules for all Next.js projects
+        ├── architectures/     # Architecture-specific rules
+        │   ├── app/           # App Router architecture (Next.js 13+)
+        │   └── pages/         # Pages Router architecture
+        └── v13/               # Version-specific overlays
+```
+
+## Configuration
+
+Architectures are configured in `templates/kit-config.json`:
+
+```json
+{
+  "laravel": {
+    "default_architecture": "standard",
+    "architectures": {
+      "standard": {
+        "globs": [...],
+        "pattern_rules": {...}
+      },
+      "ddd": {
+        "globs": [...],
+        "pattern_rules": {...}
+      }
+    }
+  },
+  "nextjs": {
+    "default_architecture": "app",
+    "architectures": {
+      "app": {...},
+      "pages": {...},
+      "hybrid": {...}
+    }
+  }
+}
+```
+
+## Architecture Selection
+
+During CLI execution, users are prompted to select an architecture for their stack:
+
+```
+? Select Laravel architecture style: (Use arrow keys)
+❯ Standard Laravel (MVC with Repositories)
+  Domain-Driven Design (DDD)
+  Hexagonal Architecture (Ports and Adapters)
+```
+
+The default architecture (set in `kit-config.json`) is pre-selected.
+
+## Implementation
+
+Architecture rules are applied in the following order:
+
+1. Base rules for the stack
+2. Version-specific overlays
+3. Architecture-specific rules
+
+This enables having common rules across all architectures while providing specialized guidance for each architecture style.
