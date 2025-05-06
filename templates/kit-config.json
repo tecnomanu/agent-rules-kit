@@ -1,0 +1,144 @@
+{
+	"version_ranges": {
+		"laravel": {
+			"8": "v8-9",
+			"9": "v8-9",
+			"10": "v10-11",
+			"11": "v10-11",
+			"12": "v12"
+		},
+		"nextjs": {
+			"12": "v12",
+			"13": "v13",
+			"14": "v14"
+		},
+		"angular": {
+			"14": "v14-15",
+			"15": "v14-15",
+			"16": "v16-17",
+			"17": "v16-17"
+		},
+		"react": {
+			"17": "v17",
+			"18": "v18"
+		}
+	},
+	"global": {
+		"always": [
+			"best-practices.md",
+			"code-standards.md",
+			"file-guard.md",
+			"log-process.md"
+		]
+	},
+	"laravel": {
+		"globs": [
+			"<root>/app/**/*.php",
+			"<root>/bootstrap/**/*.php",
+			"<root>/routes/**/*.php",
+			"<root>/database/migrations/**/*.php",
+			"<root>/config/**/*.php",
+			"<root>/tests/**/*.php"
+		],
+		"pattern_rules": {
+			"<root>/app/Models/**/*.php": [
+				"stacks/laravel/base/laravel-best.md",
+				"stacks/laravel/v8-9/model-casting.md",
+				"stacks/laravel/v10-11/model-casting.md"
+			],
+			"<root>/bootstrap/app.php": ["stacks/laravel/v12/providers.md"],
+			"<root>/config/app.php": ["stacks/laravel/v8-11/providers.md"],
+			"<root>/routes/**/*.php": [
+				"stacks/laravel/v8-11/routes.md",
+				"stacks/laravel/v12/routes.md"
+			]
+		}
+	},
+	"nextjs": {
+		"globs": [
+			"<root>/app/**/*.{ts,tsx}",
+			"<root>/src/**/*.{ts,tsx}",
+			"<root>/pages/api/**/*.ts",
+			"<root>/tests/**/*.{ts,tsx}"
+		],
+		"pattern_rules": {
+			"<root>/app/**/*.{ts,tsx}": [
+				"stacks/nextjs/v13/app-router.md",
+				"stacks/nextjs/v14/app-router.md"
+			],
+			"<root>/pages/**/*.{ts,tsx}": [
+				"stacks/nextjs/v12/pages-router.md",
+				"stacks/nextjs/v13/pages-router.md"
+			]
+		}
+	},
+	"nestjs": {
+		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"]
+	},
+	"react": {
+		"globs": [
+			"<root>/src/**/*.{ts,tsx,js,jsx}",
+			"<root>/tests/**/*.{ts,tsx,js,jsx}"
+		]
+	},
+	"angular": {
+		"globs": [
+			"<root>/src/app/**/*.ts",
+			"<root>/src/environments/**/*.ts",
+			"<root>/src/**/*.html",
+			"<root>/src/**/*.scss",
+			"<root>/e2e/**/*.ts"
+		]
+	},
+	"astro": {
+		"globs": ["<root>/src/**/*.{astro,ts,tsx,js}", "<root>/public/**/*.*"]
+	},
+	"generic": {
+		"globs": ["<root>/**/*.*"]
+	},
+	"architectures": {
+		"laravel": {
+			"standard": {
+				"globs": ["<root>/app/**/*.php", "<root>/routes/**/*.php"],
+				"pattern_rules": {
+					"<root>/app/Models/**/*.php": [
+						"architectures/laravel/standard/models.md"
+					],
+					"<root>/app/Http/Controllers/**/*.php": [
+						"architectures/laravel/standard/controllers.md"
+					]
+				}
+			},
+			"ddd": {
+				"globs": [
+					"<root>/app/Domain/**/*.php",
+					"<root>/app/Application/**/*.php",
+					"<root>/app/Infrastructure/**/*.php"
+				],
+				"pattern_rules": {
+					"<root>/app/Domain/**/*.php": [
+						"architectures/laravel/ddd/domain.md"
+					],
+					"<root>/app/Application/**/*.php": [
+						"architectures/laravel/ddd/application.md"
+					]
+				}
+			},
+			"hexagonal": {
+				"globs": [
+					"<root>/app/Core/**/*.php",
+					"<root>/app/Adapters/**/*.php",
+					"<root>/app/Ports/**/*.php"
+				],
+				"pattern_rules": {
+					"<root>/app/Core/**/*.php": [
+						"architectures/laravel/hexagonal/core.md"
+					],
+					"<root>/app/Ports/**/*.php": [
+						"architectures/laravel/hexagonal/ports.md"
+					]
+				}
+			}
+		}
+	}
+}

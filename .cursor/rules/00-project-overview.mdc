@@ -1,0 +1,16 @@
+---
+type: Agent
+globs: **/*
+alwaysApply: True
+---
+# Project Overview & Guidelines
+
+This repository contains **agent‑rules‑kit**, a CLI tool and template set that bootstraps Cursor rules for multiple stacks.
+The rules in this folder *govern the maintenance of this very project*.
+
+| Topic | Quick rule |
+|-------|------------|
+| CLI changes | Update *cli/index.js* and its prompts; add integration tests. |
+| Templates | Follow folder layout: `templates/global/`, `templates/stacks/<stack>/base/`, `templates/stacks/<stack>/v*/`. |
+| Config | Keep `templates/kit-config.json` as single source of truth for globs & version ranges. |
+| Releases | Bump `package.json` + CHANGELOG. Tag using `vx.y.z`. |
