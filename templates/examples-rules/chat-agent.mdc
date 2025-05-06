@@ -1,0 +1,114 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Agentes LLM de ChatRobot
+
+En ChatRobot v3, los agentes LLM reemplazan el sistema de preguntas fijas de versiones anteriores.
+
+## Tipos de Agentes
+
+1. **Captura de Leads** (`lead_capture`): Enfocado en obtener información específica del usuario (email, nombre, teléfono, etc.)
+2. **Asistencia** (`assistance`): Proporciona información y responde preguntas basadas en el knowledge base configurado
+3. **Personalizado** (`custom`): Combina características de ambos tipos según configuración específica
+
+## Componentes Clave
+
+-   **Prompt**: Instrucciones iniciales que definen el comportamiento del agente en el campo `prompt` del modelo Chat
+-   **RequiredFields**: Lista de campos que el agente debe capturar durante la conversación en el campo `required_fields` del modelo Chat
+-   **KnowledgeSources**: Fuentes de información para entrenar al agente (URLs, archivos, texto) en el modelo KnowledgeSource
+
+## Implementación en Servicios
+
+La lógica de los agentes está implementada en varios servicios:
+
+### MessageService
+
+Este servicio maneja el procesamiento de mensajes y la generación de respuestas:
+
+```php
+class MessageService
+{
+    protected MessageRepository $messageRepository;
+    protected OpenAIService $openAIService;
+    protected ConversationService $conversationService;
+
+    // ...
+
+    public function generateResponse(string $conversationId, object $chat)
+    {
+        // Obtener la conversación con todos sus mensajes
+        $conversation = $this->conversationService->getConversationWithMessages($conversationId);
+
+        // Preparar los mensajes para enviar a OpenAI
+        $messages = $this->prepareMessagesForLLM($conversation, $chat);
+
+        // Llamar a OpenAI para generar la respuesta
+        $response = $this->openAIService->generateChatCompletion($messages);
+
+        // Extraer información capturada si existe
+        $capturedField = null;
+        $capturedData = null;
+
+        // Crear y devolver el mensaje del asistente
+        // ...
+    }
+
+    protected function prepareMessagesForLLM($conversation, $chat)
+    {
+        $messages = [];
+
+        // Agregar el prompt del sistema al inicio
+        if ($chat->prompt) {
+            $messages[] = [
+                'role' => 'system',
+                'content' => $chat->prompt
+            ];
+        }
+
+        // Agregar los mensajes de la conversación
+        foreach ($conversation->messages as $message) {
+            $messages[] = [
+                'role' => $message->role,
+                'content' => $message->content
+            ];
+        }
+
+        return $messages;
+    }
+}
+```
+
+### OpenAIService
+
+Este servicio maneja la comunicación con la API de OpenAI:
+
+```php
+class OpenAIService
+{
+    // ...
+
+    public function generateChatCompletion(array $messages, float $temperature = 0.7, int $maxTokens = 500)
+    {
+        // Llamar a la API de OpenAI y procesar la respuesta
+        // ...
+    }
+
+    public function extractDataFromText(string $text, array $fields)
+    {
+        // Extraer información específica del texto usando OpenAI
+        // ...
+    }
+}
+```
+
+## Procesamiento de Mensajes
+
+1. El usuario envía un mensaje que se almacena con `role='user'`
+2. Se recupera la conversación y su historial de mensajes
+3. Se prepara el contexto con el prompt del sistema y los mensajes previos
+4. Se llama a la API de OpenAI para generar una respuesta
+5. La respuesta se analiza para extraer información capturada (campos del lead)
+6. Se almacena la respuesta como un mensaje con `role='assistant'`
+7. Si se detecta captura de datos, se actualizan los campos correspondientes

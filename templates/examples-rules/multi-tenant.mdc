@@ -1,0 +1,202 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Arquitectura Multi-Tenant
+
+ChatRobot tiene una arquitectura multi-tenant jerárquica con tres niveles:
+
+-   COMPANY
+-   RESELLER
+-   FRANCHISE
+
+## Estructura de Tenants
+
+Cada tenant tiene su propio conjunto de:
+
+-   Usuarios
+-   Chats
+-   Leads
+-   Configuraciones
+
+## Implementación en Modelos
+
+El tenant_id se utiliza como clave para separar los datos en varias tablas:
+
+```php
+// Modelo Chat
+class Chat extends Model
+{
+    protected $fillable = [
+        'tenant_id',
+        'hash',
+        'name',
+        // ...
+    ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // ...
+}
+
+// Modelo Lead
+class Lead extends Model
+{
+    protected $fillable = [
+        'chat_id',
+        'tenant_id',
+        'conversation_id',
+        // ...
+    ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // ...
+}
+
+// Modelo User
+class User extends Authenticatable
+{
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'tenant_id',
+        'role_id',
+    ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // ...
+}
+```
+
+## Implementación en Repositorios
+
+Los repositorios implementan métodos para filtrar por tenant:
+
+```php
+// ChatRepository
+class ChatRepository extends BaseRepository
+{
+    public function getChatsByTenant(string $tenantId)
+    {
+        return $this->model->where('tenant_id', $tenantId)->get();
+    }
+
+    public function getActiveChatsByTenant(string $tenantId)
+    {
+        return $this->model->where('tenant_id', $tenantId)
+            ->where('active', true)
+            ->get();
+    }
+
+    // ...
+}
+
+// LeadRepository
+class LeadRepository extends BaseRepository
+{
+    public function getByTenant(string $tenantId)
+    {
+        return $this->model->where('tenant_id', $tenantId)->get();
+    }
+
+    public function getLeadsByStatus(string $status, string $tenantId = null)
+    {
+        $query = $this->model->where('status', $status);
+
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        return $query->get();
+    }
+
+    // ...
+}
+```
+
+## Implementación en Controladores
+
+Los controladores respetan la separación multi-tenant filtrando por tenant del usuario autenticado:
+
+```php
+class ChatController extends Controller
+{
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $tenantId = $request->input('tenant_id');
+
+        if ($tenantId) {
+            $chats = $this->chatService->getChatsByTenant($tenantId);
+        } else {
+            $chats = $this->chatService->getAllChats();
+        }
+
+        return ChatResource::collection($chats);
+    }
+
+    // ...
+}
+
+class LeadController extends Controller
+{
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $tenantId = $request->input('tenant_id');
+        $chatId = $request->input('chat_id');
+
+        if ($chatId) {
+            $leads = $this->leadService->getLeadsByChat($chatId);
+        } elseif ($tenantId) {
+            $leads = $this->leadService->getLeadsByTenant($tenantId);
+        } else {
+            // Aquí podríamos agregar lógica para limitar según permisos del usuario
+            $leads = [];
+        }
+
+        return LeadResource::collection($leads);
+    }
+
+    // ...
+}
+```
+
+## Jerarquía de Roles y Acceso
+
+| Capacidad    | superadmin | company_admin | agent_user |
+| ------------ | ---------- | ------------- | ---------- |
+| CRUD tenants | ✔          | ✖             | ✖          |
+| CRUD chats   | ✔          | ✔             | ✖          |
+| View leads   | ✔          | ✔             | ✔          |
+| Edit prompt  | ✔          | ✔             | ✖          |
+
+Los permisos se implementan utilizando métodos en el modelo User:
+
+```php
+public function isSuperAdmin(): bool
+{
+    return $this->role && $this->role->name === 'superadmin';
+}
+
+public function isCompanyAdmin(): bool
+{
+    return $this->role && $this->role->name === 'company_admin';
+}
+
+public function isAgent(): bool
+{
+    return $this->role && $this->role->name === 'agent_user';
+}
+```

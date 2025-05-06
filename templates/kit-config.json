@@ -1,0 +1,44 @@
+{
+	"laravel": {
+		"globs": [
+			"<root>/app/**/*.php",
+			"<root>/bootstrap/**/*.php",
+			"<root>/routes/**/*.php",
+			"<root>/database/migrations/**/*.php",
+			"<root>/config/**/*.php",
+			"<root>/tests/**/*.php"
+		]
+	},
+	"nextjs": {
+		"globs": [
+			"<root>/app/**/*.{ts,tsx}",
+			"<root>/src/**/*.{ts,tsx}",
+			"<root>/pages/api/**/*.ts",
+			"<root>/tests/**/*.{ts,tsx}"
+		]
+	},
+	"nestjs": {
+		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"]
+	},
+	"react": {
+		"globs": [
+			"<root>/src/**/*.{ts,tsx,js,jsx}",
+			"<root>/tests/**/*.{ts,tsx,js,jsx}"
+		]
+	},
+	"angular": {
+		"globs": [
+			"<root>/src/app/**/*.ts",
+			"<root>/src/environments/**/*.ts",
+			"<root>/src/**/*.html",
+			"<root>/src/**/*.scss",
+			"<root>/e2e/**/*.ts"
+		]
+	},
+	"astro": {
+		"globs": ["<root>/src/**/*.{astro,ts,tsx,js}", "<root>/public/**/*.*"]
+	},
+	"generic": {
+		"globs": ["<root>/**/*.*"]
+	}
+}

@@ -1,0 +1,8 @@
+---
+description:
+globs: templates/**/*,cli/**/*.js,README.md, CHANGELOG.md
+alwaysApply: false
+---
+
+Maintain agent‑rules‑kit: update CLI, README, CHANGELOG and tests whenever
+you add/remove templates or features. Run `npm run test` before finishing.

@@ -1,0 +1,23 @@
+{
+	"name": "agent-rules-kit",
+	"version": "0.1.1",
+	"description": "Bootstrap de reglas **Cursor** (`.mdc`) y documentación espejo (`.md`) para proyectos guiados por agentes IA.",
+	"type": "module",
+	"bin": {
+		"agent-rules-kit": "cli/index.js"
+	},
+	"scripts": {
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"inquirer": "^9.0.0",
+		"fs-extra": "^11.0.0"
+	},
+	"devDependencies": {
+		"husky": "^9.0.0",
+		"vitest": "^1.5.0"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}

@@ -1,0 +1,173 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Patrón Repositorio
+
+El proyecto utiliza el patrón repositorio para abstraer la capa de persistencia de la lógica de negocio. Esto facilita las pruebas unitarias y minimiza el impacto de posibles cambios en la capa de datos.
+
+## Estructura del Patrón Repositorio
+
+1. **Clase Base Abstracta**: `app/Repositories/BaseRepository.php` define la interfaz común y funcionalidades básicas.
+2. **Implementaciones Concretas**: Cada entidad tiene su propia clase repositorio que extiende la base.
+
+## Implementación de BaseRepository
+
+```php
+namespace App\Repositories;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+abstract class BaseRepository
+{
+    protected Model $model;
+
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
+    public function getAll(): Collection
+    {
+        return $this->model->all();
+    }
+
+    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model->paginate($perPage);
+    }
+
+    public function findById(string $id): ?Model
+    {
+        return $this->model->find($id);
+    }
+
+    public function create(array $data): Model
+    {
+        return $this->model->create($data);
+    }
+
+    public function update(string $id, array $data): bool
+    {
+        $record = $this->findById($id);
+        if (!$record) {
+            return false;
+        }
+        return $record->update($data);
+    }
+
+    public function delete(string $id): bool
+    {
+        $record = $this->findById($id);
+        if (!$record) {
+            return false;
+        }
+        return $record->delete();
+    }
+
+    public function findWhere(array $criteria): Collection
+    {
+        return $this->model->where($criteria)->get();
+    }
+
+    public function findWhereFirst(array $criteria): ?Model
+    {
+        return $this->model->where($criteria)->first();
+    }
+}
+```
+
+## Implementaciones Específicas de Repositorios
+
+Cada repositorio agrega métodos específicos para su entidad:
+
+```php
+class ChatRepository extends BaseRepository
+{
+    public function __construct(Chat $model)
+    {
+        parent::__construct($model);
+    }
+
+    public function getChatsByTenant(string $tenantId)
+    {
+        return $this->model->where('tenant_id', $tenantId)->get();
+    }
+
+    public function getChatWithKnowledgeSources(string $chatId)
+    {
+        return $this->model->with('knowledgeSources')->find($chatId);
+    }
+
+    public function findByHash(string $hash)
+    {
+        return $this->model->where('hash', $hash)->first();
+    }
+
+    // Otros métodos específicos...
+}
+```
+
+## Registro de Repositorios mediante Inyección de Dependencias
+
+Los repositorios se registran en el `app/Providers/RepositoryServiceProvider.php`:
+
+```php
+class RepositoryServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Registramos los repositorios con sus respectivos modelos
+        $this->app->bind(TenantRepository::class, function ($app) {
+            return new TenantRepository(new Tenant());
+        });
+
+        $this->app->bind(ChatRepository::class, function ($app) {
+            return new ChatRepository(new Chat());
+        });
+
+        // Registro de otros repositorios...
+    }
+}
+```
+
+## Uso en Servicios
+
+Los servicios reciben los repositorios mediante inyección de dependencias:
+
+```php
+class ChatService
+{
+    protected ChatRepository $chatRepository;
+
+    public function __construct(ChatRepository $chatRepository)
+    {
+        $this->chatRepository = $chatRepository;
+    }
+
+    public function getAllChats()
+    {
+        return $this->chatRepository->getAll();
+    }
+
+    public function getChat(string $id)
+    {
+        return $this->chatRepository->findById($id);
+    }
+
+    // Métodos con lógica de negocio que utilizan el repositorio...
+}
+```
+
+## Repositorios Implementados
+
+-   **TenantRepository**: Operaciones sobre tenants (empresas).
+-   **UserRepository**: Operaciones sobre usuarios.
+-   **ChatRepository**: Operaciones sobre chats.
+-   **KnowledgeSourceRepository**: Operaciones sobre fuentes de conocimiento.
+-   **ConversationRepository**: Operaciones sobre conversaciones.
+-   **MessageRepository**: Operaciones sobre mensajes.
+-   **LeadRepository**: Operaciones sobre leads.
