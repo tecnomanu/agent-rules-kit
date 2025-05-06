@@ -7,6 +7,10 @@ alwaysApply: false
 
 This document explains how different architecture styles are managed for each stack in Agent Rules Kit.
 
+## Package managment
+
+Use always `pnpm` to install new package or something to run.
+
 ## Architecture Structure
 
 Each stack can have multiple architecture styles organized in the following way:
