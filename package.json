@@ -1,6 +1,6 @@
 {
 	"name": "agent-rules-kit",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"description": "Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.",
 	"type": "module",
 	"bin": {

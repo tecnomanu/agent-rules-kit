@@ -1,3 +1,20 @@
+# [0.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.2.1...v0.3.0) (2025-05-06)
+
+
+### Bug Fixes
+
+* :ambulance: variable uppercase to npm ([4dc8a4c](https://github.com/tecnomanu/agent-rules-kit/commit/4dc8a4c36247649c074fbaf3a15afcf9992f536e))
+* :bug: install pnpm on release workflow ([cda33a3](https://github.com/tecnomanu/agent-rules-kit/commit/cda33a3df0596e2c9055eb183009b859aafd5343))
+* :bug: projectPath default ([8b733c1](https://github.com/tecnomanu/agent-rules-kit/commit/8b733c162a45b6d6c396cc91870fb669f9bb425d))
+* :bug: semantic release ([4af97f7](https://github.com/tecnomanu/agent-rules-kit/commit/4af97f7eac4c0554dab9222c6e5b3a00c80b3a9f))
+* :sparkles: fix variable name ([3ed2a47](https://github.com/tecnomanu/agent-rules-kit/commit/3ed2a47f895cbc48c7f40081915ba9b78d1e1de9))
+
+
+### Features
+
+* :bug: add permissions to release ([d53e17c](https://github.com/tecnomanu/agent-rules-kit/commit/d53e17c9c5313d4ae74ef074ab113b3833a4e904))
+* :zap: Changes on release semantic ([7fc5845](https://github.com/tecnomanu/agent-rules-kit/commit/7fc5845e3f1d63e0878b23ba7f0433a736728aee))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
