@@ -1,26 +1,40 @@
 {
 	"name": "agent-rules-kit",
-	"version": "0.1.1",
-	"description": "Bootstrap de reglas **Cursor** (`.mdc`) y documentación espejo (`.md`) para proyectos guiados por agentes IA.",
+	"version": "0.2.0",
+	"description": "Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.",
 	"type": "module",
 	"bin": {
 		"agent-rules-kit": "cli/index.js"
 	},
 	"scripts": {
 		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"start": "node cli/index.js",
-		"dev": "node cli/index.js"
+		"dev": "node cli/index.js",
+		"lint": "eslint \"**/*.js\"",
+		"prepare": "husky install"
 	},
 	"dependencies": {
-		"inquirer": "^9.0.0",
-		"fs-extra": "^11.0.0"
+		"fs-extra": "^11.0.0",
+		"inquirer": "^9.0.0"
 	},
 	"devDependencies": {
-		"husky": "^9.0.0",
+		"eslint": "^9.26.0",
+		"husky": "^8.0.0",
 		"vitest": "^1.5.0"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"cursor",
+		"rules",
+		"templates",
+		"agent",
+		"ai",
+		"laravel",
+		"nextjs",
+		"react",
+		"angular"
+	],
+	"author": "Manuel Bruña",
 	"license": "ISC",
 	"repository": {
 		"type": "git",

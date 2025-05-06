@@ -1,7 +1,7 @@
 # Agent Rules Kit
 
 <p align="center">
-  <img src="banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="300" />
+  <img src="banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
 </p>
 
 > Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.
