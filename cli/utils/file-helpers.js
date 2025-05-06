@@ -3,6 +3,10 @@
  */
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { loadKitConfig } from './config.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Add front matter to markdown files
@@ -22,11 +26,16 @@ export const addFrontMatter = (body, meta) =>
 export const processTemplateVariables = (content, meta = {}) => {
     let processedContent = content;
 
+    // Normalize projectPath for variable replacement
+    const projectPath = (!meta.projectPath || meta.projectPath === '.')
+        ? './'
+        : meta.projectPath;
+
     // Array of template variables and their corresponding meta values
     const templateVariables = [
         { value: meta?.detectedVersion, replace: 'detectedVersion' },
         { value: meta?.versionRange, replace: 'versionRange' },
-        { value: meta?.projectPath ?? '.', replace: 'projectPath' },
+        { value: projectPath, replace: 'projectPath' },
         { value: meta?.stack, replace: 'stack' }
     ];
 
@@ -50,10 +59,127 @@ export const processTemplateVariables = (content, meta = {}) => {
 export const wrapMdToMdc = (src, destFile, meta = {}) => {
     const md = fs.readFileSync(src, 'utf8');
 
-    // Process all template placeholders in markdown content
-    const processedMd = processTemplateVariables(md, meta);
+    // Get the filename without path
+    const fileName = path.basename(src);
 
-    fs.outputFileSync(destFile, addFrontMatter(processedMd, meta));
+    // Get the directory structure to identify if this is a global rule or stack-specific
+    const srcRelPath = src.replace(/\\/g, '/');
+    const isGlobal = srcRelPath.includes('/global/');
+    const stack = meta.stack || (srcRelPath.includes('/stacks/') ? srcRelPath.split('/stacks/')[1].split('/')[0] : null);
+
+    // Load kit config
+    const templatesDir = path.join(__dirname, '../../templates');
+    const kitConfig = loadKitConfig(templatesDir);
+
+    // Initialize frontmatter with existing meta
+    const frontMatter = { ...meta };
+
+    // Normalize projectPath for glob replacements
+    const projectPathPrefix = (frontMatter.projectPath === '.' || frontMatter.projectPath === '')
+        ? ''
+        : frontMatter.projectPath + '/';
+
+    // Make sure projectPath is properly set for template replacement
+    if (!frontMatter.projectPath || frontMatter.projectPath === '.') {
+        frontMatter.projectPath = './';
+    }
+
+    // Check for global always rules regardless of location
+    if (kitConfig.global?.always && kitConfig.global.always.includes(fileName)) {
+        frontMatter.alwaysApply = true;
+        console.log(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
+    }
+
+    // Add globs information
+    if (isGlobal) {
+        // For global rules
+        frontMatter.globs = "**/*"; // Default to all files
+
+        // Check if this file is in the "always" list (redundant check, but kept for clarity)
+        if (kitConfig.global?.always && kitConfig.global.always.includes(fileName)) {
+            frontMatter.alwaysApply = true;
+            console.log(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
+        } else {
+            frontMatter.alwaysApply = false;
+            console.log(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
+        }
+    } else if (stack && kitConfig[stack]) {
+        console.log(`Processing stack-specific rule for ${stack}: ${fileName}`);
+
+        // For stack-specific rules
+        if (kitConfig[stack].globs) {
+            // Replace <root> with actual project path
+            const processedGlobs = kitConfig[stack].globs.map(glob =>
+                glob.replace(/<root>\//g, projectPathPrefix)
+            );
+            frontMatter.globs = processedGlobs.join(',');
+            console.log(`Applied default globs for ${stack}: ${frontMatter.globs}`);
+        }
+
+        // Check pattern rules to see if this file has specific globs
+        if (kitConfig[stack].pattern_rules) {
+            for (const [pattern, rules] of Object.entries(kitConfig[stack].pattern_rules)) {
+                // Convert to array if it's not already
+                const rulesList = Array.isArray(rules) ? rules : [rules];
+
+                // Check if this rule is in the list
+                for (const rule of rulesList) {
+                    const ruleParts = rule.split('/');
+                    const ruleFileName = ruleParts[ruleParts.length - 1];
+
+                    if (ruleFileName === fileName) {
+                        // Replace <root> with actual project path in the pattern
+                        const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
+                        frontMatter.globs = processedPattern;
+                        console.log(`Applied pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check architecture-specific rules
+        const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
+        if (archMatch && archMatch[1] && kitConfig[stack].architectures?.[archMatch[1]]) {
+            const arch = archMatch[1];
+            console.log(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
+
+            // Add architecture-specific globs
+            if (kitConfig[stack].architectures[arch].globs) {
+                // Replace <root> with actual project path
+                const processedGlobs = kitConfig[stack].architectures[arch].globs.map(glob =>
+                    glob.replace(/<root>\//g, projectPathPrefix)
+                );
+                frontMatter.globs = processedGlobs.join(',');
+                console.log(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+            }
+
+            // Check architecture-specific pattern rules
+            if (kitConfig[stack].architectures[arch].pattern_rules) {
+                for (const [pattern, rules] of Object.entries(kitConfig[stack].architectures[arch].pattern_rules)) {
+                    const rulesList = Array.isArray(rules) ? rules : [rules];
+                    for (const rule of rulesList) {
+                        const ruleParts = rule.split('/');
+                        const ruleFileName = ruleParts[ruleParts.length - 1];
+
+                        if (ruleFileName === fileName) {
+                            // Replace <root> with actual project path in the pattern
+                            const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
+                            frontMatter.globs = processedPattern;
+                            console.log(`Applied architecture pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Process all template placeholders in markdown content
+    const processedMd = processTemplateVariables(md, frontMatter);
+
+    fs.outputFileSync(destFile, addFrontMatter(processedMd, frontMatter));
+    console.log(`Converted ${fileName} to MDC with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply}]`);
 };
 
 /**

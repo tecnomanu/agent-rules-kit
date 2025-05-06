@@ -193,7 +193,7 @@ const main = async () => {
         templatesDir,
         answers.selected,
         targetRules,
-        answers.projectPath,
+        answers.projectPath ?? '.',
         {
             architecture,
             selectedVersion

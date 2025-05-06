@@ -1,3 +1,5 @@
 -   Se debería dar un alerta si la carpeta de rules-kit ya existe o si la del stack selecionado tambien.
 -   Si la carpeta existe debería generar un backup con fecha de hoy y copiar los actuales, y crear todo de cero, dejano las reglas nuevas y la carpeta dentro como backup. Igual por defecto esa es la acción pero consultar "queres hacer un backup de los datos actuales, sino se gborrarn" default Y
--   Debería PO
+-   cuando consulte por path relativo del proyecto, qeu deje en claro qeu es apartir de donde se eligio el path de .cursor/rules, si se elije "appmain" par .cursor/rules, qeudando appmain/.cursor/rules, que se vea "Relative path to your project (if not in the root)" aclarnado "from .cursor directory"
+-   Deberiamos mover los logs a un modo debug, no eliminarlos pero si quitarlos en el modo normal.
+-   Sumar mas colores y emojis al cli.

@@ -12,8 +12,9 @@ import { wrapMdToMdc } from './file-helpers.js';
  * @param {string} stack - The stack name
  * @param {string} versionDir - The version directory
  * @param {string} targetRules - The target rules directory
+ * @param {Object} options - Additional options
  */
-export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules) => {
+export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules, options = {}) => {
     if (!versionDir) return;
 
     const overlayDir = path.join(templatesDir, 'stacks', stack, versionDir);
@@ -26,7 +27,15 @@ export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules)
             const stackFolder = path.join(targetRules, stack);
             fs.ensureDirSync(stackFolder); // Ensure stack folder exists
             const destFile = path.join(stackFolder, fileName);
-            wrapMdToMdc(srcFile, destFile);
+
+            // Pass correct metadata including projectPath
+            const meta = {
+                projectPath: options.projectPath || '.',
+                stack: stack,
+                detectedVersion: options.detectedVersion,
+                versionRange: options.versionRange
+            };
+            wrapMdToMdc(srcFile, destFile, meta);
         });
         console.log(`→ Applied ${stack} ${versionDir} overlay`);
     }
@@ -38,8 +47,9 @@ export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules)
  * @param {string} stack - The stack name
  * @param {string} architecture - The architecture name
  * @param {string} targetRules - The target rules directory
+ * @param {Object} options - Additional options
  */
-export const copyArchitectureRules = (templatesDir, stack, architecture, targetRules) => {
+export const copyArchitectureRules = (templatesDir, stack, architecture, targetRules, options = {}) => {
     if (!architecture || stack !== 'laravel') return;
 
     // Use the new structure from stacks/laravel/architectures
@@ -58,7 +68,16 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
             const stackFolder = path.join(targetRules, stack);
             fs.ensureDirSync(stackFolder); // Ensure stack folder exists
             const destFile = path.join(stackFolder, fileName);
-            wrapMdToMdc(srcFile, destFile);
+
+            // Pass correct metadata including projectPath
+            const meta = {
+                projectPath: options.projectPath || '.',
+                stack: stack,
+                architecture: architecture,
+                detectedVersion: options.detectedVersion,
+                versionRange: options.versionRange
+            };
+            wrapMdToMdc(srcFile, destFile, meta);
         });
         console.log(`→ Applied ${stack} ${architecture} architecture rules`);
     }
@@ -123,8 +142,8 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
             // Custom metadata for each file
             const fileMeta = {
                 ...versionMeta,
-                stack: stack,
-                projectPath: projectPath !== '.' ? projectPath : '',
+                stack,
+                projectPath,
             };
 
             wrapMdToMdc(srcFile, destFile, fileMeta);
@@ -143,7 +162,11 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
     // Apply version-specific rules
     if (versionDir) {
         console.log(`Applying version-specific rules from ${versionDir}`);
-        copyVersionOverlay(templatesDir, stack, versionDir, targetRules);
+        copyVersionOverlay(templatesDir, stack, versionDir, targetRules, {
+            projectPath,
+            detectedVersion: version,
+            versionRange: versionMeta.versionRange
+        });
     } else {
         console.log(`No version-specific rules to apply for ${stack}`);
     }
@@ -151,7 +174,11 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
     // Apply architecture-specific rules for Laravel
     if (stack === 'laravel' && options.architecture) {
         console.log(`Applying architecture rules for ${options.architecture}`);
-        copyArchitectureRules(templatesDir, stack, options.architecture, targetRules);
+        copyArchitectureRules(templatesDir, stack, options.architecture, targetRules, {
+            projectPath,
+            detectedVersion: version,
+            versionRange: versionMeta.versionRange
+        });
     }
 
     console.log(`----- Finished processing ${stack} -----\n`);
