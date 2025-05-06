@@ -1,43 +1,113 @@
-# agent‑rules‑kit
+# Agent Rules Kit
 
-Bootstrap de reglas **Cursor** (`.mdc`) y documentación espejo (`.md`) para proyectos guiados por agentes IA.
+A modular rules system for Cursor AI to follow best practices in your projects across multiple frameworks and architectures.
 
-## Uso rápido
+## Overview
+
+Agent Rules Kit provides a collection of rules organized by:
+
+-   **Global rules**: Best practices that apply to any project
+-   **Framework-specific rules**: Patterns, conventions and best practices for specific frameworks
+-   **Version-specific rules**: Guidelines that apply to specific versions of a framework
+-   **Architecture-specific rules**: Rules tailored to different architectural patterns (coming soon)
+
+## Installation
 
 ```bash
-npx agent-rules-kit               # asistente interactivo
-npx agent-rules-kit --preset laravel
-npx agent-rules-kit update        # diff seguro
+# Install the rule set
+npx agent-rules-kit
+
+# Select your frameworks and preferences through the CLI wizard
 ```
 
-¿Qué hace?
+## Structure
 
-    Copia reglas base y, si corresponde, overlays de versión (Laravel 12, Next 14…).
-
-    Pregunta si querés instalar librerías de tests que falten.
-
-    Pregunta si instalamos hook pre‑commit (husky) que corre la suite de tests.
-
-    Pregunta si creamos docs espejo en docs/.
-
-    Mantiene backups y muestra diff antes de pisar nada.
-
-Estructura generada
-
+```
 .cursor/rules/
-├── global/
-├── laravel/
-└── nextjs/
-docs/
+├── global/                  # Global best practices for any project
+│   ├── best-practices.md    # General best practices
+│   ├── code-standards.md    # Code style standards
+│   ├── file-guard.md        # File modification guidelines
+│   └── log-process.md       # Process documentation guidelines
+│
+├── laravel/                 # Laravel-specific rules
+│   ├── laravel-best.md      # Core Laravel best practices
+│   ├── model-casting.md     # Laravel model casting guidelines
+│   ├── providers.md         # Service provider registration guidelines
+│   └── routes.md            # Routing best practices
+│
+├── nextjs/                  # Next.js-specific rules
+│   └── ...                  # Next.js rules files
+│
+├── angular/                 # Angular-specific rules
+│   └── ...                  # Angular rules files
+│
+└── ...                      # Other framework rules
+```
 
-### Version overlays
+## Version Detection
 
-agent‑rules‑kit auto‑detects framework versions and copies any overlay files that
-live in `templates/stacks/<stack>/v<major>/`. If your project runs Laravel 12
-you will get every file from `/base/` **plus** `/v12/`, allowing the templates
-to document new conventions (e.g. service‑provider registration changes). The
-same mechanism is ready for Next.js 14 and future releases.
+The system automatically detects your project's framework version:
 
-Contribuir
+-   **Laravel**: Reads `composer.json` for Laravel version
+-   **Next.js**: Reads `package.json` for Next.js version
+-   **Angular**: Reads `package.json` for Angular version
+-   **React**: Reads `package.json` for React version
 
-Las reglas en templates/kit/ obligan a actualizar README, CLI, tests y CHANGELOG al añadir plantillas nuevas.
+Based on the detected version, appropriate rules are applied:
+
+-   **Laravel 8-9**: Uses the v8-9 specific rules
+-   **Laravel 10-11**: Uses the v10-11 specific rules
+-   **Laravel 12**: Uses the v12 specific rules
+-   **Next.js 13**: Uses the v13 specific rules
+-   **Next.js 14**: Uses the v14 specific rules
+-   **Angular 16+**: Uses modern Angular rules
+
+The version detection system is being enhanced to better support version ranges and specific rule selection.
+
+## Rule Assignment
+
+Rules are assigned to files using patterns in `kit-config.json`:
+
+```json
+"laravel": {
+  "pattern_rules": {
+    "<root>/app/Models/**/*.php": [
+      "stacks/laravel/base/laravel-best.md",
+      "stacks/laravel/v8-9/model-casting.md",
+      "stacks/laravel/v10-11/model-casting.md"
+    ]
+  }
+}
+```
+
+Only the appropriate version-specific rules will be applied based on detected version.
+
+## Extending
+
+You can add your own rules by creating additional markdown files in the `.cursor/rules` directory, following the standard format.
+
+## Available Frameworks
+
+-   Laravel (versions 8-12)
+-   Next.js (versions 12-14)
+-   NestJS (latest versions)
+-   React (versions 17-18)
+-   Angular (versions 14-17)
+-   Astro (latest versions)
+-   Generic (for any other project type)
+
+## Coming Soon
+
+-   Architecture-specific rules (DDD, Hexagonal, CQRS, etc.)
+-   More framework supports
+-   Multilingual rule sets
+-   Custom rule creation wizard
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
