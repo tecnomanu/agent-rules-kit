@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: cli/**/*
 alwaysApply: false
 ---
 # Template Processing & Variables

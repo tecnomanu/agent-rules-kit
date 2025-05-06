@@ -34,6 +34,7 @@ When you modify the CLI or add new stack templates:
 
 4. **Docs**
    * Document new behaviour in `README.md` & `/docs/cli.md`.
+   * Change `Implementation Status` block with percent progress of current implementations and add new if is a new implementation.
 
 After changes, run:
 
