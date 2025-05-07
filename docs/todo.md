@@ -2,22 +2,22 @@
 
 ### Refactorización Arquitectónica
 
--   [ ] Crear una estructura de servicios en lugar de helpers:
+-   [x] Crear una estructura de servicios en lugar de helpers:
 
-    -   [ ] Crear `services/base-service.js` con funciones compartidas como `debugLog` y `copyFiles`
-    -   [ ] Crear servicios específicos por stack: `laravel-service.js`, `nextjs-service.js`, `react-service.js`
-    -   [ ] Mover las constantes específicas de cada stack de `config.js` a cada servicio
-    -   [ ] Refactorizar `index.js` para hacerlo más limpio delegando a servicios
+    -   [x] Crear `services/base-service.js` con funciones compartidas como `debugLog` y `copyFiles`
+    -   [x] Crear servicios específicos por stack: `laravel-service.js`, `nextjs-service.js`, `react-service.js`
+    -   [x] Mover las constantes específicas de cada stack de `config.js` a cada servicio
+    -   [x] Refactorizar `index.js` para hacerlo más limpio delegando a servicios
 
--   [ ] Eliminar redundancias entre helpers de arquitectura:
+-   [x] Eliminar redundancias entre helpers de arquitectura:
 
-    -   [ ] Refactorizar `copyArchitectureRules` para que sea una función genérica
-    -   [ ] Usar estrategia de composición donde cada servicio aporta su comportamiento específico
+    -   [x] Refactorizar `copyArchitectureRules` para que sea una función genérica
+    -   [x] Usar estrategia de composición donde cada servicio aporta su comportamiento específico
 
--   [ ] Reorganizar funcionalidades de CLI:
-    -   [ ] Crear `cli-service.js` para manejar la interfaz de línea de comandos
-    -   [ ] Separar claramente la lógica UI/UX de la lógica de procesamiento
-    -   [ ] Estandarizar los mensajes y emojis en un solo lugar
+-   [x] Reorganizar funcionalidades de CLI:
+    -   [x] Crear `cli-service.js` para manejar la interfaz de línea de comandos
+    -   [x] Separar claramente la lógica UI/UX de la lógica de procesamiento
+    -   [x] Estandarizar los mensajes y emojis en un solo lugar
 
 ### Mejoras Pendientes UI/UX
 

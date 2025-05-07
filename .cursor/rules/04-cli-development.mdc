@@ -9,11 +9,12 @@ When you modify the CLI or add new stack templates:
 
 1. **CLI**
    * Update prompts in `cli/index.js`.
-   * Organize helper functions in appropriate files in `cli/utils/`:
-     * `file-helpers.js` - File operations and template processing
-     * `stack-helpers.js` - Common stack functionality
-     * `config.js` - Configuration and constants
-     * Stack-specific helpers (e.g., `nextjs-helpers.js`)
+   * Organize services in appropriate files in `cli/services/`:
+     * `base-service.js` - Base functionality shared across all services
+     * `file-service.js` - File operations and template processing
+     * `config-service.js` - Configuration and constants management
+     * `stack-service.js` - Common stack functionality
+     * Stack-specific services (e.g., `nextjs-service.js`, `laravel-service.js`)
    * Respect `templates/kit-config.json` for configuration.
    * Add/adjust helper scripts in `version-detector.js`.
 

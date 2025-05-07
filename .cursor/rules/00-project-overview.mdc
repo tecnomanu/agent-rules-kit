@@ -1,7 +1,7 @@
 ---
-type: Agent
+description: 
 globs: **/*
-alwaysApply: True
+alwaysApply: false
 ---
 # Project Overview & Guidelines
 
@@ -10,7 +10,7 @@ The rules in this folder *govern the maintenance of this very project*.
 
 | Topic | Quick rule |
 |-------|------------|
-| CLI changes | Update code in `cli/utils/` modules and `cli/index.js`; add unit and integration tests. |
+| CLI changes | Update code in `cli/services/` modules and `cli/index.js`; add unit and integration tests. |
 | Templates | Follow folder layout: `templates/global/`, `templates/stacks/<stack>/base/`, `templates/stacks/<stack>/architectures/`, `templates/stacks/<stack>/v*/`. |
 | Config | Keep `templates/kit-config.json` as single source of truth for globs, version ranges & default architectures. |
 | Releases | Bump `package.json` + CHANGELOG. Tag using `vx.y.z`. |

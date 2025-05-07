@@ -1,36 +1,4 @@
 {
-	"version_ranges": {
-		"laravel": {
-			"8": "v8-9",
-			"9": "v8-9",
-			"10": "v10-11",
-			"11": "v10-11",
-			"12": "v12"
-		},
-		"nextjs": {
-			"12": "v12",
-			"13": "v13",
-			"14": "v14"
-		},
-		"angular": {
-			"14": "v14-15",
-			"15": "v14-15",
-			"16": "v16-17",
-			"17": "v16-17"
-		},
-		"react": {
-			"17": "v17",
-			"18": "v18"
-		},
-		"vue": {
-			"2": "v2",
-			"3": "v3"
-		},
-		"nuxt": {
-			"2": "v2",
-			"3": "v3"
-		}
-	},
 	"global": {
 		"always": [
 			"best-practices.md",
@@ -41,6 +9,28 @@
 	},
 	"laravel": {
 		"default_architecture": "standard",
+		"version_ranges": {
+			"8": {
+				"name": "Laravel 8-9",
+				"range_name": "v8-9"
+			},
+			"9": {
+				"name": "Laravel 8-9",
+				"range_name": "v8-9"
+			},
+			"10": {
+				"name": "Laravel 10-11",
+				"range_name": "v10-11"
+			},
+			"11": {
+				"name": "Laravel 10-11",
+				"range_name": "v10-11"
+			},
+			"12": {
+				"name": "Laravel 12",
+				"range_name": "v12"
+			}
+		},
 		"globs": [
 			"<root>/app/**/*.php",
 			"<root>/bootstrap/**/*.php",
@@ -64,6 +54,7 @@
 		},
 		"architectures": {
 			"standard": {
+				"name": "Standard Laravel (MVC with Repositories)",
 				"globs": ["<root>/app/**/*.php", "<root>/routes/**/*.php"],
 				"pattern_rules": {
 					"<root>/app/Models/**/*.php": [
@@ -75,6 +66,7 @@
 				}
 			},
 			"ddd": {
+				"name": "Domain-Driven Design (DDD)",
 				"globs": [
 					"<root>/app/Domain/**/*.php",
 					"<root>/app/Application/**/*.php",
@@ -90,6 +82,7 @@
 				}
 			},
 			"hexagonal": {
+				"name": "Hexagonal (Ports & Adapters)",
 				"globs": [
 					"<root>/app/Core/**/*.php",
 					"<root>/app/Adapters/**/*.php",
@@ -108,6 +101,20 @@
 	},
 	"nextjs": {
 		"default_architecture": "app",
+		"version_ranges": {
+			"12": {
+				"name": "Next.js 12",
+				"range_name": "v12"
+			},
+			"13": {
+				"name": "Next.js 13",
+				"range_name": "v13"
+			},
+			"14": {
+				"name": "Next.js 14",
+				"range_name": "v14"
+			}
+		},
 		"globs": [
 			"<root>/app/**/*.{ts,tsx}",
 			"<root>/src/**/*.{ts,tsx}",
@@ -126,6 +133,7 @@
 		},
 		"architectures": {
 			"app": {
+				"name": "App Router",
 				"globs": ["<root>/app/**/*.{ts,tsx}"],
 				"pattern_rules": {
 					"<root>/app/**/*.{ts,tsx}": [
@@ -134,6 +142,7 @@
 				}
 			},
 			"pages": {
+				"name": "Pages Router",
 				"globs": ["<root>/pages/**/*.{ts,tsx}"],
 				"pattern_rules": {
 					"<root>/pages/**/*.{ts,tsx}": [
@@ -142,6 +151,7 @@
 				}
 			},
 			"hybrid": {
+				"name": "Hybrid (App + Pages)",
 				"globs": [
 					"<root>/app/**/*.{ts,tsx}",
 					"<root>/pages/**/*.{ts,tsx}"
@@ -162,6 +172,16 @@
 	},
 	"react": {
 		"default_architecture": "standard",
+		"version_ranges": {
+			"17": {
+				"name": "React 17",
+				"range_name": "v17"
+			},
+			"18": {
+				"name": "React 18",
+				"range_name": "v18"
+			}
+		},
 		"globs": [
 			"<root>/src/**/*.{ts,tsx,js,jsx}",
 			"<root>/tests/**/*.{ts,tsx,js,jsx}"
@@ -176,6 +196,7 @@
 		},
 		"architectures": {
 			"standard": {
+				"name": "Standard Component Structure",
 				"globs": ["<root>/src/**/*.{ts,tsx,js,jsx}"],
 				"pattern_rules": {
 					"<root>/src/**/*.{ts,tsx,js,jsx}": [
@@ -187,6 +208,16 @@
 	},
 	"vue": {
 		"default_architecture": "composition",
+		"version_ranges": {
+			"2": {
+				"name": "Vue 2",
+				"range_name": "v2"
+			},
+			"3": {
+				"name": "Vue 3",
+				"range_name": "v3"
+			}
+		},
 		"globs": [
 			"<root>/src/**/*.{vue,ts,js}",
 			"<root>/tests/**/*.{vue,ts,js}"
@@ -201,6 +232,7 @@
 		},
 		"architectures": {
 			"composition": {
+				"name": "Composition API",
 				"globs": ["<root>/src/**/*.{vue,ts,js}"],
 				"pattern_rules": {
 					"<root>/src/composables/**/*.{ts,js}": [
@@ -209,6 +241,7 @@
 				}
 			},
 			"options": {
+				"name": "Options API",
 				"globs": ["<root>/src/**/*.{vue,ts,js}"],
 				"pattern_rules": {
 					"<root>/src/mixins/**/*.{ts,js}": [
@@ -220,6 +253,16 @@
 	},
 	"nuxt": {
 		"default_architecture": "standard",
+		"version_ranges": {
+			"2": {
+				"name": "Nuxt 2",
+				"range_name": "v2"
+			},
+			"3": {
+				"name": "Nuxt 3",
+				"range_name": "v3"
+			}
+		},
 		"globs": [
 			"<root>/{app,pages,components,layouts,composables,plugins,server,middleware}/**/*.{vue,ts,js}",
 			"<root>/tests/**/*.{vue,ts,js}"
@@ -235,6 +278,7 @@
 		},
 		"architectures": {
 			"standard": {
+				"name": "Standard",
 				"globs": [
 					"<root>/{app,pages,components,layouts,composables}/**/*.{vue,ts,js}"
 				]
@@ -242,6 +286,24 @@
 		}
 	},
 	"angular": {
+		"version_ranges": {
+			"14": {
+				"name": "Angular 14-15",
+				"range_name": "v14-15"
+			},
+			"15": {
+				"name": "Angular 14-15",
+				"range_name": "v14-15"
+			},
+			"16": {
+				"name": "Angular 16-17",
+				"range_name": "v16-17"
+			},
+			"17": {
+				"name": "Angular 16-17",
+				"range_name": "v16-17"
+			}
+		},
 		"globs": [
 			"<root>/src/app/**/*.ts",
 			"<root>/src/environments/**/*.ts",

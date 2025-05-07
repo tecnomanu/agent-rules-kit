@@ -12,8 +12,7 @@
 		"start": "node cli/index.js",
 		"dev": "node cli/index.js",
 		"lint": "eslint \"**/*.js\"",
-		"prepare": "husky install",
-		"release": "node scripts/release.js"
+		"prepare": "husky install"
 	},
 	"dependencies": {
 		"chalk": "^5.4.1",
