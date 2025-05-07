@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Commit Conventions
 
@@ -16,7 +16,7 @@ This document outlines the commit conventions used in the Agent Rules Kit projec
 We follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) specification with emojis:
 
 ```
-<emoji> <type>[(scope)]!: <description>
+<emoji> <type>[(scope)]: <description>
 
 [optional body]
 
@@ -35,20 +35,22 @@ When your changes affect the semantic versioning of the package, use these types
 |-------|------|-------------|------------------|
 | ✨ | feat | New feature | MINOR |
 | 🐛 | fix | Bug fix | PATCH |
-| 🎉 | feat! or fix! | Breaking change (with exclamation mark) | MAJOR |
+| 🎉 | feat or fix | Breaking change (with BREAKING CHANGE footer) | MAJOR |
 
 For major version bumps (BREAKING CHANGES), you MUST:
-1. Add an exclamation mark `!` before the colon
+1. Use a normal type (like `feat` or `fix` without exclamation mark)
 2. Include a `BREAKING CHANGE:` section in the footer
 
 Example:
 ```
-🎉 feat!: redesign user authentication system
+🎉 feat: redesign user authentication system
 
 Complete overhaul of authentication flow and API
 
 BREAKING CHANGE: The auth token format has changed and all clients will need to be updated
 ```
+
+> Important: Based on our testing, using exclamation marks (!) in the type can cause issues with our semantic-release setup. The footer `BREAKING CHANGE:` is sufficient to trigger a major version bump.
 
 ### Non-versioning Commits
 
