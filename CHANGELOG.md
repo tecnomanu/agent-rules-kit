@@ -1,3 +1,15 @@
+# [1.0.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.4.0...v1.0.0) (2025-05-07)
+
+
+### Features
+
+* :tada: prepare for major version release with service architecture ([3bba84e](https://github.com/tecnomanu/agent-rules-kit/commit/3bba84ed3ad7cb1812227deb49e8f997566a09c2))
+
+
+### BREAKING CHANGES
+
+* Complete refactoring from helper-based to service-based architecture. Service files are now in cli/services/ instead of cli/utils/
+
 # [0.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.3...v0.4.0) (2025-05-07)
 
 
