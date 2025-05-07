@@ -4,9 +4,8 @@ import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { LARAVEL_ARCHITECTURES, NEXTJS_ROUTER_MODES, STACKS, getAvailableArchitectures, loadKitConfig } from './utils/config.js';
+import { LARAVEL_ARCHITECTURES, NEXTJS_ROUTER_MODES, REACT_ARCHITECTURES, REACT_STATE_MANAGEMENT, STACKS, getAvailableArchitectures, loadKitConfig } from './utils/config.js';
 import { copyRuleGroup, wrapMdToMdc } from './utils/file-helpers.js';
-import { copyArchitectureRules } from './utils/nextjs-helpers.js';
 import { copyStack } from './utils/stack-helpers.js';
 import * as versionDetector from './version-detector.js';
 
@@ -152,6 +151,7 @@ const main = async () => {
 
     // Ask for framework-specific options
     let architecture = null;
+    let stateManagement = null;
 
     // Ask for Laravel architecture options
     if (answers.selected === 'laravel') {
@@ -196,6 +196,44 @@ const main = async () => {
         ]);
         architecture = routerAnswer.architecture;
         console.log(`${chalk.green('✅')} Selected Next.js architecture: ${chalk.cyan(architecture)}`);
+    }
+
+    // Ask for React architecture and state management options
+    if (answers.selected === 'react') {
+        // Set default architecture from config or use 'standard'
+        const defaultArchitecture = config.react?.default_architecture || 'standard';
+
+        debugLog(`React selected, asking for architecture...`);
+        const archAnswer = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'architecture',
+                message: 'Select React architecture style:',
+                choices: REACT_ARCHITECTURES,
+                default: defaultArchitecture
+            }
+        ]);
+        architecture = archAnswer.architecture;
+        console.log(`${chalk.green('✅')} Selected React architecture: ${chalk.cyan(architecture)}`);
+
+        // Ask for state management preference
+        debugLog(`Asking for React state management preference...`);
+        const stateAnswer = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'stateManagement',
+                message: 'Select React state management approach:',
+                choices: REACT_STATE_MANAGEMENT,
+                default: 'context'
+            }
+        ]);
+        stateManagement = stateAnswer.stateManagement;
+        if (stateManagement !== 'none') {
+            console.log(`${chalk.green('✅')} Selected React state management: ${chalk.cyan(stateManagement)}`);
+        } else {
+            console.log(`${chalk.green('✅')} No state management library selected`);
+            stateManagement = null; // Set to null if 'none' is selected
+        }
     }
 
     // Use rules-kit subfolder instead of putting everything in rules/
@@ -274,16 +312,11 @@ const main = async () => {
         answers.projectPath ?? '.',
         {
             architecture,
+            stateManagement,
             selectedVersion,
             debug: DEBUG_MODE
         }
     );
-
-    // Apply Next.js specific architecture rules if needed
-    if (answers.selected === 'nextjs' && architecture) {
-        debugLog(`Applying Next.js architecture rules for ${architecture}`);
-        copyArchitectureRules(templatesDir, architecture, targetRules);
-    }
 
     // Generate mirror documentation
     if (answers.mirrorDocs) {
@@ -352,6 +385,7 @@ const main = async () => {
         // Copy stack rules with proper version detection
         await copyStack(templatesDir, answers.selected, targetRules, answers.projectPath, {
             architecture: architecture,
+            stateManagement: stateManagement,
             selectedVersion: selectedVersion,
             debug: DEBUG_MODE
         });

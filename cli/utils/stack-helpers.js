@@ -6,6 +6,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import * as versionDetector from '../version-detector.js';
 import { wrapMdToMdc } from './file-helpers.js';
+import { copyArchitectureRules as copyNextjsArchitectureRules } from './nextjs-helpers.js';
+import { copyArchitectureRules as copyReactArchitectureRules, copyTestingRules as copyReactTestingRules, copyStateManagementRules } from './react-helpers.js';
 
 /**
  * Debug log helper
@@ -210,6 +212,42 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
             versionRange: versionMeta.versionRange,
             debug: options.debug
         });
+    }
+
+    // Apply architecture-specific rules for Next.js
+    if (stack === 'nextjs' && options.architecture) {
+        console.log(`${chalk.blue('🔄')} Applying Next.js architecture rules for ${chalk.magenta(options.architecture)}...`);
+        copyNextjsArchitectureRules(templatesDir, options.architecture, targetRules);
+    }
+
+    // Apply architecture-specific rules for React
+    if (stack === 'react' && options.architecture) {
+        console.log(`${chalk.blue('🔄')} Applying React architecture rules for ${chalk.magenta(options.architecture)}...`);
+        copyReactArchitectureRules(templatesDir, options.architecture, targetRules, {
+            projectPath,
+            detectedVersion: version,
+            versionRange: versionMeta.versionRange,
+            debug: options.debug
+        });
+
+        // Apply testing rules for React
+        copyReactTestingRules(templatesDir, targetRules, {
+            projectPath,
+            detectedVersion: version,
+            versionRange: versionMeta.versionRange,
+            debug: options.debug
+        });
+
+        // Apply state management rules if specified
+        if (options.stateManagement) {
+            console.log(`${chalk.blue('🔄')} Applying React state management rules for ${chalk.yellow(options.stateManagement)}...`);
+            copyStateManagementRules(templatesDir, options.stateManagement, targetRules, {
+                projectPath,
+                detectedVersion: version,
+                versionRange: versionMeta.versionRange,
+                debug: options.debug
+            });
+        }
     }
 
     console.log(`${chalk.green('✅')} Finished processing ${chalk.cyan(stack)}\n`);

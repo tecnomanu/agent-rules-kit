@@ -8,7 +8,17 @@ import path from 'path';
  * Stack options and constants
  */
 // List of supported stacks
-export const STACKS = ['laravel', 'nextjs', 'nestjs', 'react', 'angular', 'astro', 'generic'];
+export const STACKS = [
+    'laravel',
+    'nextjs',
+    'react',
+    'angular',
+    'nestjs',
+    'vue',
+    'nuxt',
+    'astro',
+    'generic'
+];
 
 // Laravel architecture options
 export const LARAVEL_ARCHITECTURES = [
@@ -19,9 +29,30 @@ export const LARAVEL_ARCHITECTURES = [
 
 // Next.js router mode options
 export const NEXTJS_ROUTER_MODES = [
-    { name: 'App Router (for Next.js 13+)', value: 'app' },
-    { name: 'Pages Router (traditional)', value: 'pages' },
-    { name: 'Both Routers (hybrid app)', value: 'hybrid' },
+    { name: 'App Router (Next.js 13+)', value: 'app' },
+    { name: 'Pages Router', value: 'pages' },
+    { name: 'Hybrid (Both routers)', value: 'hybrid' },
+];
+
+/**
+ * React architecture options
+ */
+export const REACT_ARCHITECTURES = [
+    { name: 'Standard React (Component-based)', value: 'standard' },
+    { name: 'Atomic Design', value: 'atomic' },
+    { name: 'Feature-Sliced Design', value: 'feature-sliced' }
+];
+
+/**
+ * React state management options
+ */
+export const REACT_STATE_MANAGEMENT = [
+    { name: 'React Context API', value: 'context' },
+    { name: 'Redux', value: 'redux' },
+    { name: 'MobX', value: 'mobx' },
+    { name: 'Recoil', value: 'recoil' },
+    { name: 'Zustand', value: 'zustand' },
+    { name: 'None', value: 'none' }
 ];
 
 /**

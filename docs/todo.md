@@ -37,7 +37,13 @@
 -   [ ] Crear versión state management para MobX
 -   [ ] Crear versión state management para Recoil
 -   [ ] Crear versión state management para Zustand
+-   [ ] Create testing guidelines for Svelte
+-   [ ] Create testing guidelines for SvelteKit
 -   [ ] Agregar documentación sobre prácticas de testing E2E para todos los frameworks
+-   [ ] Add integration tests
+-   [ ] Add CI/CD pipeline configuration
+-   [ ] Add contribution guidelines
+-   [ ] Add code of conduct
 
 ### Documentación
 
