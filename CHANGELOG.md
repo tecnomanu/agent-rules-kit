@@ -1,3 +1,16 @@
+# [0.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.3...v0.4.0) (2025-05-07)
+
+
+### Bug Fixes
+
+* **cli:** Actualizar index.js para usar métodos correctos del CliService ([27837d6](https://github.com/tecnomanu/agent-rules-kit/commit/27837d6735b59086af34d56cd2497e14faffa2d3))
+* corregir configuración de mocks en pruebas de servicios para fs-extra ([a2c1a02](https://github.com/tecnomanu/agent-rules-kit/commit/a2c1a0255fd87f22e2a0dd1c39828b7ed08fd6bd))
+
+
+### Features
+
+* **core:** Reestructuración completa a arquitectura de servicios v1.0.0 ([a170da1](https://github.com/tecnomanu/agent-rules-kit/commit/a170da1c54a61b6ac28d1ff54ef236955a7153fb))
+
 ## [0.3.3](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.2...v0.3.3) (2025-05-07)
 
 
