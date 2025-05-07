@@ -21,6 +21,14 @@
 		"react": {
 			"17": "v17",
 			"18": "v18"
+		},
+		"vue": {
+			"2": "v2",
+			"3": "v3"
+		},
+		"nuxt": {
+			"2": "v2",
+			"3": "v3"
 		}
 	},
 	"global": {
@@ -153,10 +161,85 @@
 		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"]
 	},
 	"react": {
+		"default_architecture": "standard",
 		"globs": [
 			"<root>/src/**/*.{ts,tsx,js,jsx}",
 			"<root>/tests/**/*.{ts,tsx,js,jsx}"
-		]
+		],
+		"pattern_rules": {
+			"<root>/src/components/**/*.{ts,tsx,js,jsx}": [
+				"stacks/react/base/react-best-practices.md"
+			],
+			"<root>/src/tests/**/*.{ts,tsx,js,jsx}": [
+				"stacks/react/base/react-testing.md"
+			]
+		},
+		"architectures": {
+			"standard": {
+				"globs": ["<root>/src/**/*.{ts,tsx,js,jsx}"],
+				"pattern_rules": {
+					"<root>/src/**/*.{ts,tsx,js,jsx}": [
+						"stacks/react/base/architecture-concepts.md"
+					]
+				}
+			}
+		}
+	},
+	"vue": {
+		"default_architecture": "composition",
+		"globs": [
+			"<root>/src/**/*.{vue,ts,js}",
+			"<root>/tests/**/*.{vue,ts,js}"
+		],
+		"pattern_rules": {
+			"<root>/src/components/**/*.{vue,ts,js}": [
+				"stacks/vue/base/architecture-concepts.md"
+			],
+			"<root>/tests/**/*.{spec,test}.{ts,js}": [
+				"stacks/vue/base/vue-testing.md"
+			]
+		},
+		"architectures": {
+			"composition": {
+				"globs": ["<root>/src/**/*.{vue,ts,js}"],
+				"pattern_rules": {
+					"<root>/src/composables/**/*.{ts,js}": [
+						"stacks/vue/architectures/composition/composables.md"
+					]
+				}
+			},
+			"options": {
+				"globs": ["<root>/src/**/*.{vue,ts,js}"],
+				"pattern_rules": {
+					"<root>/src/mixins/**/*.{ts,js}": [
+						"stacks/vue/architectures/options/mixins.md"
+					]
+				}
+			}
+		}
+	},
+	"nuxt": {
+		"default_architecture": "standard",
+		"globs": [
+			"<root>/{app,pages,components,layouts,composables,plugins,server,middleware}/**/*.{vue,ts,js}",
+			"<root>/tests/**/*.{vue,ts,js}"
+		],
+		"pattern_rules": {
+			"<root>/app.vue": ["stacks/nuxt/base/architecture-concepts.md"],
+			"<root>/components/**/*.{vue,ts,js}": [
+				"stacks/nuxt/base/architecture-concepts.md"
+			],
+			"<root>/tests/**/*.{spec,test}.{ts,js}": [
+				"stacks/nuxt/base/nuxt-testing.md"
+			]
+		},
+		"architectures": {
+			"standard": {
+				"globs": [
+					"<root>/{app,pages,components,layouts,composables}/**/*.{vue,ts,js}"
+				]
+			}
+		}
 	},
 	"angular": {
 		"globs": [
