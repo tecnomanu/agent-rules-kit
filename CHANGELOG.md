@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.0.0...v1.1.0) (2025-05-07)
+
+
+### Features
+
+* :memo: set rules as always ([74bc35b](https://github.com/tecnomanu/agent-rules-kit/commit/74bc35bcbae1c1480f328dd998cf2c51dd74ab86))
+
 # [1.0.0](https://github.com/tecnomanu/agent-rules-kit/compare/v0.4.0...v1.0.0) (2025-05-07)
 
 
