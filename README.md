@@ -1,4 +1,4 @@
-# Agent Rules Kit
+# Agent Rules Kit v1.0
 
 <p align="center">
   <img src="assets/banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
@@ -10,13 +10,26 @@
 
 Agent Rules Kit is a CLI tool that facilitates the installation and configuration of rules for Cursor AI, the AI-powered IDE. The rules help AI agents better understand the structure, patterns, and best practices of different technology stacks.
 
-## Main Features
+## 🎉 New Architecture
+
+We've completely redesigned the internal architecture to provide a more maintainable and extensible system:
+
+-   **Service-Based Architecture**: Replaced the helper-based system with a clean service-oriented architecture
+-   **Automatic Backups**: Automatically creates backups of existing rules before overwriting
+-   **Enhanced Debug Mode**: Better visibility into the rule generation process
+-   **Improved Testing Framework**: More robust testing with better mocking
+-   **React Architecture Options**: Now includes support for atomic design and feature-sliced design
+-   **Better State Management Support**: Enhanced support for various state management libraries
+
+## 🎉 New Features in Version 1.0
 
 -   🚀 Quick setup of rules for different frameworks and stacks
 -   🔍 Automatic framework version detection
 -   🏗️ Support for multiple architectural styles
 -   📚 Mirror documentation generation for human reference
 -   🧩 Modular system for easy expansion to new frameworks
+-   💾 Automatic backups of existing rules
+-   🔄 Version-specific rule overlays
 
 ## Supported Stacks
 
@@ -40,7 +53,7 @@ Agent Rules Kit is a CLI tool that facilitates the installation and configuratio
 | <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/> | ![80%](https://progress-bar.dev/80) | App & Pages router support, version detection, testing docs |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>   | ![55%](https://progress-bar.dev/55) | Signals support, base project structure                     |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>      | ![45%](https://progress-bar.dev/45) | Base project structure, patterns documentation              |
-| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![65%](https://progress-bar.dev/65) | Architecture options, state management, testing guidelines  |
+| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![80%](https://progress-bar.dev/80) | Architecture options, state management, testing guidelines  |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>            | ![45%](https://progress-bar.dev/45) | Testing guidelines, architecture concepts                   |
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>         | ![40%](https://progress-bar.dev/40) | Testing guidelines, architecture concepts                   |
 | <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>         | ![20%](https://progress-bar.dev/20) | Basic configuration                                         |
@@ -75,8 +88,8 @@ agent-rules-kit
 ```bash
 git clone https://github.com/tecnomanu/agent-rules-kit.git
 cd agent-rules-kit
-npm install
-npm start
+pnpm install
+pnpm start
 ```
 
 ## Basic Usage
@@ -96,6 +109,7 @@ Follow the interactive instructions to select the stack, architecture, and other
 -   **Cursor Directory**: Specify the location of the Cursor directory
 -   **Project Path**: Define the relative path if the project is not in the root
 -   **Mirror Documentation**: Generate .md files that reflect the rules for human reference
+-   **Debug Mode**: Enable detailed logging for troubleshooting
 
 ### Supported Architectures
 
@@ -143,6 +157,25 @@ docs/
 └── [stack]/
 ```
 
+## Project Architecture
+
+The codebase is organized using a service-oriented architecture:
+
+```
+cli/
+├── index.js                # Entry point
+├── services/               # Services directory
+│   ├── base-service.js     # Base functionality for all services
+│   ├── cli-service.js      # CLI interface management
+│   ├── config-service.js   # Configuration management
+│   ├── file-service.js     # File operations
+│   ├── stack-service.js    # Common stack functionality
+│   ├── laravel-service.js  # Laravel-specific service
+│   ├── nextjs-service.js   # Next.js-specific service
+│   └── react-service.js    # React-specific service
+└── version-detector.js     # Framework version detection
+```
+
 ## Advanced Configuration
 
 ### Template Files
@@ -155,9 +188,11 @@ templates/
 └── stacks/
     ├── laravel/
     │   ├── base/        # Laravel base rules
-    │   ├── v8-9/        # Laravel 8-9 specific rules
-    │   ├── v10-11/      # Laravel 10-11 specific rules
-    │   └── v12/         # Laravel 12 specific rules
+    │   ├── architectures/
+    │   │   ├── standard/  # Standard architecture rules
+    │   │   ├── ddd/       # DDD architecture rules
+    │   │   └── hexagonal/ # Hexagonal architecture rules
+    │   └── v10-11/      # Laravel 10-11 specific rules
     ├── nextjs/
     │   └── ...
     └── ...
@@ -175,23 +210,24 @@ The main configuration is in `templates/kit-config.json`, where it defines:
 
 ### Prerequisites
 
--   Node.js 14+
--   npm or pnpm
+-   Node.js 16+
+-   pnpm (preferred) or npm
 
 ### Development Installation
 
 ```bash
 git clone https://github.com/tecnomanu/agent-rules-kit.git
 cd agent-rules-kit
-npm install
+pnpm install
 ```
 
 ### Available Commands
 
 ```bash
-npm start           # Run the CLI
-npm test            # Run tests
-npm run test -- --update  # Update snapshots
+pnpm start           # Run the CLI
+pnpm test            # Run tests
+pnpm run lint        # Lint code
+pnpm run test -- --update  # Update snapshots
 ```
 
 ## License
