@@ -1,5 +1,46 @@
--   Se debería dar un alerta si la carpeta de rules-kit ya existe o si la del stack selecionado tambien.
--   Si la carpeta existe debería generar un backup con fecha de hoy y copiar los actuales, y crear todo de cero, dejano las reglas nuevas y la carpeta dentro como backup. Igual por defecto esa es la acción pero consultar "queres hacer un backup de los datos actuales, sino se gborrarn" default Y
--   cuando consulte por path relativo del proyecto, qeu deje en claro qeu es apartir de donde se eligio el path de .cursor/rules, si se elije "appmain" par .cursor/rules, qeudando appmain/.cursor/rules, que se vea "Relative path to your project (if not in the root)" aclarnado "from .cursor directory"
--   Deberiamos mover los logs a un modo debug, no eliminarlos pero si quitarlos en el modo normal.
--   Sumar mas colores y emojis al cli.
+## Tareas Pendientes
+
+### Refactorización Arquitectónica
+
+-   [ ] Crear una estructura de servicios en lugar de helpers:
+
+    -   [ ] Crear `services/base-service.js` con funciones compartidas como `debugLog` y `copyFiles`
+    -   [ ] Crear servicios específicos por stack: `laravel-service.js`, `nextjs-service.js`, `react-service.js`
+    -   [ ] Mover las constantes específicas de cada stack de `config.js` a cada servicio
+    -   [ ] Refactorizar `index.js` para hacerlo más limpio delegando a servicios
+
+-   [ ] Eliminar redundancias entre helpers de arquitectura:
+
+    -   [ ] Refactorizar `copyArchitectureRules` para que sea una función genérica
+    -   [ ] Usar estrategia de composición donde cada servicio aporta su comportamiento específico
+
+-   [ ] Reorganizar funcionalidades de CLI:
+    -   [ ] Crear `cli-service.js` para manejar la interfaz de línea de comandos
+    -   [ ] Separar claramente la lógica UI/UX de la lógica de procesamiento
+    -   [ ] Estandarizar los mensajes y emojis en un solo lugar
+
+### Mejoras Pendientes UI/UX
+
+-   [x] Se debe dar un alerta si la carpeta de rules-kit ya existe o si la del stack seleccionado también.
+-   [x] Si la carpeta existe debería generar un backup con fecha de hoy y copiar los actuales.
+-   [x] Aclarar mensaje de rutas relativas del proyecto: "Relative path to your project (if not in the root)" aclarando "from .cursor directory"
+-   [x] Mover los logs a un modo debug, no eliminarlos pero si quitarlos en el modo normal.
+-   [x] Sumar más colores y emojis al CLI.
+
+### Nuevas Implementaciones
+
+-   [x] Crear React-specific helpers para arquitecturas y state management
+-   [ ] Crear Angular-specific helpers
+-   [ ] Implementar arquitecturas atómicas para React
+-   [ ] Implementar arquitecturas feature-sliced para React
+-   [ ] Crear versión state management para Redux
+-   [ ] Crear versión state management para MobX
+-   [ ] Crear versión state management para Recoil
+-   [ ] Crear versión state management para Zustand
+-   [ ] Agregar documentación sobre prácticas de testing E2E para todos los frameworks
+
+### Documentación
+
+-   [ ] Actualizar el README con una mejor descripción de la nueva arquitectura
+-   [ ] Documentar cómo extender con nuevos servicios
+-   [ ] Actualizar la sección de Implementation Status a medida que se completan las tareas

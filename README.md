@@ -25,6 +25,8 @@ Agent Rules Kit is a CLI tool that facilitates the installation and configuratio
 -   React (v17-18)
 -   Angular (v14-17)
 -   NestJS
+-   Vue (v2-3)
+-   Nuxt (v2-3)
 -   Astro
 -   Generic (for any project)
 
@@ -38,7 +40,7 @@ Agent Rules Kit is a CLI tool that facilitates the installation and configuratio
 | <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/> | ![80%](https://progress-bar.dev/80) | App & Pages router support, version detection, testing docs |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>   | ![55%](https://progress-bar.dev/55) | Signals support, base project structure                     |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>      | ![45%](https://progress-bar.dev/45) | Base project structure, patterns documentation              |
-| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![50%](https://progress-bar.dev/50) | Testing guidelines, architecture concepts, best practices   |
+| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![65%](https://progress-bar.dev/65) | Architecture options, state management, testing guidelines  |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>            | ![45%](https://progress-bar.dev/45) | Testing guidelines, architecture concepts                   |
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>         | ![40%](https://progress-bar.dev/40) | Testing guidelines, architecture concepts                   |
 | <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>         | ![20%](https://progress-bar.dev/20) | Basic configuration                                         |
@@ -95,17 +97,33 @@ Follow the interactive instructions to select the stack, architecture, and other
 -   **Project Path**: Define the relative path if the project is not in the root
 -   **Mirror Documentation**: Generate .md files that reflect the rules for human reference
 
-### Supported Architectures (Laravel)
+### Supported Architectures
+
+#### Laravel
 
 -   **Standard**: Traditional MVC structure with Repositories
 -   **DDD (Domain-Driven Design)**: Business domain organization
 -   **Hexagonal**: Ports and adapters architecture
 
-### Router Modes (Next.js)
+#### Next.js
 
 -   **App Router**: For Next.js 13+ projects
 -   **Pages Router**: Traditional router
 -   **Hybrid**: Both router types
+
+#### React
+
+-   **Standard**: Component-based organization
+-   **Atomic Design**: Atoms, molecules, organisms, templates, pages
+-   **Feature-Sliced Design**: Features-first organization
+
+### State Management (React)
+
+-   **Context API**: Built-in React state management
+-   **Redux**: Predictable state container
+-   **MobX**: Simple, scalable state management
+-   **Recoil**: Experimental state management library by Facebook
+-   **Zustand**: Lightweight state management solution
 
 ## File Structure
 
