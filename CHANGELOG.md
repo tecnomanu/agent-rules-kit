@@ -1,3 +1,10 @@
+## [0.3.3](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.2...v0.3.3) (2025-05-07)
+
+
+### Bug Fixes
+
+* :zap: add version for some new stacks ([3256689](https://github.com/tecnomanu/agent-rules-kit/commit/3256689dff93b403e97e10bb1ca511e32246bcf3))
+
 ## [0.3.2](https://github.com/tecnomanu/agent-rules-kit/compare/v0.3.1...v0.3.2) (2025-05-06)
 
 
