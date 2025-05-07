@@ -37,8 +37,14 @@ const createBackup = (targetRules) => {
     const backupDir = `${targetRules}_backup_${timestamp}`;
 
     if (fs.existsSync(targetRules)) {
-        console.log(chalk.yellow(`📦 Creating backup of existing rules at ${backupDir}`));
-        fs.copySync(targetRules, backupDir);
+        console.log(chalk.blue(`📦 Creating backup of existing rules...`));
+        try {
+            fs.copySync(targetRules, backupDir);
+            debugLog(DEBUG_MODE, `Backup created successfully at: ${backupDir}`);
+        } catch (error) {
+            console.error(chalk.red(`❌ Error creating backup: ${error.message}`));
+            debugLog(DEBUG_MODE, error.stack);
+        }
     }
 
     return backupDir;
@@ -127,7 +133,7 @@ const main = async () => {
         {
             type: 'input',
             name: 'projectPath',
-            message: 'Relative path to your project (from .cursor directory):',
+            message: 'Relative path to your project (if not in the root, from .cursor directory):',
             default: '.'
         },
         {
@@ -201,20 +207,20 @@ const main = async () => {
         const stackDir = path.join(targetRules, answers.selected);
         const hasExistingStack = fs.existsSync(stackDir);
 
-        console.log(chalk.yellow(`⚠️ The rules directory ${targetRules} already exists.`));
+        console.log(chalk.yellow(`⚠️  The rules directory ${targetRules} already exists.`));
         if (hasExistingStack) {
-            console.log(chalk.yellow(`⚠️ Rules for stack ${answers.selected} already exist.`));
+            console.log(chalk.yellow(`⚠️  Rules for stack ${answers.selected} already exist in this directory.`));
         }
 
         const backupPrompt = await inquirer.prompt([
             {
                 type: 'list',
                 name: 'action',
-                message: 'Rules directory already exists. What would you like to do?',
+                message: 'How would you like to proceed with existing rules?',
                 choices: [
-                    { name: 'Create backup and continue', value: 'backup' },
-                    { name: 'Overwrite without backup', value: 'overwrite' },
-                    { name: 'Cancel installation', value: 'cancel' }
+                    { name: '📦 Create backup and continue (recommended)', value: 'backup' },
+                    { name: '⚠️  Overwrite without backup', value: 'overwrite' },
+                    { name: '❌ Cancel installation', value: 'cancel' }
                 ],
                 default: 'backup'
             }
@@ -224,12 +230,13 @@ const main = async () => {
             console.log(chalk.red('❌ Installation cancelled.'));
             return;
         } else if (backupPrompt.action === 'backup') {
-            createBackup(targetRules);
+            const backupDir = createBackup(targetRules);
+            console.log(chalk.green(`✅ Backup created at: ${chalk.cyan(backupDir)}`));
         }
 
         // Remove existing directory for the selected stack
         if (hasExistingStack) {
-            console.log(chalk.yellow(`🗑️ Removing existing ${answers.selected} rules...`));
+            console.log(chalk.yellow(`🗑️  Removing existing ${chalk.cyan(answers.selected)} rules...`));
             fs.removeSync(stackDir);
         }
     }
@@ -250,11 +257,12 @@ const main = async () => {
                 const srcFile = path.join(globalDir, f);
                 const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
                 const meta = {
-                    projectPath: answers.projectPath !== '.' ? answers.projectPath : '.',
+                    projectPath: answers.projectPath,
+                    debug: DEBUG_MODE
                 };
                 wrapMdToMdc(srcFile, destFile, meta);
             });
-            console.log(`${chalk.green('✅')} Applied global rules`);
+            console.log(chalk.green(`✅ Applied global rules`));
         }
     }
 
@@ -339,7 +347,50 @@ const main = async () => {
         }
     }
 
-    console.log(chalk.green(`\n✨ Installation complete! Rules installed in ${targetRules}`));
+    // Execute installation based on choices
+    try {
+        // Copy stack rules with proper version detection
+        await copyStack(templatesDir, answers.selected, targetRules, answers.projectPath, {
+            architecture: architecture,
+            selectedVersion: selectedVersion,
+            debug: DEBUG_MODE
+        });
+
+        // Generate mirror docs if requested
+        if (answers.mirrorDocs) {
+            console.log(chalk.blue('📚 Generating mirror documentation...'));
+            // Create global mirror docs
+            if (answers.global) {
+                const globalDir = path.join(templatesDir, 'global');
+                const mirrorGlobalDir = path.join(targetDocs, 'global');
+                fs.ensureDirSync(mirrorGlobalDir);
+                copyRuleGroup(globalDir, mirrorGlobalDir, { projectPath: answers.projectPath });
+            }
+
+            // Create stack mirror docs
+            const stackSrcDir = path.join(templatesDir, 'stacks', answers.selected, 'base');
+            const mirrorStackDir = path.join(targetDocs, answers.selected);
+            fs.ensureDirSync(mirrorStackDir);
+            copyRuleGroup(stackSrcDir, mirrorStackDir, {
+                projectPath: answers.projectPath,
+                stack: answers.selected,
+                detectedVersion: selectedVersion
+            });
+
+            console.log(chalk.green(`✅ Mirror documentation generated in ${chalk.cyan(targetDocs)}`));
+        }
+
+        console.log(chalk.green(`\n🎉 Installation completed successfully!`));
+        console.log(`${chalk.cyan('Rules installed at:')} ${chalk.bold(targetRules)}`);
+        console.log(`${chalk.cyan('Detected stack:')} ${chalk.bold(answers.selected)} ${selectedVersion ? chalk.cyan(`v${selectedVersion}`) : ''}`);
+        if (architecture) {
+            console.log(`${chalk.cyan('Architecture:')} ${chalk.bold(architecture)}`);
+        }
+        console.log(chalk.blue('\n🚀 Your AI agent is now ready to help with your codebase!'));
+    } catch (error) {
+        console.error(chalk.red(`❌ Error during installation: ${error.message}`));
+        debugLog(error.stack);
+    }
 };
 
 // Flag for handling errors

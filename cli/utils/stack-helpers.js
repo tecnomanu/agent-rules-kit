@@ -31,7 +31,11 @@ export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules,
 
     const overlayDir = path.join(templatesDir, 'stacks', stack, versionDir);
     if (fs.existsSync(overlayDir)) {
-        fs.readdirSync(overlayDir).forEach(f => {
+        debugLog(options.debug, `Applying ${stack} overlay from: ${overlayDir}`);
+        const files = fs.readdirSync(overlayDir);
+        debugLog(options.debug, `Found ${files.length} files to process`);
+
+        files.forEach(f => {
             const srcFile = path.join(overlayDir, f);
             // Write directly to rules directory with a prefixed filename for organization
             const fileName = `${f}`.replace(/\.md$/, '.mdc');
@@ -45,11 +49,15 @@ export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules,
                 projectPath: options.projectPath || '.',
                 stack: stack,
                 detectedVersion: options.detectedVersion,
-                versionRange: options.versionRange
+                versionRange: options.versionRange,
+                debug: options.debug
             };
             wrapMdToMdc(srcFile, destFile, meta);
+            debugLog(options.debug, `Processed overlay file: ${f}`);
         });
-        console.log(`${chalk.green('✅')} Applied ${chalk.cyan(stack)} ${chalk.yellow(versionDir)} overlay`);
+        console.log(`${chalk.green('✅')} Applied ${chalk.cyan(stack)} ${chalk.yellow(versionDir)} version-specific rules`);
+    } else {
+        debugLog(options.debug, `Overlay directory does not exist: ${overlayDir}`);
     }
 };
 
@@ -70,9 +78,13 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
     const oldArchDir = path.join(templatesDir, 'architectures', stack, architecture);
 
     const sourceDir = fs.existsSync(archDir) ? archDir : oldArchDir;
+    debugLog(options.debug, `Looking for architecture rules in: ${sourceDir}`);
 
     if (fs.existsSync(sourceDir)) {
-        fs.readdirSync(sourceDir).forEach(f => {
+        const files = fs.readdirSync(sourceDir);
+        debugLog(options.debug, `Found ${files.length} architecture files to process`);
+
+        files.forEach(f => {
             const srcFile = path.join(sourceDir, f);
             // Write to stack folder with architecture prefix
             const fileName = `architecture-${architecture}-${f}`.replace(/\.md$/, '.mdc');
@@ -87,11 +99,15 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
                 stack: stack,
                 architecture: architecture,
                 detectedVersion: options.detectedVersion,
-                versionRange: options.versionRange
+                versionRange: options.versionRange,
+                debug: options.debug
             };
             wrapMdToMdc(srcFile, destFile, meta);
+            debugLog(options.debug, `Processed architecture file: ${f}`);
         });
         console.log(`${chalk.green('✅')} Applied ${chalk.cyan(stack)} ${chalk.magenta(architecture)} architecture rules`);
+    } else {
+        debugLog(options.debug, `Architecture directory does not exist: ${sourceDir}`);
     }
 };
 
@@ -104,7 +120,7 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
  * @param {Object} options - Additional options
  */
 export const copyStack = async (templatesDir, stack, targetRules, projectPath, options = {}) => {
-    console.log(`\n${chalk.blue('📦')} Copying rules for ${chalk.cyan(stack)}`);
+    console.log(`\n${chalk.blue('📦')} Processing rules for ${chalk.cyan(stack)}...`);
     debugLog(options.debug, `Target rules directory: ${targetRules}`);
     debugLog(options.debug, `Project path: ${projectPath}`);
 
@@ -156,6 +172,7 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
                 ...versionMeta,
                 stack,
                 projectPath,
+                debug: options.debug
             };
 
             wrapMdToMdc(srcFile, destFile, fileMeta);
@@ -173,11 +190,12 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
 
     // Apply version-specific rules
     if (versionDir) {
-        console.log(`${chalk.blue('🔄')} Applying version-specific rules from ${chalk.yellow(versionDir)}`);
+        console.log(`${chalk.blue('🔄')} Applying version-specific rules from ${chalk.yellow(versionDir)}...`);
         copyVersionOverlay(templatesDir, stack, versionDir, targetRules, {
             projectPath,
             detectedVersion: version,
-            versionRange: versionMeta.versionRange
+            versionRange: versionMeta.versionRange,
+            debug: options.debug
         });
     } else {
         debugLog(options.debug, `No version-specific rules to apply for ${stack}`);
@@ -185,11 +203,12 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
 
     // Apply architecture-specific rules for Laravel
     if (stack === 'laravel' && options.architecture) {
-        console.log(`${chalk.blue('🔄')} Applying architecture rules for ${chalk.magenta(options.architecture)}`);
+        console.log(`${chalk.blue('🔄')} Applying architecture rules for ${chalk.magenta(options.architecture)}...`);
         copyArchitectureRules(templatesDir, stack, options.architecture, targetRules, {
             projectPath,
             detectedVersion: version,
-            versionRange: versionMeta.versionRange
+            versionRange: versionMeta.versionRange,
+            debug: options.debug
         });
     }
 

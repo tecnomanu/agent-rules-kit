@@ -59,6 +59,7 @@ export const processTemplateVariables = (content, meta = {}) => {
         if (value) {
             const regex = new RegExp(`\\{${replace}\\}`, 'g');
             processedContent = processedContent.replace(regex, value);
+            debugLog(meta.debug, `Replaced {${replace}} with ${value}`);
         }
     });
 
@@ -84,6 +85,8 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
     const srcRelPath = src.replace(/\\/g, '/');
     const isGlobal = srcRelPath.includes('/global/');
     const stack = meta.stack || (srcRelPath.includes('/stacks/') ? srcRelPath.split('/stacks/')[1].split('/')[0] : null);
+
+    debugLog(DEBUG_MODE, `Processing ${isGlobal ? 'global' : 'stack-specific'} file: ${fileName}`);
 
     // Load kit config
     const templatesDir = path.join(__dirname, '../../templates');
@@ -200,7 +203,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
     const processedMd = processTemplateVariables(md, frontMatter);
 
     fs.outputFileSync(destFile, addFrontMatter(processedMd, frontMatter));
-    debugLog(DEBUG_MODE, `Converted ${fileName} to MDC with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply}]`);
+    debugLog(DEBUG_MODE, `Created: ${chalk.green(destFile)} with frontmatter [globs: ${chalk.cyan(frontMatter.globs)}, alwaysApply: ${frontMatter.alwaysApply || false}]`);
 };
 
 /**
@@ -214,10 +217,14 @@ export const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
     DEBUG_MODE = meta.debug || false;
 
     if (!fs.existsSync(tmplDir)) {
+        debugLog(DEBUG_MODE, `Template directory does not exist: ${tmplDir}`);
         return;
     }
 
-    fs.readdirSync(tmplDir).forEach(f => {
+    const files = fs.readdirSync(tmplDir);
+    debugLog(DEBUG_MODE, `Copying ${files.length} files from ${tmplDir} to ${destDir}`);
+
+    files.forEach(f => {
         const srcFile = path.join(tmplDir, f);
         const destFile = path.join(destDir, f);
 
@@ -227,7 +234,7 @@ export const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
             const content = fs.readFileSync(srcFile, 'utf8');
             const processedContent = processTemplateVariables(content, meta);
             fs.outputFileSync(destFile, processedContent);
-            debugLog(DEBUG_MODE, `Copied ${f} to documentation`);
+            debugLog(DEBUG_MODE, `Created mirror doc: ${chalk.green(destFile)}`);
         } else {
             // This should not normally be used for rules anymore
             // But kept for backward compatibility
@@ -235,4 +242,6 @@ export const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
             wrapMdToMdc(srcFile, mdcFile, meta);
         }
     });
+
+    debugLog(DEBUG_MODE, `Copied ${files.length} files to ${destDir}`);
 }; 
