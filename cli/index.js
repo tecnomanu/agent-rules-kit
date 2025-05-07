@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import path from 'path';
@@ -12,7 +13,36 @@ import * as versionDetector from './version-detector.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, '../templates');
 
-console.log(`Available stacks: ${STACKS.join(', ')}`);
+// Debug mode flag
+let DEBUG_MODE = process.argv.includes('--debug');
+
+// Helper for logging when in debug mode
+const debugLog = (...args) => {
+    if (DEBUG_MODE) {
+        console.log(chalk.gray('[DEBUG]'), ...args);
+    }
+};
+
+console.log(chalk.blue('🧰 Agent Rules Kit - CLI'));
+debugLog(`Available stacks: ${STACKS.join(', ')}`);
+
+/**
+ * Create a backup of existing rules
+ * @param {string} targetRules - Target rules directory
+ * @returns {string} - Backup directory path
+ */
+const createBackup = (targetRules) => {
+    const date = new Date();
+    const timestamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}`;
+    const backupDir = `${targetRules}_backup_${timestamp}`;
+
+    if (fs.existsSync(targetRules)) {
+        console.log(chalk.yellow(`📦 Creating backup of existing rules at ${backupDir}`));
+        fs.copySync(targetRules, backupDir);
+    }
+
+    return backupDir;
+};
 
 /**
  * Display information about the detected version and allow manual override
@@ -25,7 +55,7 @@ const handleVersionSelection = async (stack, projectPath) => {
 
     if (detectedVersion) {
         const versionRange = versionDetector.mapVersionToRange(stack, detectedVersion, templatesDir);
-        console.log(`\nDetected ${stack} version: ${detectedVersion} (compatibility: ${versionRange})`);
+        console.log(`\n${chalk.green('✅')} Detected ${chalk.cyan(stack)} version: ${chalk.bold(detectedVersion)} (compatibility: ${chalk.bold(versionRange)})`);
 
         const confirm = await inquirer.prompt([
             {
@@ -40,7 +70,7 @@ const handleVersionSelection = async (stack, projectPath) => {
             return detectedVersion;
         }
     } else {
-        console.log(`\nCould not automatically detect ${stack} version.`);
+        console.log(`\n${chalk.yellow('⚠️')} Could not automatically detect ${chalk.cyan(stack)} version.`);
     }
 
     // Get available versions from kit-config.json
@@ -49,7 +79,7 @@ const handleVersionSelection = async (stack, projectPath) => {
     const availableVersions = Object.keys(versionRanges).map(Number).sort((a, b) => b - a);
 
     if (availableVersions.length === 0) {
-        console.log(`No versions configured for ${stack}.`);
+        console.log(chalk.red(`❌ No versions configured for ${stack}.`));
         return null;
     }
 
@@ -71,8 +101,8 @@ const handleVersionSelection = async (stack, projectPath) => {
 };
 
 const main = async () => {
-    console.log('🛠️  Agent Rules Kit - Installation');
-    console.log('Note: If you need to install multiple stacks, run this tool once for each stack.');
+    console.log(chalk.blue('🛠️  Agent Rules Kit - Installation'));
+    console.log(chalk.italic('Note: If you need to install multiple stacks, run this tool once for each stack.'));
 
     const answers = await inquirer.prompt([
         {
@@ -97,7 +127,7 @@ const main = async () => {
         {
             type: 'input',
             name: 'projectPath',
-            message: 'Relative path to your project (if not in the root):',
+            message: 'Relative path to your project (from .cursor directory):',
             default: '.'
         },
         {
@@ -130,7 +160,7 @@ const main = async () => {
         // Set default architecture from config or use 'standard'
         const defaultArchitecture = config.laravel?.default_architecture || 'standard';
 
-        console.log(`\nLaravel selected, asking for architecture...`);
+        debugLog(`Laravel selected, asking for architecture...`);
         const archAnswer = await inquirer.prompt([
             {
                 type: 'list',
@@ -141,7 +171,7 @@ const main = async () => {
             }
         ]);
         architecture = archAnswer.architecture;
-        console.log(`Selected Laravel architecture: ${architecture}`);
+        console.log(`${chalk.green('✅')} Selected Laravel architecture: ${chalk.cyan(architecture)}`);
     }
 
     // Ask for Next.js architecture (previously router mode)
@@ -159,13 +189,53 @@ const main = async () => {
             }
         ]);
         architecture = routerAnswer.architecture;
+        console.log(`${chalk.green('✅')} Selected Next.js architecture: ${chalk.cyan(architecture)}`);
     }
 
     // Use rules-kit subfolder instead of putting everything in rules/
     const targetRules = path.join(process.cwd(), answers.root, '.cursor', 'rules', 'rules-kit');
     const targetDocs = path.join(process.cwd(), 'docs');
 
+    // Check if rules directory already exists
+    if (fs.existsSync(targetRules)) {
+        const stackDir = path.join(targetRules, answers.selected);
+        const hasExistingStack = fs.existsSync(stackDir);
+
+        console.log(chalk.yellow(`⚠️ The rules directory ${targetRules} already exists.`));
+        if (hasExistingStack) {
+            console.log(chalk.yellow(`⚠️ Rules for stack ${answers.selected} already exist.`));
+        }
+
+        const backupPrompt = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'action',
+                message: 'Rules directory already exists. What would you like to do?',
+                choices: [
+                    { name: 'Create backup and continue', value: 'backup' },
+                    { name: 'Overwrite without backup', value: 'overwrite' },
+                    { name: 'Cancel installation', value: 'cancel' }
+                ],
+                default: 'backup'
+            }
+        ]);
+
+        if (backupPrompt.action === 'cancel') {
+            console.log(chalk.red('❌ Installation cancelled.'));
+            return;
+        } else if (backupPrompt.action === 'backup') {
+            createBackup(targetRules);
+        }
+
+        // Remove existing directory for the selected stack
+        if (hasExistingStack) {
+            console.log(chalk.yellow(`🗑️ Removing existing ${answers.selected} rules...`));
+            fs.removeSync(stackDir);
+        }
+    }
+
     // Ensure the rules directory exists
+    debugLog(`Ensuring rules directory exists: ${targetRules}`);
     fs.ensureDirSync(targetRules);
 
     // Copy global rules
@@ -184,7 +254,7 @@ const main = async () => {
                 };
                 wrapMdToMdc(srcFile, destFile, meta);
             });
-            console.log(`→ Applied global rules`);
+            console.log(`${chalk.green('✅')} Applied global rules`);
         }
     }
 
@@ -196,13 +266,14 @@ const main = async () => {
         answers.projectPath ?? '.',
         {
             architecture,
-            selectedVersion
+            selectedVersion,
+            debug: DEBUG_MODE
         }
     );
 
     // Apply Next.js specific architecture rules if needed
     if (answers.selected === 'nextjs' && architecture) {
-        console.log(`Applying Next.js architecture rules for ${architecture}`);
+        debugLog(`Applying Next.js architecture rules for ${architecture}`);
         copyArchitectureRules(templatesDir, architecture, targetRules);
     }
 
@@ -217,7 +288,7 @@ const main = async () => {
             const globalDir = path.join(templatesDir, 'global');
             if (fs.existsSync(globalDir)) {
                 copyRuleGroup(globalDir, globalDocsDir);
-                console.log(`→ Global documentation copied to ${globalDocsDir}`);
+                console.log(`${chalk.green('✅')} Global documentation copied to ${globalDocsDir}`);
             }
         }
 
@@ -229,7 +300,7 @@ const main = async () => {
         const baseDir = path.join(templatesDir, 'stacks', answers.selected, 'base');
         if (fs.existsSync(baseDir)) {
             copyRuleGroup(baseDir, stackDocsDir);
-            console.log(`→ Base ${answers.selected} documentation copied to ${stackDocsDir}`);
+            debugLog(`Base ${answers.selected} documentation copied to ${stackDocsDir}`);
         }
 
         // Copy version-specific docs
@@ -240,7 +311,7 @@ const main = async () => {
             const versionSrcDir = path.join(templatesDir, 'stacks', answers.selected, versionDir);
             if (fs.existsSync(versionSrcDir)) {
                 copyRuleGroup(versionSrcDir, versionDocsDir);
-                console.log(`→ ${answers.selected} ${versionDir} documentation copied to ${versionDocsDir}`);
+                debugLog(`${answers.selected} ${versionDir} documentation copied to ${versionDocsDir}`);
             }
         }
 
@@ -249,65 +320,37 @@ const main = async () => {
             // Check new directory structure first
             const newArchDocsDir = path.join(stackDocsDir, 'architectures', architecture);
             fs.ensureDirSync(newArchDocsDir);
+
             const newArchSrcDir = path.join(templatesDir, 'stacks', 'laravel', 'architectures', architecture);
-
-            // Fallback to old directory structure
-            const oldArchDocsDir = path.join(stackDocsDir, 'architectures', architecture);
-            fs.ensureDirSync(oldArchDocsDir);
-            const oldArchSrcDir = path.join(templatesDir, 'architectures', 'laravel', architecture);
-
             if (fs.existsSync(newArchSrcDir)) {
                 copyRuleGroup(newArchSrcDir, newArchDocsDir);
-                console.log(`→ ${architecture} architecture documentation copied to ${newArchDocsDir}`);
-            } else if (fs.existsSync(oldArchSrcDir)) {
-                copyRuleGroup(oldArchSrcDir, oldArchDocsDir);
-                console.log(`→ ${architecture} architecture documentation copied to ${oldArchDocsDir}`);
-            }
-        }
-
-        // Copy architecture docs for Next.js
-        if (answers.selected === 'nextjs' && architecture) {
-            const archDocsDir = path.join(stackDocsDir, 'architectures', architecture);
-            fs.ensureDirSync(archDocsDir);
-
-            // For hybrid, we need to copy both app and pages
-            if (architecture === 'hybrid') {
-                ['app', 'pages'].forEach(archType => {
-                    const archSrcDir = path.join(templatesDir, 'stacks', 'nextjs', 'architectures', archType);
-                    const typeDocsDir = path.join(archDocsDir, archType);
-                    fs.ensureDirSync(typeDocsDir);
-
-                    if (fs.existsSync(archSrcDir)) {
-                        copyRuleGroup(archSrcDir, typeDocsDir);
-                        console.log(`→ Next.js ${archType} architecture documentation copied to ${typeDocsDir}`);
-                    }
-                });
+                debugLog(`Laravel ${architecture} architecture documentation copied to ${newArchDocsDir}`);
             } else {
-                const archSrcDir = path.join(templatesDir, 'stacks', 'nextjs', 'architectures', architecture);
-                if (fs.existsSync(archSrcDir)) {
-                    copyRuleGroup(archSrcDir, archDocsDir);
-                    console.log(`→ Next.js ${architecture} architecture documentation copied to ${archDocsDir}`);
+                // Fallback to old structure
+                const oldArchDocsDir = path.join(stackDocsDir, 'architectures', architecture);
+                fs.ensureDirSync(oldArchDocsDir);
+
+                const oldArchSrcDir = path.join(templatesDir, 'architectures', 'laravel', architecture);
+                if (fs.existsSync(oldArchSrcDir)) {
+                    copyRuleGroup(oldArchSrcDir, oldArchDocsDir);
+                    debugLog(`Laravel ${architecture} architecture documentation copied to ${oldArchDocsDir}`);
                 }
             }
         }
     }
 
-    // Report architecture for Laravel
-    if (answers.selected === 'laravel' && architecture) {
-        const archName = LARAVEL_ARCHITECTURES.find(a => a.value === architecture)?.name || architecture;
-        console.log(`→ Using ${archName} for Laravel`);
-    }
-
-    // Report architecture for Next.js
-    if (answers.selected === 'nextjs' && architecture) {
-        const architectureName = NEXTJS_ROUTER_MODES.find(r => r.value === architecture)?.name || architecture;
-        console.log(`→ Using ${architectureName} for Next.js`);
-    }
-
-    console.log('\nTo install rules for another stack, run this tool again.');
+    console.log(chalk.green(`\n✨ Installation complete! Rules installed in ${targetRules}`));
 };
 
+// Flag for handling errors
+let errorOccurred = false;
+
 main().catch(err => {
-    console.error('Error:', err);
+    errorOccurred = true;
+    console.error(chalk.red('\n❌ Error:'), err);
     process.exit(1);
+}).finally(() => {
+    if (!errorOccurred) {
+        console.log(chalk.blue('\n👋 Thank you for using Agent Rules Kit!'));
+    }
 });

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,8 +9,11 @@ import { copyStack } from './cli/utils/stack-helpers.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, 'templates');
 
+// Verificar si el modo debug está activado
+const DEBUG_MODE = process.argv.includes('--debug');
+
 async function testCLI() {
-    console.log('🧪 Testing Agent Rules Kit with predefined values');
+    console.log(chalk.blue('🧪 Testing Agent Rules Kit with predefined values'));
 
     // Predefined settings
     const settings = {
@@ -19,18 +23,19 @@ async function testCLI() {
         projectPath: '.',
         mirrorDocs: false,
         selectedVersion: 12,
-        architecture: 'standard'
+        architecture: 'standard',
+        debug: DEBUG_MODE
     };
 
-    console.log('Test settings:', settings);
+    console.log(chalk.cyan('Test settings:'), settings);
 
     // Clean up previous test files but keep the testing directory
     const cursorDir = path.join(process.cwd(), settings.root, '.cursor');
     if (fs.existsSync(cursorDir)) {
-        console.log(`Cleaning up previous test files in ${cursorDir}`);
+        console.log(chalk.yellow(`Cleaning up previous test files in ${cursorDir}`));
         fs.removeSync(cursorDir);
     } else {
-        console.log(`Creating testing directory structure`);
+        console.log(chalk.green(`Creating testing directory structure`));
         fs.ensureDirSync(path.join(process.cwd(), settings.root));
     }
 
@@ -50,10 +55,11 @@ async function testCLI() {
                 const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
                 const meta = {
                     projectPath: settings.projectPath,
+                    debug: settings.debug
                 };
                 wrapMdToMdc(srcFile, destFile, meta);
             });
-            console.log(`→ Applied global rules`);
+            console.log(chalk.green(`✅ Applied global rules`));
         }
     }
 
@@ -65,14 +71,23 @@ async function testCLI() {
         settings.projectPath,
         {
             architecture: settings.architecture,
-            selectedVersion: settings.selectedVersion
+            selectedVersion: settings.selectedVersion,
+            debug: settings.debug
         }
     );
 
-    console.log('\n✅ Test completed. Check the output files in:', targetRules);
+    console.log(chalk.green(`\n✅ Test completed. Check the output files in: ${targetRules}`));
 }
 
+// Flag para manejar errores
+let errorOccurred = false;
+
 testCLI().catch(err => {
-    console.error('Error:', err);
+    errorOccurred = true;
+    console.error(chalk.red('❌ Error:'), err);
     process.exit(1);
+}).finally(() => {
+    if (!errorOccurred) {
+        console.log(chalk.blue('👋 Thank you for using Agent Rules Kit!'));
+    }
 }); 

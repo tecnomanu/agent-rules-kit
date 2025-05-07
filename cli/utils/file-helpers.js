@@ -1,12 +1,27 @@
 /**
  * File helpers for Agent Rules Kit
  */
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { loadKitConfig } from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Debug mode flag - will be set by functions that receive debug option
+let DEBUG_MODE = false;
+
+/**
+ * Debug log helper
+ * @param {boolean} debug - Debug mode flag
+ * @param {...any} args - Arguments to log
+ */
+const debugLog = (debug, ...args) => {
+    if (debug || DEBUG_MODE) {
+        console.log(chalk.gray('[DEBUG]'), ...args);
+    }
+};
 
 /**
  * Add front matter to markdown files
@@ -57,6 +72,9 @@ export const processTemplateVariables = (content, meta = {}) => {
  * @param {Object} meta - Metadata for front matter
  */
 export const wrapMdToMdc = (src, destFile, meta = {}) => {
+    // Set debug mode if provided in meta
+    DEBUG_MODE = meta.debug || false;
+
     const md = fs.readFileSync(src, 'utf8');
 
     // Get the filename without path
@@ -74,6 +92,9 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
     // Initialize frontmatter with existing meta
     const frontMatter = { ...meta };
 
+    // Remove debug property from frontMatter if exists
+    delete frontMatter.debug;
+
     // Normalize projectPath for glob replacements
     const projectPathPrefix = (frontMatter.projectPath === '.' || frontMatter.projectPath === '')
         ? ''
@@ -87,7 +108,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
     // Check for global always rules regardless of location
     if (kitConfig.global?.always && kitConfig.global.always.includes(fileName)) {
         frontMatter.alwaysApply = true;
-        console.log(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
+        debugLog(DEBUG_MODE, `Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
     }
 
     // Add globs information
@@ -98,13 +119,13 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
         // Check if this file is in the "always" list (redundant check, but kept for clarity)
         if (kitConfig.global?.always && kitConfig.global.always.includes(fileName)) {
             frontMatter.alwaysApply = true;
-            console.log(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
+            debugLog(DEBUG_MODE, `Applied 'alwaysApply: true' to global rule: ${fileName}`);
         } else {
             frontMatter.alwaysApply = false;
-            console.log(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
+            debugLog(DEBUG_MODE, `Applied 'alwaysApply: false' to global rule: ${fileName}`);
         }
     } else if (stack && kitConfig[stack]) {
-        console.log(`Processing stack-specific rule for ${stack}: ${fileName}`);
+        debugLog(DEBUG_MODE, `Processing stack-specific rule for ${stack}: ${fileName}`);
 
         // For stack-specific rules
         if (kitConfig[stack].globs) {
@@ -113,7 +134,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
                 glob.replace(/<root>\//g, projectPathPrefix)
             );
             frontMatter.globs = processedGlobs.join(',');
-            console.log(`Applied default globs for ${stack}: ${frontMatter.globs}`);
+            debugLog(DEBUG_MODE, `Applied default globs for ${stack}: ${frontMatter.globs}`);
         }
 
         // Check pattern rules to see if this file has specific globs
@@ -131,7 +152,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
                         // Replace <root> with actual project path in the pattern
                         const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                         frontMatter.globs = processedPattern;
-                        console.log(`Applied pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
+                        debugLog(DEBUG_MODE, `Applied pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
                         break;
                     }
                 }
@@ -142,7 +163,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
         const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
         if (archMatch && archMatch[1] && kitConfig[stack].architectures?.[archMatch[1]]) {
             const arch = archMatch[1];
-            console.log(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
+            debugLog(DEBUG_MODE, `Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
 
             // Add architecture-specific globs
             if (kitConfig[stack].architectures[arch].globs) {
@@ -151,7 +172,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
                     glob.replace(/<root>\//g, projectPathPrefix)
                 );
                 frontMatter.globs = processedGlobs.join(',');
-                console.log(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+                debugLog(DEBUG_MODE, `Applied architecture globs for ${arch}: ${frontMatter.globs}`);
             }
 
             // Check architecture-specific pattern rules
@@ -166,7 +187,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
                             // Replace <root> with actual project path in the pattern
                             const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                             frontMatter.globs = processedPattern;
-                            console.log(`Applied architecture pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
+                            debugLog(DEBUG_MODE, `Applied architecture pattern-specific globs: ${processedPattern} for rule: ${fileName}`);
                             break;
                         }
                     }
@@ -179,7 +200,7 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
     const processedMd = processTemplateVariables(md, frontMatter);
 
     fs.outputFileSync(destFile, addFrontMatter(processedMd, frontMatter));
-    console.log(`Converted ${fileName} to MDC with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply}]`);
+    debugLog(DEBUG_MODE, `Converted ${fileName} to MDC with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply}]`);
 };
 
 /**
@@ -189,6 +210,9 @@ export const wrapMdToMdc = (src, destFile, meta = {}) => {
  * @param {Object} meta - Metadata for front matter
  */
 export const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
+    // Set debug mode if provided in meta
+    DEBUG_MODE = meta.debug || false;
+
     if (!fs.existsSync(tmplDir)) {
         return;
     }
@@ -203,6 +227,7 @@ export const copyRuleGroup = (tmplDir, destDir, meta = {}) => {
             const content = fs.readFileSync(srcFile, 'utf8');
             const processedContent = processTemplateVariables(content, meta);
             fs.outputFileSync(destFile, processedContent);
+            debugLog(DEBUG_MODE, `Copied ${f} to documentation`);
         } else {
             // This should not normally be used for rules anymore
             // But kept for backward compatibility

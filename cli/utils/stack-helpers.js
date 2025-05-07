@@ -1,10 +1,22 @@
 /**
  * Common stack helpers for Agent Rules Kit
  */
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import * as versionDetector from '../version-detector.js';
 import { wrapMdToMdc } from './file-helpers.js';
+
+/**
+ * Debug log helper
+ * @param {boolean} debug - Debug mode flag
+ * @param {...any} args - Arguments to log
+ */
+const debugLog = (debug, ...args) => {
+    if (debug) {
+        console.log(chalk.gray('[DEBUG]'), ...args);
+    }
+};
 
 /**
  * Copy version-specific overlay
@@ -37,7 +49,7 @@ export const copyVersionOverlay = (templatesDir, stack, versionDir, targetRules,
             };
             wrapMdToMdc(srcFile, destFile, meta);
         });
-        console.log(`→ Applied ${stack} ${versionDir} overlay`);
+        console.log(`${chalk.green('✅')} Applied ${chalk.cyan(stack)} ${chalk.yellow(versionDir)} overlay`);
     }
 };
 
@@ -79,7 +91,7 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
             };
             wrapMdToMdc(srcFile, destFile, meta);
         });
-        console.log(`→ Applied ${stack} ${architecture} architecture rules`);
+        console.log(`${chalk.green('✅')} Applied ${chalk.cyan(stack)} ${chalk.magenta(architecture)} architecture rules`);
     }
 };
 
@@ -92,19 +104,19 @@ export const copyArchitectureRules = (templatesDir, stack, architecture, targetR
  * @param {Object} options - Additional options
  */
 export const copyStack = async (templatesDir, stack, targetRules, projectPath, options = {}) => {
-    console.log(`\n----- Copying rules for ${stack} -----`);
-    console.log(`Target rules directory: ${targetRules}`);
-    console.log(`Project path: ${projectPath}`);
+    console.log(`\n${chalk.blue('📦')} Copying rules for ${chalk.cyan(stack)}`);
+    debugLog(options.debug, `Target rules directory: ${targetRules}`);
+    debugLog(options.debug, `Project path: ${projectPath}`);
 
     // Copy base rules
     const baseDir = path.join(templatesDir, 'stacks', stack, 'base');
-    console.log(`Looking for base rules at: ${baseDir}`);
+    debugLog(options.debug, `Looking for base rules at: ${baseDir}`);
 
     // Check if base directory exists
     if (!fs.existsSync(baseDir)) {
-        console.error(`Base directory not found: ${baseDir}`);
+        console.error(chalk.red(`❌ Base directory not found: ${baseDir}`));
     } else {
-        console.log(`Found base directory with ${fs.readdirSync(baseDir).length} files`);
+        debugLog(options.debug, `Found base directory with ${fs.readdirSync(baseDir).length} files`);
     }
 
     // Add version information to base rules
@@ -113,19 +125,19 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
     const version = options.selectedVersion || versionDetector.detectVersion(stack, projectPath);
     if (version) {
         const versionRange = versionDetector.mapVersionToRange(stack, version, templatesDir) || `v${version}`;
-        console.log(`Using version metadata: ${version} (${versionRange})`);
+        debugLog(options.debug, `Using version metadata: ${version} (${versionRange})`);
         versionMeta = {
             detectedVersion: version,
             versionRange: versionRange
         };
     } else {
-        console.log(`No version detected for ${stack}, using base rules only`);
+        debugLog(options.debug, `No version detected for ${stack}, using base rules only`);
     }
 
     // Iterate over base files and add project path and version info
     if (fs.existsSync(baseDir)) {
         const baseFiles = fs.readdirSync(baseDir);
-        console.log(`Processing ${baseFiles.length} base files for ${stack}`);
+        debugLog(options.debug, `Processing ${baseFiles.length} base files for ${stack}`);
 
         // Create stack directory if it doesn't exist
         const stackFolder = path.join(targetRules, stack);
@@ -137,7 +149,7 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
             const fileName = `${f}`.replace(/\.md$/, '.mdc');
             const destFile = path.join(stackFolder, fileName);
 
-            console.log(`Copying ${f} to ${fileName}`);
+            debugLog(options.debug, `Copying ${f} to ${fileName}`);
 
             // Custom metadata for each file
             const fileMeta = {
@@ -148,7 +160,7 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
 
             wrapMdToMdc(srcFile, destFile, fileMeta);
         });
-        console.log(`Finished copying base rules for ${stack}`);
+        console.log(`${chalk.green('✅')} Copied base rules for ${chalk.cyan(stack)}`);
     }
 
     // Determine appropriate version directory based on selected or detected version
@@ -161,19 +173,19 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
 
     // Apply version-specific rules
     if (versionDir) {
-        console.log(`Applying version-specific rules from ${versionDir}`);
+        console.log(`${chalk.blue('🔄')} Applying version-specific rules from ${chalk.yellow(versionDir)}`);
         copyVersionOverlay(templatesDir, stack, versionDir, targetRules, {
             projectPath,
             detectedVersion: version,
             versionRange: versionMeta.versionRange
         });
     } else {
-        console.log(`No version-specific rules to apply for ${stack}`);
+        debugLog(options.debug, `No version-specific rules to apply for ${stack}`);
     }
 
     // Apply architecture-specific rules for Laravel
     if (stack === 'laravel' && options.architecture) {
-        console.log(`Applying architecture rules for ${options.architecture}`);
+        console.log(`${chalk.blue('🔄')} Applying architecture rules for ${chalk.magenta(options.architecture)}`);
         copyArchitectureRules(templatesDir, stack, options.architecture, targetRules, {
             projectPath,
             detectedVersion: version,
@@ -181,5 +193,5 @@ export const copyStack = async (templatesDir, stack, targetRules, projectPath, o
         });
     }
 
-    console.log(`----- Finished processing ${stack} -----\n`);
+    console.log(`${chalk.green('✅')} Finished processing ${chalk.cyan(stack)}\n`);
 }; 
