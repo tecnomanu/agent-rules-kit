@@ -1,12 +1,12 @@
 /**
- * Base Service para Agent Rules Kit
- * Proporciona funcionalidades compartidas para todos los servicios
+ * Base Service for Agent Rules Kit
+ * Provides shared functionality for all services
  */
 import chalk from 'chalk';
 import fs from 'fs-extra';
 
 /**
- * Servicio base que proporciona utilidades compartidas
+ * Base service that provides shared utilities
  */
 export class BaseService {
     constructor(options = {}) {
@@ -14,8 +14,8 @@ export class BaseService {
     }
 
     /**
-     * Debug log helper - Centralizado para todos los servicios
-     * @param {...any} args - Argumentos para loguear
+     * Debug log helper - Centralized for all services
+     * @param {...any} args - Arguments to log
      */
     debugLog(...args) {
         if (this.debug) {
@@ -24,30 +24,30 @@ export class BaseService {
     }
 
     /**
-     * Comprueba si un directorio existe
-     * @param {string} dir - Ruta del directorio a comprobar
-     * @returns {boolean} - true si existe, false si no
+     * Checks if a directory exists
+     * @param {string} dir - Path of the directory to check
+     * @returns {boolean} - true if it exists, false if not
      */
     directoryExists(dir) {
         return fs.existsSync(dir);
     }
 
     /**
-     * Asegura que un directorio existe, creándolo si es necesario
-     * @param {string} dir - Ruta del directorio a crear
+     * Ensures a directory exists, creating it if necessary
+     * @param {string} dir - Path of the directory to create
      */
     ensureDirectoryExists(dir) {
         fs.ensureDirSync(dir);
     }
 
     /**
-     * Obtiene los archivos de un directorio
-     * @param {string} dir - Ruta del directorio
-     * @returns {Array<string>} - Lista de archivos
+     * Gets the files in a directory
+     * @param {string} dir - Directory path
+     * @returns {Array<string>} - List of files
      */
     getFilesInDirectory(dir) {
         if (!this.directoryExists(dir)) {
-            this.debugLog(`Directorio no encontrado: ${dir}`);
+            this.debugLog(`Directory not found: ${dir}`);
             return [];
         }
 
@@ -55,31 +55,31 @@ export class BaseService {
     }
 
     /**
-     * Lee un archivo
-     * @param {string} file - Ruta del archivo a leer
-     * @returns {string} - Contenido del archivo
+     * Reads a file
+     * @param {string} file - Path of the file to read
+     * @returns {string} - File contents
      */
     readFile(file) {
         return fs.readFileSync(file, 'utf8');
     }
 
     /**
-     * Escribe un archivo
-     * @param {string} file - Ruta del archivo a escribir
-     * @param {string} content - Contenido a escribir
+     * Writes a file
+     * @param {string} file - Path of the file to write
+     * @param {string} content - Content to write
      */
     writeFile(file, content) {
         fs.outputFileSync(file, content);
-        this.debugLog(`Archivo creado: ${chalk.green(file)}`);
+        this.debugLog(`File created: ${chalk.green(file)}`);
     }
 
     /**
-     * Copia un archivo
-     * @param {string} src - Archivo fuente
-     * @param {string} dest - Destino
+     * Copies a file
+     * @param {string} src - Source file
+     * @param {string} dest - Destination
      */
     copyFile(src, dest) {
         fs.copyFileSync(src, dest);
-        this.debugLog(`Archivo copiado: ${chalk.green(dest)}`);
+        this.debugLog(`File copied: ${chalk.green(dest)}`);
     }
 } 

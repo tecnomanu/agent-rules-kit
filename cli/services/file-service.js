@@ -1,6 +1,6 @@
 /**
- * File Service para Agent Rules Kit
- * Gestiona todas las operaciones relacionadas con archivos
+ * File Service for Agent Rules Kit
+ * Manages all file-related operations
  */
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,7 +9,7 @@ import { BaseService } from './base-service.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * Servicio para manejar operaciones de archivos y procesamiento de reglas
+ * Service for handling file operations and rule processing
  */
 export class FileService extends BaseService {
     constructor(options = {}) {
@@ -18,30 +18,30 @@ export class FileService extends BaseService {
     }
 
     /**
-     * Agrega front matter a contenido markdown
-     * @param {string} body - Contenido Markdown
-     * @param {Object} meta - Metadata para front matter
-     * @returns {string} - Markdown con front matter
+     * Adds front matter to markdown content
+     * @param {string} body - Markdown content
+     * @param {Object} meta - Metadata for front matter
+     * @returns {string} - Markdown with front matter
      */
     addFrontMatter(body, meta) {
         return `---\n${Object.entries(meta).map(([k, v]) => `${k}: ${v}`).join('\n')}\n---\n${body}`;
     }
 
     /**
-     * Procesa variables de plantilla en contenido markdown
-     * @param {string} content - Contenido Markdown
-     * @param {Object} meta - Metadata para reemplazos
-     * @returns {string} - Contenido Markdown procesado
+     * Processes template variables in markdown content
+     * @param {string} content - Markdown content
+     * @param {Object} meta - Metadata for replacements
+     * @returns {string} - Processed markdown content
      */
     processTemplateVariables(content, meta = {}) {
         let processedContent = content;
 
-        // Normalizar projectPath para reemplazo de variables
+        // Normalize projectPath for variable replacement
         const projectPath = (!meta.projectPath || meta.projectPath === '.')
             ? './'
             : meta.projectPath;
 
-        // Array de variables de plantilla y sus valores correspondientes
+        // Array of template variables and their corresponding values
         const templateVariables = [
             { value: meta?.detectedVersion, replace: 'detectedVersion' },
             { value: meta?.versionRange, replace: 'versionRange' },
@@ -49,12 +49,12 @@ export class FileService extends BaseService {
             { value: meta?.stack, replace: 'stack' }
         ];
 
-        // Iterar sobre el array y reemplazar los placeholders con sus valores
+        // Iterate over the array and replace placeholders with their values
         templateVariables.forEach(({ value, replace }) => {
             if (value) {
                 const regex = new RegExp(`\\{${replace}\\}`, 'g');
                 processedContent = processedContent.replace(regex, value);
-                this.debugLog(`Reemplazado {${replace}} con ${value}`);
+                this.debugLog(`Replaced {${replace}} with ${value}`);
             }
         });
 
@@ -62,112 +62,112 @@ export class FileService extends BaseService {
     }
 
     /**
-     * Convierte markdown a markdown con front matter
-     * @param {string} src - Ruta archivo fuente
-     * @param {string} destFile - Ruta archivo destino
-     * @param {Object} meta - Metadata para front matter
-     * @param {Object} config - Configuración del kit
+     * Converts markdown to markdown with front matter
+     * @param {string} src - Source file path
+     * @param {string} destFile - Destination file path
+     * @param {Object} meta - Metadata for front matter
+     * @param {Object} config - Kit configuration
      */
     wrapMdToMdc(src, destFile, meta = {}, config = {}) {
         const md = this.readFile(src);
 
-        // Obtener el nombre del archivo sin ruta
+        // Get the filename without path
         const fileName = path.basename(src);
 
-        // Obtener la estructura de directorios para identificar si es una regla global o específica de stack
+        // Get the directory structure to identify if it's a global rule or stack-specific
         const srcRelPath = src.replace(/\\/g, '/');
         const isGlobal = srcRelPath.includes('/global/');
         const stack = meta.stack || (srcRelPath.includes('/stacks/') ? srcRelPath.split('/stacks/')[1].split('/')[0] : null);
 
-        this.debugLog(`Procesando archivo ${isGlobal ? 'global' : 'específico de stack'}: ${fileName}`);
+        this.debugLog(`Processing ${isGlobal ? 'global' : 'stack-specific'} file: ${fileName}`);
 
-        // Inicializar frontmatter con meta existente
+        // Initialize frontmatter with existing meta
         const frontMatter = { ...meta };
 
-        // Eliminar propiedad debug de frontMatter si existe
+        // Remove debug property from frontMatter if it exists
         delete frontMatter.debug;
 
-        // Normalizar projectPath para reemplazos glob
+        // Normalize projectPath for glob replacements
         const projectPathPrefix = (frontMatter.projectPath === '.' || frontMatter.projectPath === '')
             ? ''
             : frontMatter.projectPath + '/';
 
-        // Asegurar que projectPath está correctamente establecido para reemplazo de plantillas
+        // Ensure projectPath is correctly set for template replacement
         if (!frontMatter.projectPath || frontMatter.projectPath === '.') {
             frontMatter.projectPath = './';
         }
 
-        // Verificar reglas globales "always" independientemente de ubicación
+        // Check global "always" rules regardless of location
         if (config.global?.always && config.global.always.includes(fileName)) {
             frontMatter.alwaysApply = true;
-            this.debugLog(`Aplicado 'alwaysApply: true' a regla de la lista global.always: ${fileName}`);
+            this.debugLog(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
         }
 
-        // Añadir información de globs
+        // Add globs information
         if (isGlobal) {
-            // Para reglas globales
-            frontMatter.globs = "**/*"; // Por defecto a todos los archivos
+            // For global rules
+            frontMatter.globs = "**/*"; // Default to all files
 
-            // Verificar si este archivo está en la lista "always"
+            // Check if this file is in the "always" list
             if (config.global?.always && config.global.always.includes(fileName)) {
                 frontMatter.alwaysApply = true;
-                this.debugLog(`Aplicado 'alwaysApply: true' a regla global: ${fileName}`);
+                this.debugLog(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
             } else {
                 frontMatter.alwaysApply = false;
-                this.debugLog(`Aplicado 'alwaysApply: false' a regla global: ${fileName}`);
+                this.debugLog(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
             }
         } else if (stack && config[stack]) {
-            this.debugLog(`Procesando regla específica para ${stack}: ${fileName}`);
+            this.debugLog(`Processing stack-specific rule for ${stack}: ${fileName}`);
 
-            // Para reglas específicas de stack
+            // For stack-specific rules
             if (config[stack].globs) {
-                // Reemplazar <root> con ruta de proyecto actual
+                // Replace <root> with current project path
                 const processedGlobs = config[stack].globs.map(glob =>
                     glob.replace(/<root>\//g, projectPathPrefix)
                 );
                 frontMatter.globs = processedGlobs.join(',');
-                this.debugLog(`Aplicado globs por defecto para ${stack}: ${frontMatter.globs}`);
+                this.debugLog(`Applied default globs for ${stack}: ${frontMatter.globs}`);
             }
 
-            // Verificar reglas de patrón para ver si este archivo tiene globs específicos
+            // Check pattern rules to see if this file has specific globs
             if (config[stack].pattern_rules) {
                 for (const [pattern, rules] of Object.entries(config[stack].pattern_rules)) {
-                    // Convertir a array si no lo es ya
+                    // Convert to array if it's not already
                     const rulesList = Array.isArray(rules) ? rules : [rules];
 
-                    // Comprobar si esta regla está en la lista
+                    // Check if this rule is in the list
                     for (const rule of rulesList) {
                         const ruleParts = rule.split('/');
                         const ruleFileName = ruleParts[ruleParts.length - 1];
 
                         if (ruleFileName === fileName) {
-                            // Reemplazar <root> con ruta de proyecto actual en el patrón
+                            // Replace <root> with current project path in the pattern
                             const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                             frontMatter.globs = processedPattern;
-                            this.debugLog(`Aplicado globs específicos de patrón: ${processedPattern} para regla: ${fileName}`);
+                            this.debugLog(`Applied specific pattern globs: ${processedPattern} for rule: ${fileName}`);
                             break;
                         }
                     }
                 }
             }
 
-            // Verificar reglas específicas de arquitectura
+            // Check architecture-specific rules
             const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
             if (archMatch && archMatch[1] && config[stack].architectures?.[archMatch[1]]) {
                 const arch = archMatch[1];
-                this.debugLog(`Procesando regla específica de arquitectura para ${stack}/${arch}: ${fileName}`);
+                this.debugLog(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
 
-                // Añadir globs específicos de arquitectura
+                // Add architecture-specific globs
                 if (config[stack].architectures[arch].globs) {
-                    // Reemplazar <root> con ruta de proyecto actual
+                    // Replace <root> with current project path
                     const processedGlobs = config[stack].architectures[arch].globs.map(glob =>
                         glob.replace(/<root>\//g, projectPathPrefix)
                     );
                     frontMatter.globs = processedGlobs.join(',');
-                    this.debugLog(`Aplicado globs de arquitectura para ${arch}: ${frontMatter.globs}`);
+                    this.debugLog(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
                 }
 
-                // Verificar reglas de patrón específicas de arquitectura
+                // Check architecture-specific pattern rules
                 if (config[stack].architectures[arch].pattern_rules) {
                     for (const [pattern, rules] of Object.entries(config[stack].architectures[arch].pattern_rules)) {
                         const rulesList = Array.isArray(rules) ? rules : [rules];
@@ -176,10 +176,10 @@ export class FileService extends BaseService {
                             const ruleFileName = ruleParts[ruleParts.length - 1];
 
                             if (ruleFileName === fileName) {
-                                // Reemplazar <root> con ruta de proyecto actual en el patrón
+                                // Replace <root> with current project path in the pattern
                                 const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                                 frontMatter.globs = processedPattern;
-                                this.debugLog(`Aplicado globs específicos de patrón de arquitectura: ${processedPattern} para regla: ${fileName}`);
+                                this.debugLog(`Applied architecture-specific pattern globs: ${processedPattern} for rule: ${fileName}`);
                                 break;
                             }
                         }
@@ -188,47 +188,47 @@ export class FileService extends BaseService {
             }
         }
 
-        // Procesar todos los placeholders de plantilla en contenido markdown
+        // Process all template placeholders in markdown content
         const processedMd = this.processTemplateVariables(md, frontMatter);
 
         this.writeFile(destFile, this.addFrontMatter(processedMd, frontMatter));
-        this.debugLog(`Creado: ${destFile} con frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply || false}]`);
+        this.debugLog(`Created: ${destFile} with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply || false}]`);
     }
 
     /**
-     * Copia grupo de reglas - usado principalmente para duplicar documentación
-     * @param {string} tmplDir - Directorio de plantillas
-     * @param {string} destDir - Directorio de destino
-     * @param {Object} meta - Metadata para front matter
-     * @param {Object} config - Configuración del kit
+     * Copies rule group - mainly used for duplicating documentation
+     * @param {string} tmplDir - Templates directory
+     * @param {string} destDir - Destination directory
+     * @param {Object} meta - Metadata for front matter
+     * @param {Object} config - Kit configuration
      */
     copyRuleGroup(tmplDir, destDir, meta = {}, config = {}) {
         if (!this.directoryExists(tmplDir)) {
-            this.debugLog(`Directorio de plantillas no existe: ${tmplDir}`);
+            this.debugLog(`Templates directory doesn't exist: ${tmplDir}`);
             return;
         }
 
         const files = this.getFilesInDirectory(tmplDir);
-        this.debugLog(`Copiando ${files.length} archivos de ${tmplDir} a ${destDir}`);
+        this.debugLog(`Copying ${files.length} files from ${tmplDir} to ${destDir}`);
 
         files.forEach(f => {
             const srcFile = path.join(tmplDir, f);
             const destFile = path.join(destDir, f);
 
-            // Para duplicación de documentación, queremos preservar la extensión de archivo original
+            // For documentation duplication, we want to preserve the original file extension
             if (destDir.includes('docs/')) {
-                // Leer el archivo fuente, procesar variables y escribir al destino
+                // Read the source file, process variables and write to destination
                 const content = this.readFile(srcFile);
                 const processedContent = this.processTemplateVariables(content, meta);
                 this.writeFile(destFile, processedContent);
-                this.debugLog(`Creado documento espejo: ${destFile}`);
+                this.debugLog(`Created mirror document: ${destFile}`);
             } else {
-                // Esto no debería usarse normalmente para reglas pero se mantiene por compatibilidad
+                // This shouldn't normally be used for rules but is kept for compatibility
                 const mdcFile = path.join(destDir, f.replace(/\.md$/, '.mdc'));
                 this.wrapMdToMdc(srcFile, mdcFile, meta, config);
             }
         });
 
-        this.debugLog(`Copiados ${files.length} archivos a ${destDir}`);
+        this.debugLog(`Copied ${files.length} files to ${destDir}`);
     }
 } 

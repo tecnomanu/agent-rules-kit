@@ -1,13 +1,13 @@
 /**
- * React Service para Agent Rules Kit
- * Maneja operaciones específicas del stack React
+ * React Service for Agent Rules Kit
+ * Handles operations specific to the React stack
  */
 import chalk from 'chalk';
 import path from 'path';
 import { BaseService } from './base-service.js';
 
 /**
- * Servicio específico para el stack React
+ * Service specific to the React stack
  */
 export class ReactService extends BaseService {
     constructor(options = {}) {
@@ -18,10 +18,10 @@ export class ReactService extends BaseService {
     }
 
     /**
-     * Copia reglas de arquitectura específicas para React
-     * @param {string} architecture - Nombre de la arquitectura (atomic, feature-sliced, etc.)
-     * @param {string} targetRules - Directorio destino de reglas
-     * @param {Object} options - Opciones adicionales
+     * Copies specific architecture rules for React
+     * @param {string} architecture - Architecture name (atomic, feature-sliced, etc.)
+     * @param {string} targetRules - Target rules directory
+     * @param {Object} options - Additional options
      */
     copyArchitectureRules(architecture, targetRules, options = {}) {
         if (!architecture) return;
@@ -29,30 +29,30 @@ export class ReactService extends BaseService {
         const templatesDir = options.templatesDir || this.templatesDir;
         const archDir = path.join(templatesDir, 'stacks/react/architectures', architecture);
 
-        this.debugLog(`Buscando reglas de arquitectura React: ${architecture}`);
+        this.debugLog(`Looking for React architecture rules: ${architecture}`);
 
         if (!this.fileService.directoryExists(archDir)) {
-            this.debugLog(`Directorio de arquitectura React no encontrado: ${archDir}`);
+            this.debugLog(`React architecture directory not found: ${archDir}`);
             return;
         }
 
         const files = this.fileService.getFilesInDirectory(archDir);
-        this.debugLog(`Encontrados ${files.length} archivos de arquitectura para React ${architecture}`);
+        this.debugLog(`Found ${files.length} architecture files for React ${architecture}`);
 
-        // Crear directorio de stack si no existe
+        // Create stack directory if it doesn't exist
         const stackFolder = path.join(targetRules, 'react');
         this.fileService.ensureDirectoryExists(stackFolder);
 
-        // Obtener configuración del kit para metadatos de reglas
+        // Get kit configuration for rule metadata
         const kitConfig = this.configService.loadKitConfig(templatesDir);
 
         files.forEach(f => {
             const srcFile = path.join(archDir, f);
-            // Usar prefijo para indicar la arquitectura
+            // Use prefix to indicate architecture
             const fileName = `architecture-${architecture}-${f}`.replace(/\.md$/, '.mdc');
             const destFile = path.join(stackFolder, fileName);
 
-            // Metadata personalizada para cada archivo
+            // Custom metadata for each file
             const meta = {
                 stack: 'react',
                 architecture: architecture,
@@ -63,45 +63,45 @@ export class ReactService extends BaseService {
             };
 
             this.fileService.wrapMdToMdc(srcFile, destFile, meta, kitConfig);
-            this.debugLog(`Procesado archivo de arquitectura React: ${f}`);
+            this.debugLog(`Processed React architecture file: ${f}`);
         });
 
-        console.log(`${chalk.green('✅')} Aplicadas reglas de arquitectura ${chalk.magenta(architecture)} para React`);
+        console.log(`${chalk.green('✅')} Applied ${chalk.magenta(architecture)} architecture rules for React`);
     }
 
     /**
-     * Copia reglas de testing para React
-     * @param {string} targetRules - Directorio destino de reglas
-     * @param {Object} options - Opciones adicionales
+     * Copies testing rules for React
+     * @param {string} targetRules - Target rules directory
+     * @param {Object} options - Additional options
      */
     copyTestingRules(targetRules, options = {}) {
         const templatesDir = options.templatesDir || this.templatesDir;
         const testingDir = path.join(templatesDir, 'stacks/react/testing');
 
-        this.debugLog(`Buscando reglas de testing para React`);
+        this.debugLog(`Looking for testing rules for React`);
 
         if (!this.fileService.directoryExists(testingDir)) {
-            this.debugLog(`Directorio de testing React no encontrado: ${testingDir}`);
+            this.debugLog(`React testing directory not found: ${testingDir}`);
             return;
         }
 
         const files = this.fileService.getFilesInDirectory(testingDir);
-        this.debugLog(`Encontrados ${files.length} archivos de testing para React`);
+        this.debugLog(`Found ${files.length} testing files for React`);
 
-        // Crear directorio de stack si no existe
+        // Create stack directory if it doesn't exist
         const stackFolder = path.join(targetRules, 'react');
         this.fileService.ensureDirectoryExists(stackFolder);
 
-        // Obtener configuración del kit para metadatos de reglas
+        // Get kit configuration for rule metadata
         const kitConfig = this.configService.loadKitConfig(templatesDir);
 
         files.forEach(f => {
             const srcFile = path.join(testingDir, f);
-            // Usar prefijo para indicar que es una regla de testing
+            // Use prefix to indicate that it's a testing rule
             const fileName = `testing-${f}`.replace(/\.md$/, '.mdc');
             const destFile = path.join(stackFolder, fileName);
 
-            // Metadata personalizada para cada archivo
+            // Custom metadata for each file
             const meta = {
                 stack: 'react',
                 testing: true,
@@ -112,17 +112,17 @@ export class ReactService extends BaseService {
             };
 
             this.fileService.wrapMdToMdc(srcFile, destFile, meta, kitConfig);
-            this.debugLog(`Procesado archivo de testing React: ${f}`);
+            this.debugLog(`Processed React testing file: ${f}`);
         });
 
-        console.log(`${chalk.green('✅')} Aplicadas reglas de testing para React`);
+        console.log(`${chalk.green('✅')} Applied testing rules for React`);
     }
 
     /**
-     * Copia reglas de gestión de estado para React
-     * @param {string} stateManager - Nombre del gestor de estado (redux, mobx, etc.)
-     * @param {string} targetRules - Directorio destino de reglas
-     * @param {Object} options - Opciones adicionales
+     * Copies state management rules for React
+     * @param {string} stateManager - State manager name (redux, mobx, etc.)
+     * @param {string} targetRules - Target rules directory
+     * @param {Object} options - Additional options
      */
     copyStateManagementRules(stateManager, targetRules, options = {}) {
         if (!stateManager) return;
@@ -130,30 +130,30 @@ export class ReactService extends BaseService {
         const templatesDir = options.templatesDir || this.templatesDir;
         const stateDir = path.join(templatesDir, 'stacks/react/state-management', stateManager);
 
-        this.debugLog(`Buscando reglas de gestión de estado React: ${stateManager}`);
+        this.debugLog(`Looking for React state management rules: ${stateManager}`);
 
         if (!this.fileService.directoryExists(stateDir)) {
-            this.debugLog(`Directorio de gestión de estado React no encontrado: ${stateDir}`);
+            this.debugLog(`React state management directory not found: ${stateDir}`);
             return;
         }
 
         const files = this.fileService.getFilesInDirectory(stateDir);
-        this.debugLog(`Encontrados ${files.length} archivos de gestión de estado para React ${stateManager}`);
+        this.debugLog(`Found ${files.length} state management files for React ${stateManager}`);
 
-        // Crear directorio de stack si no existe
+        // Create stack directory if it doesn't exist
         const stackFolder = path.join(targetRules, 'react');
         this.fileService.ensureDirectoryExists(stackFolder);
 
-        // Obtener configuración del kit para metadatos de reglas
+        // Get kit configuration for rule metadata
         const kitConfig = this.configService.loadKitConfig(templatesDir);
 
         files.forEach(f => {
             const srcFile = path.join(stateDir, f);
-            // Usar prefijo para indicar el gestor de estado
+            // Use prefix to indicate the state manager
             const fileName = `state-${stateManager}-${f}`.replace(/\.md$/, '.mdc');
             const destFile = path.join(stackFolder, fileName);
 
-            // Metadata personalizada para cada archivo
+            // Custom metadata for each file
             const meta = {
                 stack: 'react',
                 stateManagement: stateManager,
@@ -164,50 +164,50 @@ export class ReactService extends BaseService {
             };
 
             this.fileService.wrapMdToMdc(srcFile, destFile, meta, kitConfig);
-            this.debugLog(`Procesado archivo de gestión de estado React: ${f}`);
+            this.debugLog(`Processed React state management file: ${f}`);
         });
 
-        console.log(`${chalk.green('✅')} Aplicadas reglas de gestión de estado ${chalk.yellow(stateManager)} para React`);
+        console.log(`${chalk.green('✅')} Applied ${chalk.yellow(stateManager)} state management rules for React`);
     }
 
     /**
-     * Copia reglas base de React
-     * @param {string} targetRules - Directorio destino de reglas
-     * @param {Object} versionMeta - Metadatos de versión
-     * @param {Object} options - Opciones adicionales
+     * Copies React base rules
+     * @param {string} targetRules - Target rules directory
+     * @param {Object} versionMeta - Version metadata
+     * @param {Object} options - Additional options
      */
     copyBaseRules(targetRules, versionMeta = {}, options = {}) {
         const templatesDir = options.templatesDir || this.templatesDir;
         const baseDir = path.join(templatesDir, 'stacks/react/base');
-        this.debugLog(`Buscando reglas base en: ${baseDir}`);
+        this.debugLog(`Looking for base rules in: ${baseDir}`);
 
         if (!this.fileService.directoryExists(baseDir)) {
-            console.error(chalk.red(`❌ Directorio base no encontrado: ${baseDir}`));
+            console.error(chalk.red(`❌ Base directory not found: ${baseDir}`));
             return false;
         }
 
-        this.debugLog(`Encontrado directorio base con ${this.fileService.getFilesInDirectory(baseDir).length} archivos`);
+        this.debugLog(`Found base directory with ${this.fileService.getFilesInDirectory(baseDir).length} files`);
 
-        // Obtener configuración del kit para metadatos de reglas
+        // Get kit configuration for rule metadata
         const kitConfig = this.configService.loadKitConfig(templatesDir);
 
-        // Iterar sobre archivos base y añadir path del proyecto e info de versión
+        // Iterate over base files and add project path and version info
         const baseFiles = this.fileService.getFilesInDirectory(baseDir);
-        this.debugLog(`Procesando ${baseFiles.length} archivos base para react`);
+        this.debugLog(`Processing ${baseFiles.length} base files for react`);
 
-        // Crear directorio de stack si no existe
+        // Create stack directory if it doesn't exist
         const stackFolder = path.join(targetRules, 'react');
         this.fileService.ensureDirectoryExists(stackFolder);
 
         baseFiles.forEach(f => {
             const srcFile = path.join(baseDir, f);
-            // Almacenar en carpeta de stack con nombre original
+            // Store in stack folder with original name
             const fileName = `${f}`.replace(/\.md$/, '.mdc');
             const destFile = path.join(stackFolder, fileName);
 
-            this.debugLog(`Copiando ${f} a ${fileName}`);
+            this.debugLog(`Copying ${f} to ${fileName}`);
 
-            // Metadata personalizada para cada archivo
+            // Custom metadata for each file
             const fileMeta = {
                 ...versionMeta,
                 stack: 'react',
@@ -218,7 +218,7 @@ export class ReactService extends BaseService {
             this.fileService.wrapMdToMdc(srcFile, destFile, fileMeta, kitConfig);
         });
 
-        console.log(`${chalk.green('✅')} Copiadas reglas base para ${chalk.cyan('react')}`);
+        console.log(`${chalk.green('✅')} Copied base rules for ${chalk.cyan('react')}`);
         return true;
     }
 } 

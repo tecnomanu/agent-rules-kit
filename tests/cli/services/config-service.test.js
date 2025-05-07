@@ -4,15 +4,16 @@ import { ConfigService } from '../../../cli/services/config-service.js';
 
 // Mock fs-extra correctamente
 vi.mock('fs-extra', () => {
-    return {
+    const mockFunctions = {
         existsSync: vi.fn(),
         readFileSync: vi.fn(),
         writeFileSync: vi.fn(),
-        default: {
-            existsSync: vi.fn(),
-            readFileSync: vi.fn(),
-            writeFileSync: vi.fn()
-        }
+    };
+
+    return {
+        ...mockFunctions,
+        __esModule: true,
+        default: mockFunctions
     };
 });
 
@@ -43,8 +44,8 @@ describe('ConfigService', () => {
 
             const result = configService.loadKitConfig(templatesDir);
 
-            expect(fs.existsSync).toHaveBeenCalledWith(`${templatesDir}/config.json`);
-            expect(fs.readFileSync).toHaveBeenCalledWith(`${templatesDir}/config.json`, 'utf8');
+            expect(fs.existsSync).toHaveBeenCalledWith(`${templatesDir}/kit-config.json`);
+            expect(fs.readFileSync).toHaveBeenCalledWith(`${templatesDir}/kit-config.json`, 'utf8');
             expect(result).toEqual(mockConfig);
         });
 
@@ -54,7 +55,7 @@ describe('ConfigService', () => {
 
             const result = configService.loadKitConfig(templatesDir);
 
-            expect(fs.existsSync).toHaveBeenCalledWith(`${templatesDir}/config.json`);
+            expect(fs.existsSync).toHaveBeenCalledWith(`${templatesDir}/kit-config.json`);
             expect(configService.debugLog).toHaveBeenCalled();
             expect(result).toEqual(defaultConfig);
         });
@@ -75,7 +76,10 @@ describe('ConfigService', () => {
             fs.existsSync.mockReturnValue(true);
             fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
 
+            // Primera llamada debe leer el archivo
             configService.loadKitConfig(templatesDir);
+
+            // Resetear el mock para verificar que no se llama de nuevo
             fs.readFileSync.mockClear();
 
             // Segunda llamada debe usar el cache
@@ -106,7 +110,7 @@ describe('ConfigService', () => {
             const result = configService.saveKitConfig(config, templatesDir);
 
             expect(fs.writeFileSync).toHaveBeenCalledWith(
-                `${templatesDir}/config.json`,
+                `${templatesDir}/kit-config.json`,
                 JSON.stringify(config, null, 2),
                 'utf8'
             );
@@ -124,6 +128,151 @@ describe('ConfigService', () => {
 
             expect(errorSpy).toHaveBeenCalled();
             expect(result).toBe(false);
+        });
+    });
+
+    describe('getGlobalRules', () => {
+        it('should return global rules from config', () => {
+            const mockConfig = {
+                global: {
+                    always: ['rule1.md', 'rule2.md']
+                }
+            };
+            // Asegurar que loadKitConfig devuelva nuestro mock en lugar del default
+            configService.loadKitConfig = vi.fn().mockReturnValue(mockConfig);
+
+            const result = configService.getGlobalRules();
+
+            expect(result).toEqual(['rule1.md', 'rule2.md']);
+        });
+
+        it('should return empty array when global rules are not defined', () => {
+            const mockConfig = { global: {} };
+            // Asegurar que loadKitConfig devuelva nuestro mock en lugar del default
+            configService.loadKitConfig = vi.fn().mockReturnValue(mockConfig);
+
+            const result = configService.getGlobalRules();
+
+            expect(result).toEqual([]);
+        });
+    });
+
+    describe('processTemplateVariables', () => {
+        it('should replace all template variables', () => {
+            const content = 'Stack: {stack}, Version: {detectedVersion}, Range: {versionRange}';
+            const meta = {
+                stack: 'laravel',
+                detectedVersion: '10',
+                versionRange: 'v10-11',
+                formattedVersionName: 'Laravel 10-11'
+            };
+
+            const result = configService.processTemplateVariables(content, meta);
+
+            expect(result).toBe('Stack: laravel, Version: 10, Range: Laravel 10-11');
+        });
+
+        it('should handle empty content', () => {
+            const result = configService.processTemplateVariables('', { stack: 'laravel' });
+            expect(result).toBe('');
+        });
+
+        it('should handle null content', () => {
+            const result = configService.processTemplateVariables(null, { stack: 'laravel' });
+            expect(result).toBe(null);
+        });
+
+        it('should handle missing variables', () => {
+            const content = 'Stack: {stack}, Architecture: {architecture}';
+            const meta = { stack: 'laravel' };
+
+            const result = configService.processTemplateVariables(content, meta);
+
+            expect(result).toBe('Stack: laravel, Architecture: {architecture}');
+        });
+
+        it('should handle formattedVersionName replacing versionRange', () => {
+            const content = 'Version Range: {versionRange}';
+            const meta = {
+                formattedVersionName: 'Laravel 10-11'
+            };
+
+            const result = configService.processTemplateVariables(content, meta);
+
+            expect(result).toBe('Version Range: Laravel 10-11');
+        });
+    });
+
+    describe('validateOptions', () => {
+        it('should validate required options', () => {
+            const mockConfig = {
+                laravel: { /* config */ },
+                nextjs: { /* config */ }
+            };
+            fs.existsSync.mockReturnValue(true);
+            fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
+
+            const options = {
+                stack: 'laravel',
+                outputDir: '/path/to/output'
+            };
+
+            const result = configService.validateOptions(options);
+
+            expect(result.valid).toBe(true);
+            expect(result.messages).toEqual([]);
+        });
+
+        it('should detect missing required options', () => {
+            const options = {
+                stack: 'laravel'
+                // outputDir is missing
+            };
+
+            const result = configService.validateOptions(options);
+
+            expect(result.valid).toBe(false);
+            expect(result.messages).toContain('Output directory is required');
+        });
+
+        it('should detect unsupported stack', () => {
+            const mockConfig = {
+                laravel: { /* config */ },
+                nextjs: { /* config */ }
+            };
+            fs.existsSync.mockReturnValue(true);
+            fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
+
+            const options = {
+                stack: 'unsupported-stack',
+                outputDir: '/path/to/output'
+            };
+
+            const result = configService.validateOptions(options);
+
+            expect(result.valid).toBe(false);
+            expect(result.messages).toContain('Stack "unsupported-stack" is not supported');
+        });
+    });
+
+    describe('handleBackupOptions', () => {
+        it('should return create action when directory does not exist', () => {
+            fs.existsSync.mockReturnValue(false);
+
+            const result = configService.handleBackupOptions('/path/to/rules');
+
+            expect(result.action).toBe('create');
+            expect(result.backupPath).toBe(null);
+        });
+
+        it('should return backup action with paths when directory exists', () => {
+            fs.existsSync.mockReturnValue(true);
+
+            const result = configService.handleBackupOptions('/path/to/rules');
+
+            expect(result.action).toBe('backup');
+            expect(result.backupPath).toContain('/path/to/rules-backup-');
+            expect(result.originalPath).toBe('/path/to/rules');
         });
     });
 }); 

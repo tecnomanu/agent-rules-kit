@@ -4,21 +4,19 @@ import { BaseService } from '../../../cli/services/base-service.js';
 
 // Mock fs-extra correctamente
 vi.mock('fs-extra', () => {
-    return {
+    const mockFunctions = {
         existsSync: vi.fn(),
         ensureDirSync: vi.fn(),
         readdirSync: vi.fn(),
         readFileSync: vi.fn(),
         outputFileSync: vi.fn(),
         copyFileSync: vi.fn(),
-        default: {
-            existsSync: vi.fn(),
-            ensureDirSync: vi.fn(),
-            readdirSync: vi.fn(),
-            readFileSync: vi.fn(),
-            outputFileSync: vi.fn(),
-            copyFileSync: vi.fn()
-        }
+    };
+
+    return {
+        ...mockFunctions,
+        __esModule: true,
+        default: mockFunctions
     }
 });
 
