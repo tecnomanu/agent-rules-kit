@@ -1,4 +1,4 @@
-# Agent Rules Kit v1.2.0
+# Agent Rules Kit v1
 
 <p align="center">
   <img src="assets/banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
@@ -21,7 +21,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 -   **React Architecture Options**: Now includes support for atomic design and feature-sliced design
 -   **Better State Management Support**: Enhanced support for modern state management libraries
 
-## 🎉 New Features in Version 1.2.0
+## 🎉 New Features
 
 -   🚀 Quick setup of rules for different frameworks and stacks
 -   🔍 Automatic framework version detection
