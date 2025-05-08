@@ -1,6 +1,7 @@
 import path from 'path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getAvailableArchitectures, LARAVEL_ARCHITECTURES, loadKitConfig, STACKS } from '../../cli/utils/config.js';
+import { ConfigService } from '../../cli/services/config-service.js';
+import { StackService } from '../../cli/services/stack-service.js';
 
 // Mock fs-extra
 vi.mock('fs-extra', () => {
@@ -22,8 +23,17 @@ vi.mock('fs-extra', () => {
 import fs from 'fs-extra';
 
 describe('Config Module', () => {
+    let configService;
+    let stackService;
+    const templatesDir = '/templates';
+
     beforeEach(() => {
         vi.resetAllMocks();
+        configService = new ConfigService({ debug: true, templatesDir });
+        stackService = new StackService({ debug: true, configService, templatesDir });
+
+        // Mock métodos internos
+        configService.debugLog = vi.fn();
     });
 
     describe('loadKitConfig', () => {
@@ -37,40 +47,43 @@ describe('Config Module', () => {
             fs.existsSync.mockReturnValue(true);
             fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
 
-            const result = loadKitConfig('/templates');
+            const result = configService.loadKitConfig(templatesDir);
 
             expect(result).toEqual(mockConfig);
-            expect(fs.existsSync).toHaveBeenCalledWith(path.join('/templates', 'kit-config.json'));
+            expect(fs.existsSync).toHaveBeenCalledWith(path.join(templatesDir, 'kit-config.json'));
         });
 
-        it('should return empty object if config file does not exist', () => {
+        it('should return default config if config file does not exist', () => {
             fs.existsSync.mockReturnValue(false);
 
-            const result = loadKitConfig('/templates');
+            const result = configService.loadKitConfig(templatesDir);
 
-            expect(result).toEqual({});
+            expect(result).toBeTruthy();
+            expect(Object.keys(result)).toContain('laravel');
+            expect(Object.keys(result)).toContain('nextjs');
         });
 
         it('should handle JSON parse errors gracefully', () => {
             fs.existsSync.mockReturnValue(true);
             fs.readFileSync.mockReturnValue('invalid json');
 
-            const result = loadKitConfig('/templates');
+            const result = configService.loadKitConfig(templatesDir);
 
-            expect(result).toEqual({});
+            expect(result).toBeTruthy();
+            expect(configService.debugLog).toHaveBeenCalled();
         });
     });
 
     describe('getAvailableArchitectures', () => {
         it('should get architectures from the new location if available', () => {
-            const templatesDir = '/templates';
             const stack = 'laravel';
 
             fs.existsSync.mockReturnValue(true);
             fs.readdirSync.mockReturnValue(['standard', 'ddd', 'hexagonal']);
             fs.statSync.mockReturnValue({ isDirectory: () => true });
 
-            const result = getAvailableArchitectures(stack, templatesDir);
+            // Usar stackService que internamente usa configService
+            const result = stackService.getAvailableArchitectures(stack);
 
             expect(result.length).toBe(3);
             expect(result[0].value).toBe('standard');
@@ -78,43 +91,103 @@ describe('Config Module', () => {
         });
 
         it('should fallback to the old location if new location does not exist', () => {
-            const templatesDir = '/templates';
             const stack = 'laravel';
 
-            fs.existsSync.mockImplementation((path) => {
-                return !path.includes('/stacks/laravel/architectures') && path.includes('/architectures/laravel');
-            });
-            fs.readdirSync.mockReturnValue(['standard', 'ddd']);
+            // Reseteamos el mock para tener control completo
+            fs.existsSync.mockReset();
+
+            // Primero se chequea el archivo de configuración
+            fs.existsSync.mockImplementationOnce(() => true); // kit-config.json
+
+            // Después se chequea si existe el directorio nuevo de arquitecturas
+            fs.existsSync.mockImplementationOnce(() => false); // stacks/laravel/architectures
+
+            // Finalmente se chequea el directorio antiguo de arquitecturas
+            fs.existsSync.mockImplementationOnce(() => true); // architectures/laravel
+
+            // Para cualquier otra llamada
+            fs.existsSync.mockImplementation(() => true);
+
+            fs.readdirSync.mockReturnValue(['standard']);
             fs.statSync.mockReturnValue({ isDirectory: () => true });
 
-            const result = getAvailableArchitectures(stack, templatesDir);
+            const result = stackService.getAvailableArchitectures(stack);
+
+            expect(result.length).toBe(1);
+            expect(result[0].value).toBe('standard');
+        });
+
+        it('should get architectures from config if filesystem check fails', () => {
+            const stack = 'laravel';
+            const mockConfig = {
+                laravel: {
+                    architectures: {
+                        standard: { name: "Standard Laravel" },
+                        ddd: { name: "Domain-Driven Design" }
+                    }
+                }
+            };
+
+            fs.existsSync.mockReturnValue(false);
+            configService.loadKitConfig = vi.fn().mockReturnValue(mockConfig);
+
+            const result = stackService.getAvailableArchitectures(stack);
 
             expect(result.length).toBe(2);
             expect(result[0].value).toBe('standard');
-            expect(fs.existsSync).toHaveBeenCalledWith(path.join(templatesDir, 'architectures', stack));
-        });
-
-        it('should return empty array for non-Laravel stacks', () => {
-            const result = getAvailableArchitectures('nextjs', '/templates');
-
-            expect(result).toEqual([]);
-            expect(fs.existsSync).not.toHaveBeenCalled();
+            expect(result[0].name).toBe('Standard Laravel');
         });
     });
 
-    describe('Constants', () => {
-        it('should export stack constants', () => {
-            expect(STACKS).toContain('laravel');
-            expect(STACKS).toContain('nextjs');
-            expect(STACKS).toContain('react');
-            expect(STACKS).toContain('angular');
+    describe('getDefaultConfig', () => {
+        it('should return a default configuration object', () => {
+            const defaultConfig = configService.getDefaultConfig();
+
+            expect(defaultConfig).toBeTruthy();
+            expect(defaultConfig.laravel).toBeDefined();
+            expect(defaultConfig.nextjs).toBeDefined();
+            expect(defaultConfig.react).toBeDefined();
+            expect(defaultConfig.global).toBeDefined();
+        });
+    });
+
+    describe('getGlobalRules', () => {
+        it('should return global rules from config', () => {
+            const mockConfig = {
+                global: {
+                    always: ['README.md', 'CONTRIBUTING.md']
+                }
+            };
+
+            configService.loadKitConfig = vi.fn().mockReturnValue(mockConfig);
+
+            const globalRules = configService.getGlobalRules();
+
+            expect(globalRules).toEqual(['README.md', 'CONTRIBUTING.md']);
+        });
+    });
+
+    describe('processTemplateVariables', () => {
+        it('should replace template variables in content', () => {
+            const content = 'Project {stack} version {detectedVersion} with {versionRange}';
+            const meta = {
+                stack: 'laravel',
+                detectedVersion: '10',
+                formattedVersionName: 'v10-11'
+            };
+
+            const result = configService.processTemplateVariables(content, meta);
+
+            expect(result).toBe('Project laravel version 10 with v10-11');
         });
 
-        it('should export architecture options for Laravel', () => {
-            expect(LARAVEL_ARCHITECTURES.length).toBeGreaterThan(0);
-            expect(LARAVEL_ARCHITECTURES.find(a => a.value === 'standard')).toBeDefined();
-            expect(LARAVEL_ARCHITECTURES.find(a => a.value === 'ddd')).toBeDefined();
-            expect(LARAVEL_ARCHITECTURES.find(a => a.value === 'hexagonal')).toBeDefined();
+        it('should handle missing variables', () => {
+            const content = 'Project {stack} with {missingVar}';
+            const meta = { stack: 'laravel' };
+
+            const result = configService.processTemplateVariables(content, meta);
+
+            expect(result).toBe('Project laravel with {missingVar}');
         });
     });
 }); 

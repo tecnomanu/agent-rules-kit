@@ -14,12 +14,12 @@ Agent Rules Kit is a CLI tool that facilitates the installation and configuratio
 
 We've completely redesigned the internal architecture to provide a more maintainable and extensible system:
 
--   **Service-Based Architecture**: Replaced the helper-based system with a clean service-oriented architecture
--   **Automatic Backups**: Automatically creates backups of existing rules before overwriting
--   **Enhanced Debug Mode**: Better visibility into the rule generation process
--   **Improved Testing Framework**: More robust testing with better mocking
+-   **Service-Based Architecture**: Replaced the helper-based system with a clean service-oriented architecture that enhances maintainability and extensibility
+-   **Automatic Backups**: Smart backup system that preserves your custom rules when updating
+-   **Enhanced Debug Mode**: Better visibility into the rule generation process with standardized logging
+-   **Improved Testing Framework**: More robust testing with better mocking and service isolation
 -   **React Architecture Options**: Now includes support for atomic design and feature-sliced design
--   **Better State Management Support**: Enhanced support for various state management libraries
+-   **Better State Management Support**: Enhanced support for modern state management libraries
 
 ## 🎉 New Features in Version 1.0
 
@@ -159,22 +159,42 @@ docs/
 
 ## Project Architecture
 
-The codebase is organized using a service-oriented architecture:
+The codebase is organized using a comprehensive service-oriented architecture:
 
 ```
 cli/
 ├── index.js                # Entry point
 ├── services/               # Services directory
-│   ├── base-service.js     # Base functionality for all services
-│   ├── cli-service.js      # CLI interface management
-│   ├── config-service.js   # Configuration management
-│   ├── file-service.js     # File operations
-│   ├── stack-service.js    # Common stack functionality
-│   ├── laravel-service.js  # Laravel-specific service
-│   ├── nextjs-service.js   # Next.js-specific service
-│   └── react-service.js    # React-specific service
-└── version-detector.js     # Framework version detection
+│   ├── base-service.js     # Base class with shared functionality across all services
+│   ├── cli-service.js      # CLI interface and user interaction management
+│   ├── config-service.js   # Configuration loading, validation and management
+│   ├── file-service.js     # File operations and template processing
+│   ├── stack-service.js    # Core stack functionality and orchestration
+│   ├── laravel-service.js  # Laravel-specific implementations
+│   ├── nextjs-service.js   # Next.js-specific implementations
+│   └── react-service.js    # React-specific implementations
+└── version-detector.js     # Framework version detection utilities
 ```
+
+### Service-Oriented Design
+
+Each service has specific responsibilities:
+
+-   **BaseService**: Provides common utilities like debugging, file operations, and shared functions
+-   **FileService**: Handles all file operations, template processing, and MDC conversion
+-   **ConfigService**: Manages configuration from kit-config.json and default settings
+-   **CLIService**: Standardizes user interaction, messaging, and prompts
+-   **Stack-specific Services**: Implement specialized processing for each framework
+
+Key benefits of this architecture:
+
+-   **High Cohesion**: Services have clear, focused responsibilities
+-   **Low Coupling**: Services communicate through well-defined interfaces
+-   **Extensibility**: New stacks can be added by creating new service classes
+-   **Testability**: Isolated services are easier to test independently
+-   **Maintainability**: Consistent patterns and organization across the codebase
+
+For more details on the service architecture, see [docs/services-architecture.md](/docs/services-architecture.md).
 
 ## Advanced Configuration
 

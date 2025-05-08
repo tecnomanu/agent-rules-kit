@@ -1,6 +1,6 @@
 import path from 'path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addFrontMatter, copyRuleGroup, processTemplateVariables, wrapMdToMdc } from '../../cli/utils/file-helpers.js';
+import { FileService } from '../../cli/services/file-service.js';
 
 // Mock fs-extra
 vi.mock('fs-extra', () => {
@@ -24,8 +24,17 @@ vi.mock('fs-extra', () => {
 import fs from 'fs-extra';
 
 describe('File Helpers', () => {
+    let fileService;
+
     beforeEach(() => {
         vi.resetAllMocks();
+        fileService = new FileService({ debug: true });
+
+        // Mock los métodos base que no queremos probar directamente
+        fileService.readFile = vi.fn((path) => fs.readFileSync(path));
+        fileService.writeFile = vi.fn((path, content) => fs.outputFileSync(path, content));
+        fileService.directoryExists = vi.fn((path) => fs.existsSync(path));
+        fileService.getFilesInDirectory = vi.fn((path) => fs.readdirSync(path));
     });
 
     describe('addFrontMatter', () => {
@@ -33,7 +42,7 @@ describe('File Helpers', () => {
             const body = '# Test Markdown';
             const meta = { title: 'Test Title', stack: 'laravel', detectedVersion: '10' };
 
-            const result = addFrontMatter(body, meta);
+            const result = fileService.addFrontMatter(body, meta);
 
             expect(result).toContain('---');
             expect(result).toContain('title: Test Title');
@@ -53,7 +62,7 @@ describe('File Helpers', () => {
                 projectPath: '/path/to/project'
             };
 
-            const result = processTemplateVariables(content, meta);
+            const result = fileService.processTemplateVariables(content, meta);
 
             expect(result).toBe('# Project using laravel 10 in /path/to/project with v10-11');
         });
@@ -62,7 +71,7 @@ describe('File Helpers', () => {
             const content = 'Using {stack} version {detectedVersion}';
             const meta = { stack: 'nextjs' };
 
-            const result = processTemplateVariables(content, meta);
+            const result = fileService.processTemplateVariables(content, meta);
 
             expect(result).toBe('Using nextjs version {detectedVersion}');
         });
@@ -70,7 +79,7 @@ describe('File Helpers', () => {
         it('should return original content when no meta provided', () => {
             const content = 'Original content with {placeholders}';
 
-            const result = processTemplateVariables(content);
+            const result = fileService.processTemplateVariables(content);
 
             expect(result).toBe(content);
         });
@@ -87,7 +96,7 @@ describe('File Helpers', () => {
 
             fs.readFileSync.mockReturnValue(sourceContent);
 
-            wrapMdToMdc('source.md', 'dest.mdc', meta);
+            fileService.wrapMdToMdc('source.md', 'dest.mdc', meta);
 
             const expectedContent = `---\ndetectedVersion: 10\nversionRange: v10-11\nprojectPath: /path/to/project\n---\n# Project using 10 in /path/to/project`;
             expect(fs.outputFileSync).toHaveBeenCalledWith('dest.mdc', expectedContent);
@@ -101,7 +110,7 @@ describe('File Helpers', () => {
             fs.readFileSync.mockReturnValue('# Doc for {stack}');
 
             const meta = { stack: 'nextjs' };
-            copyRuleGroup('source/dir', 'docs/target/dir', meta);
+            fileService.copyRuleGroup('source/dir', 'docs/target/dir', meta);
 
             expect(fs.outputFileSync).toHaveBeenCalledTimes(2);
             expect(fs.outputFileSync).toHaveBeenCalledWith(
@@ -113,7 +122,7 @@ describe('File Helpers', () => {
         it('should not copy anything if source directory does not exist', () => {
             fs.existsSync.mockReturnValue(false);
 
-            copyRuleGroup('nonexistent/dir', 'target/dir');
+            fileService.copyRuleGroup('nonexistent/dir', 'target/dir');
 
             expect(fs.readdirSync).not.toHaveBeenCalled();
             expect(fs.outputFileSync).not.toHaveBeenCalled();
@@ -124,7 +133,7 @@ describe('File Helpers', () => {
             fs.readdirSync.mockReturnValue(['file1.md']);
             fs.readFileSync.mockReturnValue('# Test content');
 
-            copyRuleGroup('source/dir', 'rules/dir');
+            fileService.copyRuleGroup('source/dir', 'rules/dir');
 
             expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
             expect(fs.outputFileSync).toHaveBeenCalledWith(
