@@ -2,7 +2,7 @@
 
 ## React State Management Libraries Added
 
-We've implemented comprehensive guides for two major state management libraries in React:
+We've implemented comprehensive guides for three major state management libraries in React:
 
 ### 1. Redux Implementation
 
@@ -41,21 +41,40 @@ The MobX implementation showcases:
 -   Form state management
 -   Comparison with Redux to help developers choose the right tool
 
+### 3. Recoil Implementation
+
+Added comprehensive documentation for implementing Recoil in React applications:
+
+-   **Atoms & Selectors**: Core concepts with detailed examples
+-   **Atom/Selector Families**: Handling collections efficiently
+-   **Async Selectors**: Data fetching with built-in suspense support
+-   **Atom Effects**: Side effects like persistence and validation
+-   **TypeScript Integration**: Type safety with generics
+-   **Performance Optimizations**: Minimizing re-renders and memoization
+
+The Recoil implementation highlights:
+
+-   Graph-based state management
+-   Fine-grained reactivity model
+-   Async data handling with suspense
+-   Time-travel debugging capabilities
+-   Integration with React Concurrent Mode
+
 ## Directory Organization
 
 -   Created proper directory structure under `templates/stacks/react/state-management/`
 -   Organized implementations in dedicated folders:
     -   `redux/` - Redux implementation files
     -   `mobx/` - MobX implementation files
+    -   `recoil/` - Recoil implementation files
 
 ## Next Steps
 
 Continue implementing additional state management libraries:
 
-1. Recoil - Facebook's experimental state management library
-2. Zustand - Lightweight state management with hooks
+1. Zustand - Lightweight state management with hooks
 
-Each implementation will follow the same comprehensive pattern established with Redux and MobX, providing clear guidance on:
+Each implementation follows the same comprehensive pattern established with the current libraries, providing clear guidance on:
 
 -   Directory structure
 -   Store setup

@@ -35,7 +35,7 @@
 -   [x] Implement feature-sliced architecture for React
 -   [x] Create state management version for Redux
 -   [x] Create state management version for MobX
--   [ ] Create state management version for Recoil
+-   [x] Create state management version for Recoil
 -   [ ] Create state management version for Zustand
 -   [ ] Create testing guidelines for Svelte
 -   [ ] Create testing guidelines for SvelteKit
