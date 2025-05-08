@@ -1,15 +1,15 @@
 ---
 description: 
-globs: **/*
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 # Architecture Management
 
 This document explains how different architecture styles are managed for each stack in Agent Rules Kit.
 
-## Package managment
+## Package Management
 
-Use always `pnpm` to install new package or something to run.
+Always use `pnpm` to install new packages or to run commands.
 
 ## Architecture Structure
 
@@ -40,29 +40,51 @@ Architectures are configured in `templates/kit-config.json`:
 
 ```json
 {
-  "laravel": {
+  "[stack_name]": {
     "default_architecture": "standard",
+    "version_ranges": {
+      "8": {
+        "name": "Laravel 8-9",
+        "range_name": "v8-9"
+      },
+      "9": {
+        "name": "Laravel 8-9",
+        "range_name": "v8-9"
+      },
+      "10": {
+        "name": "Laravel 10-11",
+        "range_name": "v10-11"
+      }
+    },
+    "globs": [
+      "<root>/app/**/*.php",
+      "<root>/routes/**/*.php"
+    ],
     "architectures": {
       "standard": {
+        "name": "Standard Architecture", 
         "globs": [...],
         "pattern_rules": {...}
       },
       "ddd": {
+        "name": "Domain-Driven Design",
         "globs": [...],
         "pattern_rules": {...}
       }
     }
-  },
-  "nextjs": {
-    "default_architecture": "app",
-    "architectures": {
-      "app": {...},
-      "pages": {...},
-      "hybrid": {...}
-    }
   }
 }
 ```
+
+Key configuration properties:
+
+- `default_architecture`: The default architecture to use if none is specified
+- `version_ranges`: Maps major versions to version range information
+  - `name`: Human-readable name for the version range
+  - `range_name`: Identifier used for version-specific directories
+- `globs`: File patterns to apply rules to
+- `architectures`: Available architecture styles for the stack
+  - Each architecture can have its own `globs` and `pattern_rules`
 
 ## Architecture Selection
 

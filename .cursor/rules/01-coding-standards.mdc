@@ -1,7 +1,7 @@
 ---
-type: Agent
-globs: **/*
-alwaysApply: True
+description: 
+globs: 
+alwaysApply: true
 ---
 # Global Coding Standards
 
