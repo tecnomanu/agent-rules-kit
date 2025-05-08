@@ -49,4 +49,4 @@
 
 -   [x] Actualizar el README con una mejor descripción de la nueva arquitectura
 -   [x] Documentar cómo extender con nuevos servicios
--   [ ] Actualizar la sección de Implementation Status a medida que se completan las tareas
+-   [x] Actualizar la sección de Implementation Status a medida que se completan las tareas
