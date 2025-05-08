@@ -5,9 +5,11 @@
  * New services architecture v1.0.0
  */
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { AngularService } from './services/angular-service.js';
 import { BaseService } from './services/base-service.js';
 import { CliService } from './services/cli-service.js';
 import { ConfigService } from './services/config-service.js';
@@ -52,6 +54,13 @@ const nextjsService = new NextjsService({
 });
 
 const reactService = new ReactService({
+    debug: debugMode,
+    fileService,
+    configService,
+    templatesDir
+});
+
+const angularService = new AngularService({
     debug: debugMode,
     fileService,
     configService,
@@ -195,6 +204,39 @@ async function main() {
             versionRange,
             formattedVersionName
         };
+    }
+    else if (stack === 'angular') {
+        // Get available architectures for Angular
+        const architectures = stackService.getAvailableArchitectures(stack);
+        const architecture = await cliService.askArchitecture(architectures, stack);
+
+        // Ask if Angular signals should be included
+        const { includeSignals } = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'includeSignals',
+                message: `${cliService.emoji.config} Include Angular Signals rules?`,
+                default: true
+            }
+        ]);
+
+        // Get available versions for Angular
+        const versions = stackService.getAvailableVersions(stack);
+        const version = await cliService.askVersion(versions, detectedVersion);
+
+        // Map specific version to version range if needed
+        const versionRange = stackService.mapVersionToRange(stack, version);
+
+        // Get formatted version name for display
+        const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+
+        additionalOptions = {
+            architecture,
+            includeSignals,
+            detectedVersion: version,
+            versionRange,
+            formattedVersionName
+        };
     } else {
         // For other stacks, fetch available versions and architectures when available
         const architectures = stackService.getAvailableArchitectures(stack);
@@ -248,101 +290,90 @@ async function main() {
                     const content = fileService.readFile(sourceFile);
                     const processedContent = configService.processTemplateVariables(content, meta);
                     fileService.writeFile(destFile, processedContent);
-                    cliService.info(`Global rule copied: ${rule}`);
-                } catch (error) {
-                    cliService.warning(`Failed to copy global rule ${rule}: ${error.message}`);
+                }
+                catch (err) {
+                    cliService.error(`Error processing global rule ${rule}: ${err.message}`);
                 }
             }
+            cliService.success(`Copied ${globalRules.length} global rules`);
         }
     }
 
-    // Use the appropriate service based on the stack
-    let success = false;
+    // Process the stack-specific rules
     switch (stack) {
         case 'laravel':
-            success = await laravelService.copyBaseRules(rulesDir, meta, {
-                projectPath
-            });
+            laravelService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
 
-            if (success && additionalOptions.versionRange) {
-                await laravelService.copyVersionOverlay(additionalOptions.versionRange, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.versionRange) {
+                laravelService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
             }
 
-            if (success && additionalOptions.architecture) {
-                await laravelService.copyArchitectureRules(additionalOptions.architecture, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.architecture) {
+                laravelService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
             }
             break;
 
         case 'nextjs':
-            success = await nextjsService.copyBaseRules(rulesDir, meta, {
-                projectPath
-            });
+            nextjsService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
 
-            if (success && additionalOptions.versionRange) {
-                await nextjsService.copyVersionOverlay(additionalOptions.versionRange, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.versionRange) {
+                nextjsService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
             }
 
-            if (success && additionalOptions.architecture) {
-                await nextjsService.copyArchitectureRules(additionalOptions.architecture, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.architecture) {
+                nextjsService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
             }
             break;
 
         case 'react':
-            success = await reactService.copyBaseRules(rulesDir, meta, {
-                projectPath
-            });
+            reactService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
 
-            if (success && additionalOptions.architecture) {
-                await reactService.copyArchitectureRules(additionalOptions.architecture, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.architecture) {
+                reactService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
             }
 
-            if (success && additionalOptions.stateManagement) {
-                await reactService.copyStateManagementRules(additionalOptions.stateManagement, rulesDir, {
-                    ...meta,
-                    projectPath
-                });
+            if (additionalOptions.stateManagement) {
+                reactService.copyStateManagementRules(additionalOptions.stateManagement, stackRulesDir, { ...additionalOptions, projectPath });
             }
+
+            // Always copy testing rules
+            reactService.copyTestingRules(stackRulesDir, { ...additionalOptions, projectPath });
+            break;
+
+        case 'angular':
+            angularService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
+
+            if (additionalOptions.versionRange) {
+                angularService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
+            }
+
+            if (additionalOptions.architecture) {
+                angularService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
+            }
+
+            if (additionalOptions.includeSignals) {
+                angularService.copySignalsRules(stackRulesDir, { ...additionalOptions, projectPath });
+            }
+
+            // Always copy testing rules
+            angularService.copyTestingRules(stackRulesDir, { ...additionalOptions, projectPath });
             break;
 
         default:
-            cliService.error(`Unsupported stack: ${stack}`);
-            process.exit(1);
+            // For other stacks, copy config-defined rules and version overlays
+            cliService.info(`Using generic processing for stack: ${stack}`);
+            break;
     }
 
-    if (success) {
-        cliService.success(`Rules for ${stack} successfully generated`);
-
-        console.log(chalk.cyan('\n📖 Documentation:'));
-        console.log(chalk.blue('  - Global Rules: ') + chalk.white(`${rulesDir}/global`));
-        console.log(chalk.blue('  - Stack Rules: ') + chalk.white(`${rulesDir}/${stack}`));
-
-        console.log(chalk.green('\n✅ All done! ') + chalk.white('Import the rules in Cursor with the "Import Rules" command'));
-    } else {
-        cliService.error(`Failed to generate rules for ${stack}`);
-        process.exit(1);
-    }
+    cliService.success(`Rules for ${chalk.cyan(stack)} installed successfully!`);
+    cliService.info(`Location: ${chalk.blue(rulesDir)}`);
 }
 
-// Execute the application
-main().catch(error => {
-    cliService.error(`Unexpected error: ${error.message}`);
+// Execute the main function
+main().catch(err => {
+    console.error(chalk.red(`\n❌ An error occurred: ${err.message}`));
     if (debugMode) {
-        console.error(error);
+        console.error(err);
     }
     process.exit(1);
 });
