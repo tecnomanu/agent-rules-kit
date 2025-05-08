@@ -2,3 +2,7 @@ node_modules
 testing/**/*
 .DS_Store
 docs/agent-process-log/**/*
+*.zip
+*.rar
+*.tar.*
+*.7z
