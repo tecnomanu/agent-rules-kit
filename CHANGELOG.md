@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/tecnomanu/agent-rules-kit/compare/v1.2.0...v1.2.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* :zap: show version by package.json on cli and readme update ([ec4ed5a](https://github.com/tecnomanu/agent-rules-kit/commit/ec4ed5ab72866cc8b194c9a4ce6d19fec95937b6))
+
 # [1.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.1.0...v1.2.0) (2025-05-08)
 
 
