@@ -1,3 +1,8 @@
+---
+globs: '**/*'
+alwaysApply: true
+---
+
 # Task Process Logging
 
 For long or complex tasks, maintain a detailed log in `docs/logs-process/YYYY-MM-DD_<task-name>.md`. This practice improves task tracking, knowledge sharing, and project documentation.

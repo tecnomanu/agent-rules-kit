@@ -137,4 +137,66 @@ describe('FileService', () => {
             expect(fileService.debugLog).toHaveBeenCalled();
         });
     });
+
+    describe('unwrapMdcToMd', () => {
+        it('should remove frontmatter from MDC content', () => {
+            const mdcContent = `---
+globs: "**/*"
+alwaysApply: true
+---
+# Test Heading
+
+This is test content.`;
+
+            const result = fileService.unwrapMdcToMd(mdcContent);
+
+            expect(result).not.toContain('---');
+            expect(result).not.toContain('globs:');
+            expect(result).not.toContain('alwaysApply:');
+            expect(result).toBe('# Test Heading\n\nThis is test content.');
+        });
+
+        it('should return original content if no frontmatter', () => {
+            const content = '# No Frontmatter\n\nJust regular content.';
+
+            const result = fileService.unwrapMdcToMd(content);
+
+            expect(result).toBe(content);
+        });
+
+        it('should handle malformed frontmatter gracefully', () => {
+            const badContent = `---
+This is not proper frontmatter
+# Heading`;
+
+            const result = fileService.unwrapMdcToMd(badContent);
+
+            // Should return original content if frontmatter is malformed
+            expect(result).toBe(badContent);
+        });
+    });
+
+    describe('exportMdcToMd', () => {
+        it('should export MDC file to MD by removing frontmatter', async () => {
+            const mdcContent = `---
+globs: "**/*"
+---
+# Content`;
+
+            // Mock file reading and writing
+            fileService.readFileOptimized = vi.fn().mockResolvedValue(mdcContent);
+            fileService.writeFileAsync = vi.fn().mockResolvedValue();
+
+            await fileService.exportMdcToMd('source.mdc', 'dest.md');
+
+            expect(fileService.readFileOptimized).toHaveBeenCalledWith('source.mdc');
+            expect(fileService.writeFileAsync).toHaveBeenCalledWith('dest.md', '# Content');
+        });
+
+        it('should handle errors when exporting', async () => {
+            fileService.readFileOptimized = vi.fn().mockRejectedValue(new Error('Read error'));
+
+            await expect(fileService.exportMdcToMd('source.mdc', 'dest.md')).rejects.toThrow('Read error');
+        });
+    });
 }); 

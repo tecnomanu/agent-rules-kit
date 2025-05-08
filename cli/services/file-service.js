@@ -193,6 +193,37 @@ export class FileService extends BaseService {
             // For backward compatibility with tests, use synchronous methods
             const md = this.readFile(src);
 
+            // Check if the md file already has frontmatter
+            let existingFrontMatter = {};
+            let contentWithoutFrontMatter = md;
+
+            if (md.startsWith('---')) {
+                const endIndex = md.indexOf('---', 3);
+                if (endIndex !== -1) {
+                    // Extract frontmatter
+                    const frontMatterText = md.substring(3, endIndex).trim();
+                    // Parse frontmatter lines into object
+                    frontMatterText.split('\n').forEach(line => {
+                        const [key, value] = line.split(':').map(part => part.trim());
+                        if (key && value) {
+                            try {
+                                // Try to parse as JSON if it looks like an array or object
+                                if (value.startsWith('[') || value.startsWith('{')) {
+                                    existingFrontMatter[key] = JSON.parse(value);
+                                } else {
+                                    existingFrontMatter[key] = value;
+                                }
+                            } catch (e) {
+                                existingFrontMatter[key] = value;
+                            }
+                        }
+                    });
+                    // Extract content without frontmatter
+                    contentWithoutFrontMatter = md.substring(endIndex + 3).trim();
+                    this.debugLog(`Found existing frontmatter in ${src}`);
+                }
+            }
+
             // Get the filename without path
             const fileName = path.basename(src);
 
@@ -203,8 +234,8 @@ export class FileService extends BaseService {
 
             this.debugLog(`Processing ${isGlobal ? 'global' : 'stack-specific'} file: ${fileName}`);
 
-            // Initialize frontmatter with existing meta
-            const frontMatter = { ...meta };
+            // Initialize frontmatter with existing meta and any existing frontmatter from the file
+            const frontMatter = { ...meta, ...existingFrontMatter };
 
             // Remove debug property from frontMatter if it exists
             delete frontMatter.debug;
@@ -219,80 +250,47 @@ export class FileService extends BaseService {
                 frontMatter.projectPath = './';
             }
 
-            // Check global "always" rules regardless of location
-            if (config.global?.always && config.global.always.includes(fileName)) {
-                frontMatter.alwaysApply = true;
-                this.debugLog(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
-            }
-
-            // Add globs information
-            if (isGlobal) {
-                // For global rules
-                frontMatter.globs = "**/*"; // Default to all files
-
-                // Check if this file is in the "always" list
+            // Only set these if not already defined in the file's frontmatter
+            if (!existingFrontMatter.alwaysApply && !existingFrontMatter.globs) {
+                // Check global "always" rules regardless of location
                 if (config.global?.always && config.global.always.includes(fileName)) {
                     frontMatter.alwaysApply = true;
-                    this.debugLog(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
-                } else {
-                    frontMatter.alwaysApply = false;
-                    this.debugLog(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
-                }
-            } else if (stack && config[stack]) {
-                this.debugLog(`Processing stack-specific rule for ${stack}: ${fileName}`);
-
-                // For stack-specific rules
-                if (config[stack].globs) {
-                    // Replace <root> with current project path
-                    const processedGlobs = config[stack].globs.map(glob =>
-                        glob.replace(/<root>\//g, projectPathPrefix)
-                    );
-                    frontMatter.globs = processedGlobs.join(',');
-                    this.debugLog(`Applied default globs for ${stack}: ${frontMatter.globs}`);
+                    this.debugLog(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
                 }
 
-                // Check pattern rules to see if this file has specific globs
-                if (config[stack].pattern_rules) {
-                    for (const [pattern, rules] of Object.entries(config[stack].pattern_rules)) {
-                        // Convert to array if it's not already
-                        const rulesList = Array.isArray(rules) ? rules : [rules];
+                // Add globs information if not already in the file
+                if (isGlobal) {
+                    // For global rules
+                    frontMatter.globs = frontMatter.globs || "**/*"; // Default to all files
 
-                        // Check if this rule is in the list
-                        for (const rule of rulesList) {
-                            const ruleParts = rule.split('/');
-                            const ruleFileName = ruleParts[ruleParts.length - 1];
-
-                            if (ruleFileName === fileName) {
-                                // Replace <root> with current project path in the pattern
-                                const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
-                                frontMatter.globs = processedPattern;
-                                this.debugLog(`Applied specific pattern globs: ${processedPattern} for rule: ${fileName}`);
-                                break;
-                            }
-                        }
+                    // Check if this file is in the "always" list
+                    if (config.global?.always && config.global.always.includes(fileName)) {
+                        frontMatter.alwaysApply = true;
+                        this.debugLog(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
+                    } else if (frontMatter.alwaysApply === undefined) {
+                        frontMatter.alwaysApply = false;
+                        this.debugLog(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
                     }
-                }
+                } else if (stack && config[stack]) {
+                    this.debugLog(`Processing stack-specific rule for ${stack}: ${fileName}`);
 
-                // Check architecture-specific rules
-                const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
-                if (archMatch && archMatch[1] && config[stack].architectures?.[archMatch[1]]) {
-                    const arch = archMatch[1];
-                    this.debugLog(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
-
-                    // Add architecture-specific globs
-                    if (config[stack].architectures[arch].globs) {
+                    // For stack-specific rules
+                    if (config[stack].globs && !frontMatter.globs) {
                         // Replace <root> with current project path
-                        const processedGlobs = config[stack].architectures[arch].globs.map(glob =>
+                        const processedGlobs = config[stack].globs.map(glob =>
                             glob.replace(/<root>\//g, projectPathPrefix)
                         );
                         frontMatter.globs = processedGlobs.join(',');
-                        this.debugLog(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+                        this.debugLog(`Applied default globs for ${stack}: ${frontMatter.globs}`);
                     }
 
-                    // Check architecture-specific pattern rules
-                    if (config[stack].architectures[arch].pattern_rules) {
-                        for (const [pattern, rules] of Object.entries(config[stack].architectures[arch].pattern_rules)) {
+                    // Check pattern rules to see if this file has specific globs
+                    if (config[stack].pattern_rules && !frontMatter.globs) {
+                        for (const [pattern, rules] of Object.entries(config[stack].pattern_rules)) {
+                            // Convert to array if it's not already
                             const rulesList = Array.isArray(rules) ? rules : [rules];
+
+                            // Check if this rule is in the list
                             for (const rule of rulesList) {
                                 const ruleParts = rule.split('/');
                                 const ruleFileName = ruleParts[ruleParts.length - 1];
@@ -301,8 +299,44 @@ export class FileService extends BaseService {
                                     // Replace <root> with current project path in the pattern
                                     const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                                     frontMatter.globs = processedPattern;
-                                    this.debugLog(`Applied architecture-specific pattern globs: ${processedPattern} for rule: ${fileName}`);
+                                    this.debugLog(`Applied specific pattern globs: ${processedPattern} for rule: ${fileName}`);
                                     break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Check architecture-specific rules
+                    const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
+                    if (archMatch && archMatch[1] && config[stack].architectures?.[archMatch[1]]) {
+                        const arch = archMatch[1];
+                        this.debugLog(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
+
+                        // Add architecture-specific globs
+                        if (config[stack].architectures[arch].globs && !frontMatter.globs) {
+                            // Replace <root> with current project path
+                            const processedGlobs = config[stack].architectures[arch].globs.map(glob =>
+                                glob.replace(/<root>\//g, projectPathPrefix)
+                            );
+                            frontMatter.globs = processedGlobs.join(',');
+                            this.debugLog(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+                        }
+
+                        // Check architecture-specific pattern rules
+                        if (config[stack].architectures[arch].pattern_rules && !frontMatter.globs) {
+                            for (const [pattern, rules] of Object.entries(config[stack].architectures[arch].pattern_rules)) {
+                                const rulesList = Array.isArray(rules) ? rules : [rules];
+                                for (const rule of rulesList) {
+                                    const ruleParts = rule.split('/');
+                                    const ruleFileName = ruleParts[ruleParts.length - 1];
+
+                                    if (ruleFileName === fileName) {
+                                        // Replace <root> with current project path in the pattern
+                                        const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
+                                        frontMatter.globs = processedPattern;
+                                        this.debugLog(`Applied architecture-specific pattern globs: ${processedPattern} for rule: ${fileName}`);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -311,7 +345,7 @@ export class FileService extends BaseService {
             }
 
             // Process all template placeholders in markdown content
-            const processedMd = this.processTemplateVariables(md, frontMatter);
+            const processedMd = this.processTemplateVariables(contentWithoutFrontMatter, frontMatter);
 
             // For test compatibility, use synchronous write
             this.writeFile(destFile, this.addFrontMatter(processedMd, frontMatter));
@@ -342,6 +376,37 @@ export class FileService extends BaseService {
 
         const md = await this.readFileOptimized(src);
 
+        // Check if the md file already has frontmatter
+        let existingFrontMatter = {};
+        let contentWithoutFrontMatter = md;
+
+        if (md.startsWith('---')) {
+            const endIndex = md.indexOf('---', 3);
+            if (endIndex !== -1) {
+                // Extract frontmatter
+                const frontMatterText = md.substring(3, endIndex).trim();
+                // Parse frontmatter lines into object
+                frontMatterText.split('\n').forEach(line => {
+                    const [key, value] = line.split(':').map(part => part.trim());
+                    if (key && value) {
+                        try {
+                            // Try to parse as JSON if it looks like an array or object
+                            if (value.startsWith('[') || value.startsWith('{')) {
+                                existingFrontMatter[key] = JSON.parse(value);
+                            } else {
+                                existingFrontMatter[key] = value;
+                            }
+                        } catch (e) {
+                            existingFrontMatter[key] = value;
+                        }
+                    }
+                });
+                // Extract content without frontmatter
+                contentWithoutFrontMatter = md.substring(endIndex + 3).trim();
+                this.debugLog(`Found existing frontmatter in ${src}`);
+            }
+        }
+
         // Get the filename without path
         const fileName = path.basename(src);
 
@@ -352,8 +417,8 @@ export class FileService extends BaseService {
 
         this.debugLog(`Processing ${isGlobal ? 'global' : 'stack-specific'} file: ${fileName}`);
 
-        // Initialize frontmatter with existing meta
-        const frontMatter = { ...meta };
+        // Initialize frontmatter with existing meta and any existing frontmatter from the file
+        const frontMatter = { ...meta, ...existingFrontMatter };
 
         // Remove debug property from frontMatter if it exists
         delete frontMatter.debug;
@@ -368,80 +433,47 @@ export class FileService extends BaseService {
             frontMatter.projectPath = './';
         }
 
-        // Check global "always" rules regardless of location
-        if (config.global?.always && config.global.always.includes(fileName)) {
-            frontMatter.alwaysApply = true;
-            this.debugLog(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
-        }
-
-        // Add globs information
-        if (isGlobal) {
-            // For global rules
-            frontMatter.globs = "**/*"; // Default to all files
-
-            // Check if this file is in the "always" list
+        // Only set these if not already defined in the file's frontmatter
+        if (!existingFrontMatter.alwaysApply && !existingFrontMatter.globs) {
+            // Check global "always" rules regardless of location
             if (config.global?.always && config.global.always.includes(fileName)) {
                 frontMatter.alwaysApply = true;
-                this.debugLog(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
-            } else {
-                frontMatter.alwaysApply = false;
-                this.debugLog(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
-            }
-        } else if (stack && config[stack]) {
-            this.debugLog(`Processing stack-specific rule for ${stack}: ${fileName}`);
-
-            // For stack-specific rules
-            if (config[stack].globs) {
-                // Replace <root> with current project path
-                const processedGlobs = config[stack].globs.map(glob =>
-                    glob.replace(/<root>\//g, projectPathPrefix)
-                );
-                frontMatter.globs = processedGlobs.join(',');
-                this.debugLog(`Applied default globs for ${stack}: ${frontMatter.globs}`);
+                this.debugLog(`Applied 'alwaysApply: true' to rule from global.always list: ${fileName}`);
             }
 
-            // Check pattern rules to see if this file has specific globs
-            if (config[stack].pattern_rules) {
-                for (const [pattern, rules] of Object.entries(config[stack].pattern_rules)) {
-                    // Convert to array if it's not already
-                    const rulesList = Array.isArray(rules) ? rules : [rules];
+            // Add globs information if not already in the file
+            if (isGlobal) {
+                // For global rules
+                frontMatter.globs = frontMatter.globs || "**/*"; // Default to all files
 
-                    // Check if this rule is in the list
-                    for (const rule of rulesList) {
-                        const ruleParts = rule.split('/');
-                        const ruleFileName = ruleParts[ruleParts.length - 1];
-
-                        if (ruleFileName === fileName) {
-                            // Replace <root> with current project path in the pattern
-                            const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
-                            frontMatter.globs = processedPattern;
-                            this.debugLog(`Applied specific pattern globs: ${processedPattern} for rule: ${fileName}`);
-                            break;
-                        }
-                    }
+                // Check if this file is in the "always" list
+                if (config.global?.always && config.global.always.includes(fileName)) {
+                    frontMatter.alwaysApply = true;
+                    this.debugLog(`Applied 'alwaysApply: true' to global rule: ${fileName}`);
+                } else if (frontMatter.alwaysApply === undefined) {
+                    frontMatter.alwaysApply = false;
+                    this.debugLog(`Applied 'alwaysApply: false' to global rule: ${fileName}`);
                 }
-            }
+            } else if (stack && config[stack]) {
+                this.debugLog(`Processing stack-specific rule for ${stack}: ${fileName}`);
 
-            // Check architecture-specific rules
-            const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
-            if (archMatch && archMatch[1] && config[stack].architectures?.[archMatch[1]]) {
-                const arch = archMatch[1];
-                this.debugLog(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
-
-                // Add architecture-specific globs
-                if (config[stack].architectures[arch].globs) {
+                // For stack-specific rules
+                if (config[stack].globs && !frontMatter.globs) {
                     // Replace <root> with current project path
-                    const processedGlobs = config[stack].architectures[arch].globs.map(glob =>
+                    const processedGlobs = config[stack].globs.map(glob =>
                         glob.replace(/<root>\//g, projectPathPrefix)
                     );
                     frontMatter.globs = processedGlobs.join(',');
-                    this.debugLog(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+                    this.debugLog(`Applied default globs for ${stack}: ${frontMatter.globs}`);
                 }
 
-                // Check architecture-specific pattern rules
-                if (config[stack].architectures[arch].pattern_rules) {
-                    for (const [pattern, rules] of Object.entries(config[stack].architectures[arch].pattern_rules)) {
+                // Check pattern rules to see if this file has specific globs
+                if (config[stack].pattern_rules && !frontMatter.globs) {
+                    for (const [pattern, rules] of Object.entries(config[stack].pattern_rules)) {
+                        // Convert to array if it's not already
                         const rulesList = Array.isArray(rules) ? rules : [rules];
+
+                        // Check if this rule is in the list
                         for (const rule of rulesList) {
                             const ruleParts = rule.split('/');
                             const ruleFileName = ruleParts[ruleParts.length - 1];
@@ -450,8 +482,44 @@ export class FileService extends BaseService {
                                 // Replace <root> with current project path in the pattern
                                 const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
                                 frontMatter.globs = processedPattern;
-                                this.debugLog(`Applied architecture-specific pattern globs: ${processedPattern} for rule: ${fileName}`);
+                                this.debugLog(`Applied specific pattern globs: ${processedPattern} for rule: ${fileName}`);
                                 break;
+                            }
+                        }
+                    }
+                }
+
+                // Check architecture-specific rules
+                const archMatch = srcRelPath.match(/\/architectures\/([^/]+)\//);
+                if (archMatch && archMatch[1] && config[stack].architectures?.[archMatch[1]]) {
+                    const arch = archMatch[1];
+                    this.debugLog(`Processing architecture-specific rule for ${stack}/${arch}: ${fileName}`);
+
+                    // Add architecture-specific globs
+                    if (config[stack].architectures[arch].globs && !frontMatter.globs) {
+                        // Replace <root> with current project path
+                        const processedGlobs = config[stack].architectures[arch].globs.map(glob =>
+                            glob.replace(/<root>\//g, projectPathPrefix)
+                        );
+                        frontMatter.globs = processedGlobs.join(',');
+                        this.debugLog(`Applied architecture globs for ${arch}: ${frontMatter.globs}`);
+                    }
+
+                    // Check architecture-specific pattern rules
+                    if (config[stack].architectures[arch].pattern_rules && !frontMatter.globs) {
+                        for (const [pattern, rules] of Object.entries(config[stack].architectures[arch].pattern_rules)) {
+                            const rulesList = Array.isArray(rules) ? rules : [rules];
+                            for (const rule of rulesList) {
+                                const ruleParts = rule.split('/');
+                                const ruleFileName = ruleParts[ruleParts.length - 1];
+
+                                if (ruleFileName === fileName) {
+                                    // Replace <root> with current project path in the pattern
+                                    const processedPattern = pattern.replace(/<root>\//g, projectPathPrefix);
+                                    frontMatter.globs = processedPattern;
+                                    this.debugLog(`Applied architecture-specific pattern globs: ${processedPattern} for rule: ${fileName}`);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -460,7 +528,7 @@ export class FileService extends BaseService {
         }
 
         // Process all template placeholders in markdown content
-        const processedMd = this.processTemplateVariables(md, frontMatter);
+        const processedMd = this.processTemplateVariables(contentWithoutFrontMatter, frontMatter);
 
         await this.writeFileAsync(destFile, this.addFrontMatter(processedMd, frontMatter));
         this.debugLog(`Created: ${destFile} with frontmatter [globs: ${frontMatter.globs}, alwaysApply: ${frontMatter.alwaysApply || false}]`);
@@ -599,5 +667,46 @@ export class FileService extends BaseService {
     clearCache() {
         this.templateCache.clear();
         this.debugLog('Template cache cleared');
+    }
+
+    /**
+     * Removes frontmatter from an MDC file for external usage
+     * @param {string} mdcContent - Content of MDC file with frontmatter
+     * @returns {string} - Clean MD content without frontmatter
+     */
+    unwrapMdcToMd(mdcContent) {
+        try {
+            // Check if the content has frontmatter (between --- markers)
+            if (mdcContent.startsWith('---')) {
+                const endIndex = mdcContent.indexOf('---', 3);
+                if (endIndex !== -1) {
+                    // Extract only the content after the second --- marker
+                    return mdcContent.substring(endIndex + 3).trim();
+                }
+            }
+            // If no frontmatter found, return the original content
+            return mdcContent;
+        } catch (error) {
+            this.debugLog(`Error removing frontmatter: ${error.message}`);
+            return mdcContent;
+        }
+    }
+
+    /**
+     * Exports an MDC file to MD by removing the frontmatter
+     * @param {string} mdcFilePath - Path to MDC file
+     * @param {string} mdFilePath - Path to output MD file
+     * @returns {Promise<void>}
+     */
+    async exportMdcToMd(mdcFilePath, mdFilePath) {
+        try {
+            const mdcContent = await this.readFileOptimized(mdcFilePath);
+            const mdContent = this.unwrapMdcToMd(mdcContent);
+            await this.writeFileAsync(mdFilePath, mdContent);
+            this.debugLog(`Exported ${mdcFilePath} to ${mdFilePath}`);
+        } catch (error) {
+            this.debugLog(`Error exporting MDC to MD: ${error.message}`);
+            throw error;
+        }
     }
 } 

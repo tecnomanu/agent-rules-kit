@@ -1,3 +1,8 @@
+---
+globs: '**/*'
+alwaysApply: true
+---
+
 # Global Best Practices
 
 This document defines best practices applicable to any development project, regardless of the technology stack used.

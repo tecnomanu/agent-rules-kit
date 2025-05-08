@@ -1,3 +1,8 @@
+---
+globs: '**/*'
+alwaysApply: true
+---
+
 # Global Code Standards
 
 -   Follow consistent code formatting across the entire project.

@@ -1,3 +1,8 @@
+---
+globs: '**/*'
+alwaysApply: true
+---
+
 # File Management Guard
 
 Before creating a file, check if it already exists. If it exists and there is no explicit instruction to overwrite, merge content instead of replacing.
