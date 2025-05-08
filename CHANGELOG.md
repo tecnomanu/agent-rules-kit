@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.1.0...v1.2.0) (2025-05-08)
+
+
+### Features
+
+* :zap: add git commit guidelines as global rules ([b97338a](https://github.com/tecnomanu/agent-rules-kit/commit/b97338a3b7dd7519ceeb0ad3edf73628e5222c33))
+
 # [1.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.0.0...v1.1.0) (2025-05-07)
 
 
