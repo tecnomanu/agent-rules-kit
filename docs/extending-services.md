@@ -1,30 +1,30 @@
-# Extendiendo Agent Rules Kit con Nuevos Servicios
+# Extending Agent Rules Kit with New Services
 
-Este documento proporciona una guía paso a paso sobre cómo ampliar Agent Rules Kit con nuevos servicios para stacks adicionales o funcionalidades extendidas.
+This document provides a step-by-step guide on how to extend Agent Rules Kit with new services for additional stacks or extended functionalities.
 
-## Índice
+## Table of Contents
 
-1. [Requisitos previos](#requisitos-previos)
-2. [Creando un nuevo servicio de stack](#creando-un-nuevo-servicio-de-stack)
-3. [Integrando el servicio en el sistema](#integrando-el-servicio-en-el-sistema)
-4. [Creando plantillas de reglas](#creando-plantillas-de-reglas)
-5. [Actualizando la configuración](#actualizando-la-configuración)
-6. [Pruebas](#pruebas)
-7. [Ejemplo completo: Creación de un servicio para Svelte](#ejemplo-completo-creación-de-un-servicio-para-svelte)
+1. [Prerequisites](#prerequisites)
+2. [Creating a new stack service](#creating-a-new-stack-service)
+3. [Integrating the service into the system](#integrating-the-service-into-the-system)
+4. [Creating rule templates](#creating-rule-templates)
+5. [Updating the configuration](#updating-the-configuration)
+6. [Testing](#testing)
+7. [Complete example: Creating a service for Svelte](#complete-example-creating-a-service-for-svelte)
 
-## Requisitos previos
+## Prerequisites
 
-Antes de extender Agent Rules Kit, asegúrate de comprender:
+Before extending Agent Rules Kit, make sure you understand:
 
--   La arquitectura de servicios (consulta [services-architecture.md](./services-architecture.md))
--   La estructura de directorios del proyecto
--   Las interfaces y contratos de los servicios base
+-   The service architecture (see [services-architecture.md](./services-architecture.md))
+-   The project directory structure
+-   The interfaces and contracts of the base services
 
-## Creando un nuevo servicio de stack
+## Creating a new stack service
 
-### 1. Crear la clase de servicio
+### 1. Create the service class
 
-Crea un nuevo archivo en `cli/services/` siguiendo la convención de nombrado:
+Create a new file in `cli/services/` following the naming convention:
 
 ```javascript
 // cli/services/svelte-service.js
@@ -37,20 +37,20 @@ export class SvelteService extends BaseService {
 		this.configService = options.configService;
 		this.cliService = options.cliService;
 
-		// Configuración específica de Svelte
+		// Svelte-specific configuration
 		this.stackName = 'svelte';
 	}
 
 	/**
-	 * Copia las reglas base para Svelte
-	 * @param {string} targetRules - Ruta al directorio de destino
-	 * @param {object} versionMeta - Metadatos de versión
-	 * @param {object} options - Opciones adicionales
+	 * Copies the base rules for Svelte
+	 * @param {string} targetRules - Path to the target directory
+	 * @param {object} versionMeta - Version metadata
+	 * @param {object} options - Additional options
 	 */
 	copyBaseRules(targetRules, versionMeta, options = {}) {
-		this.debugLog(`Copiando reglas base de Svelte a ${targetRules}`);
+		this.debugLog(`Copying Svelte base rules to ${targetRules}`);
 
-		// Implementación específica para Svelte
+		// Svelte-specific implementation
 		const { fileService } = this;
 
 		fileService.copyRuleGroup({
@@ -67,14 +67,14 @@ export class SvelteService extends BaseService {
 	}
 
 	/**
-	 * Copia reglas de arquitectura específicas
-	 * @param {string} targetRules - Ruta al directorio de destino
-	 * @param {string} architecture - Nombre de la arquitectura elegida
-	 * @param {object} options - Opciones adicionales
+	 * Copies architecture-specific rules
+	 * @param {string} targetRules - Path to the target directory
+	 * @param {string} architecture - Name of the chosen architecture
+	 * @param {object} options - Additional options
 	 */
 	copyArchitectureRules(targetRules, architecture, options = {}) {
 		this.debugLog(
-			`Copiando reglas de arquitectura ${architecture} para Svelte`
+			`Copying architecture rules for ${architecture} for Svelte`
 		);
 
 		const { fileService } = this;
@@ -82,7 +82,7 @@ export class SvelteService extends BaseService {
 
 		if (!fileService.directoryExists(architecturePath)) {
 			this.debugLog(
-				`Arquitectura ${architecture} no encontrada en ${architecturePath}`
+				`Architecture ${architecture} not found in ${architecturePath}`
 			);
 			return false;
 		}
@@ -100,14 +100,14 @@ export class SvelteService extends BaseService {
 	}
 
 	/**
-	 * Copia reglas específicas de una versión
-	 * @param {string} targetRules - Ruta al directorio de destino
-	 * @param {object} versionMeta - Metadatos de versión
-	 * @param {object} options - Opciones adicionales
+	 * Copies version-specific rules
+	 * @param {string} targetRules - Path to the target directory
+	 * @param {object} versionMeta - Version metadata
+	 * @param {object} options - Additional options
 	 */
 	copyVersionOverlay(targetRules, versionMeta, options = {}) {
 		this.debugLog(
-			`Buscando reglas específicas para Svelte ${versionMeta.detectedVersion}`
+			`Looking for specific rules for Svelte ${versionMeta.detectedVersion}`
 		);
 
 		const { fileService } = this;
@@ -120,9 +120,7 @@ export class SvelteService extends BaseService {
 
 		for (const versionPath of versionPaths) {
 			if (fileService.directoryExists(versionPath)) {
-				this.debugLog(
-					`Aplicando reglas de versión desde ${versionPath}`
-				);
+				this.debugLog(`Applying version rules from ${versionPath}`);
 
 				fileService.copyRuleGroup({
 					sourcePath: versionPath,
@@ -143,25 +141,25 @@ export class SvelteService extends BaseService {
 }
 ```
 
-### 2. Implementar métodos requeridos
+### 2. Implement required methods
 
-Tu servicio debe implementar al menos estos métodos clave:
+Your service must implement at least these key methods:
 
--   **copyBaseRules**: Copia las reglas base del stack
--   **copyArchitectureRules**: Copia reglas específicas de una arquitectura
--   **copyVersionOverlay**: Copia reglas específicas de una versión
+-   **copyBaseRules**: Copies the base rules for the stack
+-   **copyArchitectureRules**: Copies architecture-specific rules
+-   **copyVersionOverlay**: Copies version-specific rules
 
-## Integrando el servicio en el sistema
+## Integrating the service into the system
 
-### 1. Actualizar el archivo principal
+### 1. Update the main file
 
-Integra tu nuevo servicio en `cli/index.js`:
+Integrate your new service in `cli/index.js`:
 
 ```javascript
-// Importar el nuevo servicio
+// Import the new service
 import { SvelteService } from './services/svelte-service.js';
 
-// En la función principal, añade el servicio a las opciones
+// In the main function, add the service to the options
 const services = {
 	laravel: new LaravelService({
 		fileService,
@@ -175,7 +173,7 @@ const services = {
 		cliService,
 		debug,
 	}),
-	// Añadir el nuevo servicio
+	// Add the new service
 	svelte: new SvelteService({
 		fileService,
 		configService,
@@ -184,57 +182,57 @@ const services = {
 	}),
 };
 
-// Asegúrate de añadir el stack a las opciones del CLI
+// Make sure to add the stack to the CLI options
 const stacks = [
 	{ name: 'Laravel', value: 'laravel' },
 	{ name: 'Next.js', value: 'nextjs' },
-	// Añadir la nueva opción
+	// Add the new option
 	{ name: 'Svelte', value: 'svelte' },
 ];
 ```
 
-## Creando plantillas de reglas
+## Creating rule templates
 
-### 1. Estructura de directorios
+### 1. Directory structure
 
-Crea la estructura de directorios siguiendo el patrón establecido:
+Create the directory structure following the established pattern:
 
 ```
 templates/
 └── stacks/
     └── svelte/
-        ├── base/                # Reglas base
-        ├── architectures/       # Arquitecturas específicas
-        │   ├── component/       # Arquitectura basada en componentes
-        │   └── actions/         # Arquitectura basada en acciones
-        └── v4/                  # Reglas específicas de Svelte 4
+        ├── base/                # Base rules
+        ├── architectures/       # Architecture-specific rules
+        │   ├── component/       # Component-based architecture
+        │   └── actions/         # Actions-based architecture
+        └── v4/                  # Svelte 4-specific rules
 ```
 
-### 2. Crear reglas base
+### 2. Create base rules
 
-Crea archivos de reglas básicas en `templates/stacks/svelte/base/`:
+Create basic rule files in `templates/stacks/svelte/base/`:
 
 ```markdown
-# Estructura de Proyecto Svelte
+# Svelte Project Structure
 
-Este documento describe la estructura básica de un proyecto Svelte.
+This document describes the basic structure of a Svelte project.
 
-## Organización de Archivos
+## File Organization
 
--   `src/`: Contiene el código fuente de la aplicación
-    -   `components/`: Componentes reutilizables
-    -   `routes/`: Páginas de la aplicación (si se usa SvelteKit)
-    -   `stores/`: Almacenamiento de estado global
-    -   `lib/`: Utilidades y funciones auxiliares
--   `public/`: Archivos estáticos
--   `svelte.config.js`: Configuración de Svelte
+-   `src/`: Contains the application source code
+    -   `components/`: Reusable components
+    -   `routes/`: Application pages (if using SvelteKit)
+    -   `stores/`: Global state storage
+    -   `lib/`: Utilities and helper functions
+-   `public/`: Static files
+-   `svelte.config.js`: Svelte configuration
 ```
 
-## Actualizando la configuración
+## Updating the configuration
 
-### 1. Modificar kit-config.json
+### 1. Modify kit-config.json
 
-Actualiza `templates/kit-config.json` para incluir tu nuevo stack:
+Update `templates/kit-config.json` to include your new stack:
 
 ```json
 {
@@ -247,11 +245,11 @@ Actualiza `templates/kit-config.json` para incluir tu nuevo stack:
 		"architectures": {
 			"component": {
 				"name": "Component-based",
-				"description": "Estructura basada en componentes"
+				"description": "Component-based structure"
 			},
 			"actions": {
 				"name": "Actions-based",
-				"description": "Estructura basada en acciones"
+				"description": "Actions-based structure"
 			}
 		},
 		"globs": ["src/**/*.svelte", "svelte.config.js"],
@@ -262,28 +260,28 @@ Actualiza `templates/kit-config.json` para incluir tu nuevo stack:
 }
 ```
 
-## Pruebas
+## Testing
 
-### 1. Crear pruebas unitarias
+### 1. Create unit tests
 
-Crea pruebas para tu nuevo servicio en `tests/cli/svelte-service.test.js`:
+Create tests for your new service in `tests/cli/svelte-service.test.js`:
 
 ```javascript
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { SvelteService } from '../../cli/services/svelte-service.js';
 
-// Mock de dependencias
+// Dependencies mocks
 const mockFileService = {
 	directoryExists: vi.fn().mockReturnValue(true),
 	copyRuleGroup: vi.fn().mockReturnValue(true),
 };
 
 const mockConfigService = {
-	// Mocks de configuración
+	// Configuration mocks
 };
 
 const mockCliService = {
-	// Mocks de CLI
+	// CLI mocks
 };
 
 describe('SvelteService', () => {
@@ -299,7 +297,7 @@ describe('SvelteService', () => {
 		});
 	});
 
-	test('copyBaseRules copia reglas base correctamente', () => {
+	test('copyBaseRules copies base rules correctly', () => {
 		const result = svelteService.copyBaseRules('target/path', {
 			detectedVersion: '4.0.0',
 			majorVersion: 4,
@@ -313,31 +311,31 @@ describe('SvelteService', () => {
 		);
 	});
 
-	// Más pruebas para otros métodos...
+	// More tests for other methods...
 });
 ```
 
-## Ejemplo completo: Creación de un servicio para Svelte
+## Complete example: Creating a service for Svelte
 
-Este ejemplo muestra el proceso completo para añadir soporte para Svelte:
+This example shows the complete process for adding support for Svelte:
 
-1. **Crear el servicio**: `cli/services/svelte-service.js`
-2. **Crear plantillas**:
+1. **Create the service**: `cli/services/svelte-service.js`
+2. **Create templates**:
     - `templates/stacks/svelte/base/`
     - `templates/stacks/svelte/architectures/component/`
     - `templates/stacks/svelte/architectures/actions/`
-    - `templates/stacks/svelte/v4/` (para Svelte 4)
-3. **Actualizar configuración** en `templates/kit-config.json`
-4. **Integrar** en `cli/index.js`
-5. **Crear pruebas** en `tests/cli/svelte-service.test.js`
-6. **Probar manualmente** con `pnpm start`
-7. **Documentar** en README.md, actualizando la sección de Implementation Status
+    - `templates/stacks/svelte/v4/` (for Svelte 4)
+3. **Update configuration** in `templates/kit-config.json`
+4. **Integrate** in `cli/index.js`
+5. **Create tests** in `tests/cli/svelte-service.test.js`
+6. **Test manually** with `pnpm start`
+7. **Document** in README.md, updating the Implementation Status section
 
-## Buenas prácticas
+## Best practices
 
--   Sigue el patrón de diseño y arquitectura existente
--   Mantén los nombres de archivos y servicios consistentes
--   Crea tests unitarios para todas las nuevas funcionalidades
--   Documenta las características específicas de tu stack
--   Proporciona reglas para las arquitecturas más comunes
--   Incluye información sobre la documentación más actualizada y mejores prácticas
+-   Follow the existing design pattern and architecture
+-   Keep file and service names consistent
+-   Create unit tests for all new functionalities
+-   Document the specific features of your stack
+-   Provide rules for the most common architectures
+-   Include information about the most up-to-date documentation and best practices

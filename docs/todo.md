@@ -1,52 +1,52 @@
-## Tareas Pendientes
+## Pending Tasks
 
-### Refactorización Arquitectónica
+### Architectural Refactoring
 
--   [x] Crear una estructura de servicios en lugar de helpers:
+-   [x] Create a service structure instead of helpers:
 
-    -   [x] Crear `services/base-service.js` con funciones compartidas como `debugLog` y `copyFiles`
-    -   [x] Crear servicios específicos por stack: `laravel-service.js`, `nextjs-service.js`, `react-service.js`
-    -   [x] Mover las constantes específicas de cada stack de `config.js` a cada servicio
-    -   [x] Refactorizar `index.js` para hacerlo más limpio delegando a servicios
+    -   [x] Create `services/base-service.js` with shared functions like `debugLog` and `copyFiles`
+    -   [x] Create stack-specific services: `laravel-service.js`, `nextjs-service.js`, `react-service.js`
+    -   [x] Move stack-specific constants from `config.js` to each service
+    -   [x] Refactor `index.js` to make it cleaner by delegating to services
 
--   [x] Eliminar redundancias entre helpers de arquitectura:
+-   [x] Remove redundancies between architecture helpers:
 
-    -   [x] Refactorizar `copyArchitectureRules` para que sea una función genérica
-    -   [x] Usar estrategia de composición donde cada servicio aporta su comportamiento específico
+    -   [x] Refactor `copyArchitectureRules` to be a generic function
+    -   [x] Use composition strategy where each service provides its specific behavior
 
--   [x] Reorganizar funcionalidades de CLI:
-    -   [x] Crear `cli-service.js` para manejar la interfaz de línea de comandos
-    -   [x] Separar claramente la lógica UI/UX de la lógica de procesamiento
-    -   [x] Estandarizar los mensajes y emojis en un solo lugar
+-   [x] Reorganize CLI functionalities:
+    -   [x] Create `cli-service.js` to handle command line interface
+    -   [x] Clearly separate UI/UX logic from processing logic
+    -   [x] Standardize messages and emojis in one place
 
-### Mejoras Pendientes UI/UX
+### Pending UI/UX Improvements
 
--   [x] Se debe dar un alerta si la carpeta de rules-kit ya existe o si la del stack seleccionado también.
--   [x] Si la carpeta existe debería generar un backup con fecha de hoy y copiar los actuales.
--   [x] Aclarar mensaje de rutas relativas del proyecto: "Relative path to your project (if not in the root)" aclarando "from .cursor directory"
--   [x] Mover los logs a un modo debug, no eliminarlos pero si quitarlos en el modo normal.
--   [x] Sumar más colores y emojis al CLI.
+-   [x] Alert if the rules-kit folder already exists or if the selected stack folder also exists
+-   [x] If the folder exists, generate a backup with today's date and copy the current ones
+-   [x] Clarify relative path message: "Relative path to your project (if not in the root)" by adding "from .cursor directory"
+-   [x] Move logs to debug mode, not removing them but disabling them in normal mode
+-   [x] Add more colors and emojis to the CLI
 
-### Nuevas Implementaciones
+### New Implementations
 
--   [x] Crear React-specific helpers para arquitecturas y state management
--   [ ] Crear Angular-specific helpers
--   [ ] Implementar arquitecturas atómicas para React
--   [ ] Implementar arquitecturas feature-sliced para React
--   [ ] Crear versión state management para Redux
--   [ ] Crear versión state management para MobX
--   [ ] Crear versión state management para Recoil
--   [ ] Crear versión state management para Zustand
+-   [x] Create React-specific helpers for architectures and state management
+-   [ ] Create Angular-specific helpers
+-   [ ] Implement atomic architecture for React
+-   [ ] Implement feature-sliced architecture for React
+-   [ ] Create state management version for Redux
+-   [ ] Create state management version for MobX
+-   [ ] Create state management version for Recoil
+-   [ ] Create state management version for Zustand
 -   [ ] Create testing guidelines for Svelte
 -   [ ] Create testing guidelines for SvelteKit
--   [ ] Agregar documentación sobre prácticas de testing E2E para todos los frameworks
+-   [ ] Add documentation on E2E testing practices for all frameworks
 -   [ ] Add integration tests
 -   [ ] Add CI/CD pipeline configuration
 -   [x] Add contribution guidelines
 -   [x] Add code of conduct
 
-### Documentación
+### Documentation
 
--   [x] Actualizar el README con una mejor descripción de la nueva arquitectura
--   [x] Documentar cómo extender con nuevos servicios
--   [x] Actualizar la sección de Implementation Status a medida que se completan las tareas
+-   [x] Update README with a better description of the new architecture
+-   [x] Document how to extend with new services
+-   [x] Update the Implementation Status section as tasks are completed
