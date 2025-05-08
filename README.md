@@ -61,7 +61,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 
 </p>
 
-> **Mejora de extensibilidad**: Se ha añadido documentación detallada sobre cómo [extender Agent Rules Kit con nuevos servicios](/docs/extending-services.md), facilitando la contribución de nuevos stacks y funcionalidades.
+> **Enhanced Extensibility**: Detailed documentation has been added on how to [extend Agent Rules Kit with new services](/docs/extending-services.md), making it easier to contribute new stacks and features.
 
 ## Installation
 
