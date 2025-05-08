@@ -33,8 +33,8 @@
 -   [x] Create Angular-specific helpers
 -   [x] Implement atomic architecture for React
 -   [x] Implement feature-sliced architecture for React
--   [ ] Create state management version for Redux
--   [ ] Create state management version for MobX
+-   [x] Create state management version for Redux
+-   [x] Create state management version for MobX
 -   [ ] Create state management version for Recoil
 -   [ ] Create state management version for Zustand
 -   [ ] Create testing guidelines for Svelte
