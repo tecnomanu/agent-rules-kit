@@ -537,26 +537,454 @@ export class StackService extends BaseService {
     }
 
     /**
-     * Create a backup of an existing rules directory
-     * @param {string} rulesDir - The rules directory to backup
-     * @returns {string} - The backup directory path or null if backup wasn't created
+     * Creates a backup of the rules directory
+     * @param {string} rulesDir - Rules directory to backup
+     * @returns {string|null} - Path to backup directory or null if failed
      */
     createBackup(rulesDir) {
-        if (!fs.existsSync(rulesDir)) {
-            this.debugLog(`No need for backup, directory doesn't exist: ${rulesDir}`);
-            return null;
-        }
-
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupDir = `${rulesDir}-backup-${timestamp}`;
-
         try {
+            // Check if directory exists first
+            if (!fs.existsSync(rulesDir)) {
+                return null;
+            }
+
+            // Generate backup directory name with date
+            const date = new Date();
+            const timestamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}${String(date.getMinutes()).padStart(2, '0')}`;
+            const backupDir = `${rulesDir}-backup-${timestamp}`;
+
+            // Copy directory
             fs.copySync(rulesDir, backupDir);
-            this.debugLog(`Created backup: ${rulesDir} → ${backupDir}`);
+            this.debugLog(`Created backup at ${backupDir}`);
             return backupDir;
         } catch (error) {
             this.debugLog(`Failed to create backup: ${error.message}`);
             return null;
+        }
+    }
+
+    /**
+     * Creates a backup of the rules directory asynchronously
+     * @param {string} rulesDir - Rules directory to backup
+     * @returns {Promise<string|null>} - Path to backup directory or null if failed
+     */
+    async createBackupAsync(rulesDir) {
+        try {
+            // Check if directory exists first
+            if (!await fs.pathExists(rulesDir)) {
+                return null;
+            }
+
+            // Generate backup directory name with date
+            const date = new Date();
+            const timestamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}${String(date.getMinutes()).padStart(2, '0')}`;
+            const backupDir = `${rulesDir}-backup-${timestamp}`;
+
+            // Copy directory asynchronously
+            await fs.copy(rulesDir, backupDir);
+            this.debugLog(`Created backup at ${backupDir}`);
+            return backupDir;
+        } catch (error) {
+            this.debugLog(`Failed to create backup: ${error.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * Count the total number of rule files to be generated
+     * @param {Object} meta - Metadata for counting rules
+     * @returns {number} - Total number of files to be generated
+     */
+    countTotalRules(meta) {
+        let totalFiles = 0;
+        const { stack, architecture, includeGlobalRules } = meta;
+
+        try {
+            // Count base rules
+            const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
+            if (fs.existsSync(baseDir)) {
+                const baseFiles = fs.readdirSync(baseDir).filter(f => f.endsWith('.md'));
+                totalFiles += baseFiles.length;
+                this.debugLog(`Base rules count: ${baseFiles.length}`);
+            }
+
+            // Count architecture rules if specified
+            if (architecture) {
+                const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
+                if (fs.existsSync(archDir)) {
+                    const archFiles = fs.readdirSync(archDir).filter(f => f.endsWith('.md'));
+                    totalFiles += archFiles.length;
+                    this.debugLog(`Architecture rules count: ${archFiles.length}`);
+                }
+            }
+
+            // Count version-specific rules if applicable
+            const versionRange = meta.versionRange;
+            if (versionRange) {
+                const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
+                if (fs.existsSync(versionDir)) {
+                    const versionFiles = fs.readdirSync(versionDir).filter(f => f.endsWith('.md'));
+                    totalFiles += versionFiles.length;
+                    this.debugLog(`Version rules count: ${versionFiles.length}`);
+                }
+            }
+
+            // Count global rules if included
+            if (includeGlobalRules) {
+                const globalDir = path.join(this.templatesDir, 'global');
+                if (fs.existsSync(globalDir)) {
+                    const globalFiles = fs.readdirSync(globalDir).filter(f => f.endsWith('.md'));
+                    totalFiles += globalFiles.length;
+                    this.debugLog(`Global rules count: ${globalFiles.length}`);
+                }
+            }
+
+            // Add state management rules for React if specified
+            if (stack === 'react' && meta.stateManagement) {
+                const stateDir = path.join(this.templatesDir, 'stacks', stack, 'state-management', meta.stateManagement);
+                if (fs.existsSync(stateDir)) {
+                    const stateFiles = fs.readdirSync(stateDir).filter(f => f.endsWith('.md'));
+                    totalFiles += stateFiles.length;
+                    this.debugLog(`State management rules count: ${stateFiles.length}`);
+                }
+            }
+
+            // Add testing rules for React/Angular
+            if (['react', 'angular'].includes(stack)) {
+                const testingDir = path.join(this.templatesDir, 'stacks', stack, 'testing');
+                if (fs.existsSync(testingDir)) {
+                    const testingFiles = fs.readdirSync(testingDir).filter(f => f.endsWith('.md'));
+                    totalFiles += testingFiles.length;
+                    this.debugLog(`Testing rules count: ${testingFiles.length}`);
+                }
+            }
+
+            // Count Angular signals rules if included
+            if (stack === 'angular' && meta.includeSignals) {
+                const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+                if (fs.existsSync(signalsDir)) {
+                    const signalsFiles = fs.readdirSync(signalsDir).filter(f => f.endsWith('.md'));
+                    totalFiles += signalsFiles.length;
+                    this.debugLog(`Angular signals rules count: ${signalsFiles.length}`);
+                }
+            }
+
+            this.debugLog(`Total rule files to generate: ${totalFiles}`);
+            return totalFiles;
+
+        } catch (error) {
+            this.debugLog(`Error counting rules: ${error.message}`);
+            return 10; // Default fallback value
+        }
+    }
+
+    /**
+     * Count the total number of rule files to be generated asynchronously
+     * @param {Object} meta - Metadata for counting rules
+     * @returns {Promise<number>} - Total number of files to be generated
+     */
+    async countTotalRulesAsync(meta) {
+        let totalFiles = 0;
+        const { stack, architecture, includeGlobalRules } = meta;
+
+        try {
+            // Count base rules
+            const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
+            if (await fs.pathExists(baseDir)) {
+                const baseFiles = (await fs.readdir(baseDir)).filter(f => f.endsWith('.md'));
+                totalFiles += baseFiles.length;
+                this.debugLog(`Base rules count: ${baseFiles.length}`);
+            }
+
+            // Count architecture rules if specified
+            if (architecture) {
+                const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
+                if (await fs.pathExists(archDir)) {
+                    const archFiles = (await fs.readdir(archDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += archFiles.length;
+                    this.debugLog(`Architecture rules count: ${archFiles.length}`);
+                }
+            }
+
+            // Count version-specific rules if applicable
+            const versionRange = meta.versionRange;
+            if (versionRange) {
+                const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
+                if (await fs.pathExists(versionDir)) {
+                    const versionFiles = (await fs.readdir(versionDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += versionFiles.length;
+                    this.debugLog(`Version rules count: ${versionFiles.length}`);
+                }
+            }
+
+            // Count global rules if included
+            if (includeGlobalRules) {
+                const globalDir = path.join(this.templatesDir, 'global');
+                if (await fs.pathExists(globalDir)) {
+                    const globalFiles = (await fs.readdir(globalDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += globalFiles.length;
+                    this.debugLog(`Global rules count: ${globalFiles.length}`);
+                }
+            }
+
+            // Add state management rules for React if specified
+            if (stack === 'react' && meta.stateManagement) {
+                const stateDir = path.join(this.templatesDir, 'stacks', stack, 'state-management', meta.stateManagement);
+                if (await fs.pathExists(stateDir)) {
+                    const stateFiles = (await fs.readdir(stateDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += stateFiles.length;
+                    this.debugLog(`State management rules count: ${stateFiles.length}`);
+                }
+            }
+
+            // Add testing rules for React/Angular
+            if (['react', 'angular'].includes(stack)) {
+                const testingDir = path.join(this.templatesDir, 'stacks', stack, 'testing');
+                if (await fs.pathExists(testingDir)) {
+                    const testingFiles = (await fs.readdir(testingDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += testingFiles.length;
+                    this.debugLog(`Testing rules count: ${testingFiles.length}`);
+                }
+            }
+
+            // Count Angular signals rules if included
+            if (stack === 'angular' && meta.includeSignals) {
+                const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+                if (await fs.pathExists(signalsDir)) {
+                    const signalsFiles = (await fs.readdir(signalsDir)).filter(f => f.endsWith('.md'));
+                    totalFiles += signalsFiles.length;
+                    this.debugLog(`Angular signals rules count: ${signalsFiles.length}`);
+                }
+            }
+
+            this.debugLog(`Total rule files to generate: ${totalFiles}`);
+            return totalFiles;
+
+        } catch (error) {
+            this.debugLog(`Error counting rules: ${error.message}`);
+            return 10; // Default fallback value
+        }
+    }
+
+    /**
+     * Generate rules for a stack asynchronously with progress tracking
+     * @param {string} rulesDir - Base directory for rules
+     * @param {Object} meta - Metadata for rule generation
+     * @param {Object} config - Configuration
+     * @param {Function} progressCallback - Callback for progress updates
+     * @param {boolean} includeGlobalRules - Whether to include global rules
+     * @returns {Promise<void>}
+     */
+    async generateRulesAsync(rulesDir, meta, config, progressCallback, includeGlobalRules) {
+        const { stack } = meta;
+
+        // Create the stack-specific directory
+        const stackRulesDir = path.join(rulesDir, stack);
+        await fs.ensureDir(stackRulesDir);
+
+        // Get a reference to the file service if needed
+        const fileService = this.configService?.fileService;
+        if (!fileService) {
+            throw new Error('File service is required but not available');
+        }
+
+        // Process global rules if requested
+        if (includeGlobalRules) {
+            const globalRules = config.global?.rules || [];
+
+            if (globalRules.length > 0) {
+                const globalDir = path.join(rulesDir, 'global');
+                await fs.ensureDir(globalDir);
+
+                // Get global templates
+                const globalTemplatesDir = path.join(this.templatesDir, 'global');
+
+                // Process in batches for better memory usage
+                const batchSize = 10;
+                for (let i = 0; i < globalRules.length; i += batchSize) {
+                    const batch = globalRules.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (rule) => {
+                        const sourceFile = path.join(globalTemplatesDir, rule);
+                        const destFile = path.join(globalDir, rule.replace(/\.md$/, '.mdc'));
+
+                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                        // Update progress
+                        if (typeof progressCallback === 'function') {
+                            progressCallback();
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Process base rules
+        const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
+        if (await fs.pathExists(baseDir)) {
+            const baseFiles = await fs.readdir(baseDir);
+
+            // Process in batches
+            const batchSize = 10;
+            for (let i = 0; i < baseFiles.length; i += batchSize) {
+                const batch = baseFiles.slice(i, i + batchSize);
+
+                await Promise.all(batch.map(async (file) => {
+                    if (file.endsWith('.md')) {
+                        const sourceFile = path.join(baseDir, file);
+                        const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                        // Update progress
+                        if (typeof progressCallback === 'function') {
+                            progressCallback();
+                        }
+                    }
+                }));
+            }
+        }
+
+        // Process version overlay if applicable
+        const versionRange = meta.versionRange;
+        if (versionRange) {
+            const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
+            if (await fs.pathExists(versionDir)) {
+                const versionFiles = await fs.readdir(versionDir);
+
+                // Process in batches
+                const batchSize = 10;
+                for (let i = 0; i < versionFiles.length; i += batchSize) {
+                    const batch = versionFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        if (file.endsWith('.md')) {
+                            const sourceFile = path.join(versionDir, file);
+                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Process architecture-specific rules if applicable
+        const architecture = meta.architecture;
+        if (architecture) {
+            const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
+            if (await fs.pathExists(archDir)) {
+                const archFiles = await fs.readdir(archDir);
+
+                // Process in batches
+                const batchSize = 10;
+                for (let i = 0; i < archFiles.length; i += batchSize) {
+                    const batch = archFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        if (file.endsWith('.md')) {
+                            const sourceFile = path.join(archDir, file);
+                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Process state management rules for React
+        if (stack === 'react' && meta.stateManagement) {
+            const stateDir = path.join(this.templatesDir, 'stacks', stack, 'state-management', meta.stateManagement);
+            if (await fs.pathExists(stateDir)) {
+                const stateFiles = await fs.readdir(stateDir);
+
+                // Process in batches
+                const batchSize = 10;
+                for (let i = 0; i < stateFiles.length; i += batchSize) {
+                    const batch = stateFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        if (file.endsWith('.md')) {
+                            const sourceFile = path.join(stateDir, file);
+                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Process testing rules for React/Angular
+        if (['react', 'angular'].includes(stack)) {
+            const testingDir = path.join(this.templatesDir, 'stacks', stack, 'testing');
+            if (await fs.pathExists(testingDir)) {
+                const testingFiles = await fs.readdir(testingDir);
+
+                // Process in batches
+                const batchSize = 10;
+                for (let i = 0; i < testingFiles.length; i += batchSize) {
+                    const batch = testingFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        if (file.endsWith('.md')) {
+                            const sourceFile = path.join(testingDir, file);
+                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Process Angular signals rules if applicable
+        if (stack === 'angular' && meta.includeSignals) {
+            const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+            if (await fs.pathExists(signalsDir)) {
+                const signalsFiles = await fs.readdir(signalsDir);
+
+                // Process in batches
+                const batchSize = 10;
+                for (let i = 0; i < signalsFiles.length; i += batchSize) {
+                    const batch = signalsFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        if (file.endsWith('.md')) {
+                            const sourceFile = path.join(signalsDir, file);
+                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
+
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        }
+                    }));
+                }
+            }
         }
     }
 } 

@@ -3,6 +3,7 @@
  * Handles command line interface and message formatting
  */
 import chalk from 'chalk';
+import cliProgress from 'cli-progress';
 import inquirer from 'inquirer';
 import { BaseService } from './base-service.js';
 
@@ -25,8 +26,10 @@ export class CliService extends BaseService {
             config: '⚙️',
             backup: '📦',
             file: '📄',
-            global: '🌐'
+            global: '🌐',
+            progress: '🔨'
         };
+        this.progressBar = null;
     }
 
     /**
@@ -79,6 +82,58 @@ export class CliService extends BaseService {
      */
     processing(message) {
         console.log(`${chalk.blue(this.emoji.processing)} ${message}`);
+    }
+
+    /**
+     * Starts a progress bar with the given title
+     * @param {string} title - Title for the progress operation
+     * @param {Object} options - Options for the progress bar
+     */
+    startProgress(title, options = {}) {
+        // Ensure any existing progress bar is stopped
+        this.completeProgress();
+
+        // Create a new progress bar
+        this.progressBar = new cliProgress.SingleBar({
+            format: `${this.emoji.progress} ${title} |${chalk.cyan('{bar}')}| {percentage}% | {value}/{total} files`,
+            barCompleteChar: '\u2588',
+            barIncompleteChar: '\u2591',
+            hideCursor: true,
+            clearOnComplete: false,
+            ...options
+        });
+
+        // Start with 0/100 as default if not specified
+        const total = options.total || 100;
+        this.progressBar.start(total, 0);
+    }
+
+    /**
+     * Updates the progress bar
+     * @param {number} value - Current progress value (percentage if between 0-100)
+     * @param {Object} payload - Additional data for the progress bar
+     */
+    updateProgress(value, payload = {}) {
+        if (!this.progressBar) return;
+
+        // If value is percentage between 0-100, convert to actual value
+        if (value <= 100 && value >= 0) {
+            const total = this.progressBar.getTotal();
+            value = Math.floor((value / 100) * total);
+        }
+
+        this.progressBar.update(value, payload);
+    }
+
+    /**
+     * Completes and clears the progress bar
+     */
+    completeProgress() {
+        if (this.progressBar) {
+            this.progressBar.stop();
+            this.progressBar = null;
+            console.log(); // Add an empty line after the progress bar
+        }
     }
 
     /**
@@ -240,48 +295,11 @@ export class CliService extends BaseService {
     }
 
     /**
-     * Asks the user to confirm all options before processing
-     * @param {Object} options - All the collected options
-     * @returns {Promise<boolean>} true if the user wants to proceed
-     */
-    async confirmOptions(options) {
-        // Format options for display
-        const formattedOptions = [
-            `${this.emoji.stack} Stack: ${chalk.blue(options.stack)}`,
-            `${this.emoji.architecture} Architecture: ${chalk.blue(options.architecture || 'Not specified')}`,
-            `${this.emoji.version} Version: ${chalk.blue(options.versionRange || 'Not specified')}`,
-            `${this.emoji.file} Project path: ${chalk.blue(options.projectPath)}`,
-            `${this.emoji.global} Include global rules: ${chalk.blue(options.includeGlobal ? 'Yes' : 'No')}`
-        ];
-
-        // Add state management if it's for React
-        if (options.stack === 'react' && options.stateManagement) {
-            formattedOptions.push(`${this.emoji.config} State management: ${chalk.blue(options.stateManagement)}`);
-        }
-
-        // Display all options
-        console.log(chalk.bold('\nConfiguration summary:'));
-        formattedOptions.forEach(option => console.log(option));
-
-        // Ask for confirmation
-        const { confirm } = await inquirer.prompt([
-            {
-                type: 'confirm',
-                name: 'confirm',
-                message: 'Proceed with these settings?',
-                default: true
-            }
-        ]);
-
-        return confirm;
-    }
-
-    /**
-     * Informs about the creation of a backup
-     * @param {string} originalDir - Original directory
-     * @param {string} backupDir - Backup directory
+     * Shows a notification that a backup was created
+     * @param {string} originalDir - Original directory path
+     * @param {string} backupDir - Backup directory path
      */
     backupCreated(originalDir, backupDir) {
-        this.info(`${this.emoji.backup} Backup created: ${chalk.green(originalDir)} → ${chalk.green(backupDir)}`);
+        this.success(`Created backup of ${chalk.blue(originalDir)} at ${chalk.green(backupDir)}`);
     }
 } 

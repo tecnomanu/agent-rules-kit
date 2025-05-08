@@ -26,7 +26,7 @@
 -   [x] Clarify relative path message: "Relative path to your project (if not in the root)" by adding "from .cursor directory"
 -   [x] Move logs to debug mode, not removing them but disabling them in normal mode
 -   [x] Add more colors and emojis to the CLI
--   [ ] Add progress bars for long-running operations like rule generation and backup
+-   [x] Add progress bars for long-running operations like rule generation and backup
 -   [ ] Create a more detailed summary after rule generation
 -   [ ] Add "quick mode" flag to skip confirmations for experienced users
 

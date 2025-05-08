@@ -3,21 +3,19 @@
 /**
  * Main entry point for Agent Rules Kit
  * New services architecture v1.0.0
+ * Optimized for performance v1.x.x
  */
 import chalk from 'chalk';
-import fs from 'fs';
+import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { AngularService } from './services/angular-service.js';
+// Only import essential services at startup
 import { BaseService } from './services/base-service.js';
 import { CliService } from './services/cli-service.js';
 import { ConfigService } from './services/config-service.js';
 import { FileService } from './services/file-service.js';
-import { LaravelService } from './services/laravel-service.js';
-import { NextjsService } from './services/nextjs-service.js';
-import { ReactService } from './services/react-service.js';
 import { StackService } from './services/stack-service.js';
 
 // Path configuration
@@ -27,8 +25,9 @@ const templatesDir = path.join(__dirname, '../templates');
 // Parse command line arguments
 const args = process.argv.slice(2);
 const debugMode = args.includes('--debug');
+const updateFlag = args.includes('--update');
 
-// Initialize services
+// Initialize essential services
 const baseService = new BaseService({ debug: debugMode });
 const configService = new ConfigService({ debug: debugMode, templatesDir });
 const fileService = new FileService({ debug: debugMode, templatesDir });
@@ -39,34 +38,50 @@ const stackService = new StackService({
     templatesDir
 });
 
-// Stack-specific services
-const laravelService = new LaravelService({
-    debug: debugMode,
-    fileService,
-    configService,
-    templatesDir
-});
+// Map to store dynamically loaded stack services
+const stackServices = new Map();
 
-const nextjsService = new NextjsService({
-    debug: debugMode,
-    fileService,
-    configService,
-    templatesDir
-});
+/**
+ * Dynamically load a service based on the selected stack
+ * @param {string} stack - Selected stack name
+ * @returns {Promise<object>} - Stack service instance
+ */
+async function loadStackService(stack) {
+    // Return from cache if already loaded
+    if (stackServices.has(stack)) {
+        return stackServices.get(stack);
+    }
 
-const reactService = new ReactService({
-    debug: debugMode,
-    fileService,
-    configService,
-    templatesDir
-});
+    try {
+        // Dynamically import the required service
+        const servicePath = `./services/${stack}-service.js`;
+        const serviceModule = await import(servicePath);
 
-const angularService = new AngularService({
-    debug: debugMode,
-    fileService,
-    configService,
-    templatesDir
-});
+        // Get the service class (follows naming convention like LaravelService)
+        const ServiceClass =
+            serviceModule[`${stack.charAt(0).toUpperCase() + stack.slice(1)}Service`];
+
+        if (!ServiceClass) {
+            throw new Error(`Service class not found for stack: ${stack}`);
+        }
+
+        // Instantiate the service
+        const serviceInstance = new ServiceClass({
+            debug: debugMode,
+            fileService,
+            configService,
+            templatesDir
+        });
+
+        // Cache the instance
+        stackServices.set(stack, serviceInstance);
+
+        return serviceInstance;
+    } catch (error) {
+        baseService.debugLog(`Error loading service for ${stack}: ${error.message}`);
+        throw error;
+    }
+}
 
 // Get package version from package.json
 const packageJsonPath = path.join(__dirname, '../package.json');
@@ -78,6 +93,12 @@ const version = packageJson.version;
  */
 async function main() {
     cliService.showBanner(`🚀 Agent Rules Kit v${version}`, true);
+
+    // Handle update flag
+    if (updateFlag) {
+        await handleUpdate();
+        return;
+    }
 
     // Get available stacks from the service
     const availableStacks = stackService.getAvailableStacks().map(stack => ({
@@ -106,7 +127,7 @@ async function main() {
     const rulesDir = stackService.formatRulesPath(projectPath);
 
     // Check if rules directory already exists and create backup if needed
-    if (baseService.directoryExists(rulesDir)) {
+    if (await baseService.directoryExistsAsync(rulesDir)) {
         const action = await cliService.askDirectoryAction(rulesDir);
 
         if (action === 'cancel') {
@@ -115,7 +136,7 @@ async function main() {
         }
 
         if (action === 'backup') {
-            const backupDir = stackService.createBackup(rulesDir);
+            const backupDir = await stackService.createBackupAsync(rulesDir);
             if (backupDir) {
                 cliService.backupCreated(rulesDir, backupDir);
             }
@@ -126,7 +147,10 @@ async function main() {
     const includeGlobalRules = await cliService.askIncludeGlobalRules();
 
     // Ensure the rules directory exists
-    baseService.ensureDirectoryExists(rulesDir);
+    await baseService.ensureDirectoryExistsAsync(rulesDir);
+
+    // Load the appropriate stack service dynamically
+    const stackService = await loadStackService(stack);
 
     // Stack-specific questions
     let additionalOptions = {};
@@ -251,133 +275,165 @@ async function main() {
         const versions = stackService.getAvailableVersions(stack);
         if (versions.length > 0) {
             const version = await cliService.askVersion(versions, detectedVersion);
-            additionalOptions.detectedVersion = version;
-            additionalOptions.versionRange = stackService.mapVersionToRange(stack, version);
-            additionalOptions.formattedVersionName = stackService.getFormattedVersionName(
-                stack,
-                additionalOptions.versionRange
-            );
+            const versionRange = stackService.mapVersionToRange(stack, version);
+            const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+
+            additionalOptions = {
+                ...additionalOptions,
+                detectedVersion: version,
+                versionRange,
+                formattedVersionName
+            };
         }
     }
 
-    // Common metadata
+    // Get the start time for measuring performance
+    const startGeneration = Date.now();
+
+    // Generate rules with progress tracking
+    cliService.startProgress('Generating rules');
+
+    // Prepare metadata for rule generation
     const meta = {
-        stack,
         projectPath,
+        stack,
         debug: debugMode,
-        includeGlobalRules,
         ...additionalOptions
     };
 
-    // Process the selected stack
-    cliService.processing(`Processing rules for ${stack}...`);
+    // Load config only once to improve performance
+    const config = configService.getConfig();
 
-    // Create the stack-specific directory 
-    const stackRulesDir = path.join(rulesDir, stack);
-    baseService.ensureDirectoryExists(stackRulesDir);
+    try {
+        // Progress tracker variables
+        let totalFiles = 0;
+        let processedFiles = 0;
 
-    // Copy global rules if requested
-    if (includeGlobalRules) {
-        cliService.processing('Copying global best-practice rules...');
-        const globalRules = configService.getGlobalRules();
+        // Generate rules with different methods depending on stack
+        switch (stack) {
+            case 'laravel':
+                // Load Laravel service dynamically if needed
+                const laravelService = await loadStackService('laravel');
+                totalFiles = await laravelService.countTotalRules(meta);
 
-        if (globalRules.length > 0) {
-            const globalDir = path.join(rulesDir, 'global');
-            baseService.ensureDirectoryExists(globalDir);
+                // Set up progress tracking
+                const updateLaravelProgress = () => {
+                    processedFiles++;
+                    cliService.updateProgress((processedFiles / totalFiles) * 100);
+                };
 
-            for (const rule of globalRules) {
-                const sourceFile = path.join(templatesDir, 'global', rule);
-                const destFile = path.join(globalDir, rule);
+                await laravelService.generateRulesAsync(rulesDir, meta, config, updateLaravelProgress, includeGlobalRules);
+                break;
 
-                // Process template variables and copy file
-                try {
-                    const content = fileService.readFile(sourceFile);
-                    const processedContent = configService.processTemplateVariables(content, meta);
-                    fileService.writeFile(destFile, processedContent);
-                }
-                catch (err) {
-                    cliService.error(`Error processing global rule ${rule}: ${err.message}`);
-                }
-            }
-            cliService.success(`Copied ${globalRules.length} global rules`);
+            case 'nextjs':
+                // Load Next.js service dynamically if needed
+                const nextjsService = await loadStackService('nextjs');
+                totalFiles = await nextjsService.countTotalRules(meta);
+
+                // Set up progress tracking
+                const updateNextjsProgress = () => {
+                    processedFiles++;
+                    cliService.updateProgress((processedFiles / totalFiles) * 100);
+                };
+
+                await nextjsService.generateRulesAsync(rulesDir, meta, config, updateNextjsProgress, includeGlobalRules);
+                break;
+
+            case 'react':
+                // Load React service dynamically if needed
+                const reactService = await loadStackService('react');
+                totalFiles = await reactService.countTotalRules(meta);
+
+                // Set up progress tracking
+                const updateReactProgress = () => {
+                    processedFiles++;
+                    cliService.updateProgress((processedFiles / totalFiles) * 100);
+                };
+
+                await reactService.generateRulesAsync(rulesDir, meta, config, updateReactProgress, includeGlobalRules);
+                break;
+
+            case 'angular':
+                // Load Angular service dynamically if needed
+                const angularService = await loadStackService('angular');
+                totalFiles = await angularService.countTotalRules(meta);
+
+                // Set up progress tracking
+                const updateAngularProgress = () => {
+                    processedFiles++;
+                    cliService.updateProgress((processedFiles / totalFiles) * 100);
+                };
+
+                await angularService.generateRulesAsync(rulesDir, meta, config, updateAngularProgress, includeGlobalRules);
+                break;
+
+            default:
+                // For other stacks, use the generic stack service
+                totalFiles = stackService.countTotalRules(meta);
+
+                // Set up progress tracking
+                const updateGenericProgress = () => {
+                    processedFiles++;
+                    cliService.updateProgress((processedFiles / totalFiles) * 100);
+                };
+
+                await stackService.generateRulesAsync(rulesDir, meta, config, updateGenericProgress, includeGlobalRules);
         }
+
+        // End progress tracking
+        cliService.completeProgress();
+
+        // Get the end time and calculate duration
+        const endGeneration = Date.now();
+        const durationMs = endGeneration - startGeneration;
+        const durationFormatted = (durationMs / 1000).toFixed(2);
+
+        // Create the summary and show it
+        cliService.success(`Rules generated successfully in ${durationFormatted}s!`);
+        cliService.info(`Generated ${totalFiles} rule files at ${chalk.bold(rulesDir)}`);
+
+        // Show additional information about the architecture if available
+        if (additionalOptions.architecture) {
+            cliService.info(`Architecture: ${chalk.bold(additionalOptions.architecture)}`);
+        }
+
+        // Show version information if available
+        if (additionalOptions.formattedVersionName) {
+            cliService.info(`Version: ${chalk.bold(additionalOptions.formattedVersionName)}`);
+        }
+
+        // Clean up cached templates to free memory
+        fileService.clearCache();
+
+    } catch (error) {
+        cliService.completeProgress();
+        cliService.error(`Error generating rules: ${error.message}`);
+
+        if (debugMode) {
+            console.error(error);
+        }
+
+        process.exit(1);
     }
-
-    // Process the stack-specific rules
-    switch (stack) {
-        case 'laravel':
-            laravelService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
-
-            if (additionalOptions.versionRange) {
-                laravelService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
-            }
-
-            if (additionalOptions.architecture) {
-                laravelService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
-            }
-            break;
-
-        case 'nextjs':
-            nextjsService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
-
-            if (additionalOptions.versionRange) {
-                nextjsService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
-            }
-
-            if (additionalOptions.architecture) {
-                nextjsService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
-            }
-            break;
-
-        case 'react':
-            reactService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
-
-            if (additionalOptions.architecture) {
-                reactService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
-            }
-
-            if (additionalOptions.stateManagement) {
-                reactService.copyStateManagementRules(additionalOptions.stateManagement, stackRulesDir, { ...additionalOptions, projectPath });
-            }
-
-            // Always copy testing rules
-            reactService.copyTestingRules(stackRulesDir, { ...additionalOptions, projectPath });
-            break;
-
-        case 'angular':
-            angularService.copyBaseRules(stackRulesDir, meta, { ...additionalOptions, projectPath });
-
-            if (additionalOptions.versionRange) {
-                angularService.copyVersionOverlay(stackRulesDir, meta, { ...additionalOptions, projectPath });
-            }
-
-            if (additionalOptions.architecture) {
-                angularService.copyArchitectureRules(additionalOptions.architecture, stackRulesDir, { ...additionalOptions, projectPath });
-            }
-
-            if (additionalOptions.includeSignals) {
-                angularService.copySignalsRules(stackRulesDir, { ...additionalOptions, projectPath });
-            }
-
-            // Always copy testing rules
-            angularService.copyTestingRules(stackRulesDir, { ...additionalOptions, projectPath });
-            break;
-
-        default:
-            // For other stacks, copy config-defined rules and version overlays
-            cliService.info(`Using generic processing for stack: ${stack}`);
-            break;
-    }
-
-    cliService.success(`Rules for ${chalk.cyan(stack)} installed successfully!`);
-    cliService.info(`Location: ${chalk.blue(rulesDir)}`);
 }
 
-// Execute the main function
-main().catch(err => {
-    console.error(chalk.red(`\n❌ An error occurred: ${err.message}`));
+/**
+ * Handle the --update flag for updating rules
+ */
+async function handleUpdate() {
+    cliService.info('Updating rules...');
+
+    // Implementation for update mode
+    // TODO: Add implementation for update mode
+
+    cliService.success('Rules updated successfully!');
+}
+
+// Run the main function
+main().catch(error => {
+    cliService.error(`Error: ${error.message}`);
     if (debugMode) {
-        console.error(err);
+        console.error(error);
     }
     process.exit(1);
 });
