@@ -42,8 +42,8 @@
 -   [ ] Agregar documentación sobre prácticas de testing E2E para todos los frameworks
 -   [ ] Add integration tests
 -   [ ] Add CI/CD pipeline configuration
--   [ ] Add contribution guidelines
--   [ ] Add code of conduct
+-   [x] Add contribution guidelines
+-   [x] Add code of conduct
 
 ### Documentación
 
