@@ -5,6 +5,7 @@
  * New services architecture v1.0.0
  */
 import chalk from 'chalk';
+import fs from 'fs';
 import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -67,7 +68,10 @@ const angularService = new AngularService({
     templatesDir
 });
 
-const version = '1.0.0' //TODO:tomar la version del package.json
+// Get package version from package.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+const version = packageJson.version;
 
 /**
  * Main function

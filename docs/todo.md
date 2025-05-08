@@ -26,6 +26,9 @@
 -   [x] Clarify relative path message: "Relative path to your project (if not in the root)" by adding "from .cursor directory"
 -   [x] Move logs to debug mode, not removing them but disabling them in normal mode
 -   [x] Add more colors and emojis to the CLI
+-   [ ] Add progress bars for long-running operations like rule generation and backup
+-   [ ] Create a more detailed summary after rule generation
+-   [ ] Add "quick mode" flag to skip confirmations for experienced users
 
 ### New Implementations
 
@@ -36,7 +39,7 @@
 -   [x] Create state management version for Redux
 -   [x] Create state management version for MobX
 -   [x] Create state management version for Recoil
--   [ ] Create state management version for Zustand
+-   [x] Create state management version for Zustand
 -   [ ] Create testing guidelines for Svelte
 -   [ ] Create testing guidelines for SvelteKit
 -   [ ] Add documentation on E2E testing practices for all frameworks
@@ -50,3 +53,114 @@
 -   [x] Update README with a better description of the new architecture
 -   [x] Document how to extend with new services
 -   [x] Update the Implementation Status section as tasks are completed
+-   [ ] Create a comprehensive user guide with examples
+-   [ ] Add visual diagrams for the architecture
+-   [ ] Create video tutorials for using Agent Rules Kit
+
+### New Stacks Support
+
+-   [ ] Add support for Svelte/SvelteKit
+-   [ ] Add support for Express.js
+-   [ ] Add support for FastAPI (Python)
+-   [ ] Add support for Django
+-   [ ] Add support for Flutter/Dart
+-   [ ] Add support for Ruby on Rails
+
+### Testing Improvements
+
+-   [ ] Increase unit test coverage to >80%
+-   [ ] Add E2E tests with actual rule generation
+-   [ ] Create test fixtures for new framework versions
+-   [ ] Add snapshot testing for generated rule content
+-   [ ] Implement automated testing on multiple Node.js versions
+
+### Phase: Rule Type Categorization
+
+-   [ ] Initial category selection interface:
+
+    -   [ ] Add CLI option to select rule type (Frontend, Backend, Database, DevOps, Testing)
+    -   [ ] Create category-specific flows in the CLI
+    -   [ ] Add category metadata to rules for filtering
+
+-   [ ] Stack categorization:
+
+    -   [ ] Add category property to stacks in kit-config.json
+    -   [ ] Filter available stacks based on selected category
+    -   [ ] Create recommendation system for stacks based on category
+
+-   [ ] Global rules restructuring:
+
+    -   [ ] Reorganize global rules into subcategories:
+        -   [ ] Universal (always applicable)
+        -   [ ] Documentation (for generating docs)
+        -   [ ] Repository (version control related)
+        -   [ ] Testing (test automation and practices)
+    -   [ ] Add metadata for rule categorization
+    -   [ ] Create category-specific rule selection logic
+
+-   [ ] Documentation atomization:
+    -   [ ] Split larger documentation files into atomic components
+    -   [ ] Create merging system for version-specific docs
+    -   [ ] Add intelligent rule combining for related topics
+    -   [ ] Implement section headers for merged documentation
+
+### Phase: Version Control Integration
+
+-   [ ] Version control configuration:
+
+    -   [ ] Add CLI options for selecting version control system (Git, GitLab, GitHub)
+    -   [ ] Create rules for standard Git workflows
+    -   [ ] Implement repository structure rules
+
+-   [ ] Commit convention support:
+
+    -   [ ] Add options for conventional commits integration
+    -   [ ] Create rules for commit message formatting
+    -   [ ] Add support for emoji commits
+    -   [ ] Generate .commitlintrc or similar config files
+
+-   [ ] Documentation atomization:
+    -   [ ] Create separate files for different aspects of version control
+    -   [ ] Implement merging system for final rules
+    -   [ ] Add configuration for automated releases
+
+### Phase: Integration Capabilities
+
+-   [ ] Third-party tool integration:
+
+    -   [ ] Add ESLint rule generation
+    -   [ ] Add Prettier configuration
+    -   [ ] Support for Husky pre-commit hooks
+    -   [ ] Integration with TypeScript compiler options
+
+-   [ ] CI/CD templates:
+
+    -   [ ] GitHub Actions workflows
+    -   [ ] GitLab CI pipelines
+    -   [ ] Circle CI configuration
+    -   [ ] Azure Pipelines support
+
+-   [ ] Cloud deployment rules:
+    -   [ ] Vercel deployment best practices
+    -   [ ] AWS deployment guidelines
+    -   [ ] Google Cloud Platform recommendations
+    -   [ ] Azure deployment patterns
+
+### Phase: Template Customization
+
+-   [ ] User template extensions:
+
+    -   [ ] Create mechanism for users to add custom rule templates
+    -   [ ] Implement template inheritance and overrides
+    -   [ ] Add support for organization-specific rule templates
+
+-   [ ] Dynamic rule generation:
+
+    -   [ ] Create rule templates with dynamic sections
+    -   [ ] Add conditional logic to rule templates
+    -   [ ] Support for rule parameter customization
+
+-   [ ] Project-specific configuration:
+    -   [ ] Add project configuration file support
+    -   [ ] Create migration path for changing stack/architecture
+    -   [ ] Support for multi-stack projects
