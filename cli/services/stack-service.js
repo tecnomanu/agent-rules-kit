@@ -664,8 +664,8 @@ export class StackService extends BaseService {
         try {
             // Count base rules
             const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
-            if (await fs.pathExists(baseDir)) {
-                const baseFiles = (await fs.readdir(baseDir)).filter(f => f.endsWith('.md'));
+            if (await this.pathExistsAsync(baseDir)) {
+                const baseFiles = await fs.promises.readdir(baseDir);
                 totalFiles += baseFiles.length;
                 this.debugLog(`Base rules count: ${baseFiles.length}`);
             }
@@ -673,8 +673,8 @@ export class StackService extends BaseService {
             // Count architecture rules if specified
             if (architecture) {
                 const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
-                if (await fs.pathExists(archDir)) {
-                    const archFiles = (await fs.readdir(archDir)).filter(f => f.endsWith('.md'));
+                if (await this.pathExistsAsync(archDir)) {
+                    const archFiles = await fs.promises.readdir(archDir);
                     totalFiles += archFiles.length;
                     this.debugLog(`Architecture rules count: ${archFiles.length}`);
                 }
@@ -684,8 +684,8 @@ export class StackService extends BaseService {
             const versionRange = meta.versionRange;
             if (versionRange) {
                 const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
-                if (await fs.pathExists(versionDir)) {
-                    const versionFiles = (await fs.readdir(versionDir)).filter(f => f.endsWith('.md'));
+                if (await this.pathExistsAsync(versionDir)) {
+                    const versionFiles = await fs.promises.readdir(versionDir);
                     totalFiles += versionFiles.length;
                     this.debugLog(`Version rules count: ${versionFiles.length}`);
                 }
@@ -694,8 +694,8 @@ export class StackService extends BaseService {
             // Count global rules if included
             if (includeGlobalRules) {
                 const globalDir = path.join(this.templatesDir, 'global');
-                if (await fs.pathExists(globalDir)) {
-                    const globalFiles = (await fs.readdir(globalDir)).filter(f => f.endsWith('.md'));
+                if (await this.pathExistsAsync(globalDir)) {
+                    const globalFiles = await fs.promises.readdir(globalDir);
                     totalFiles += globalFiles.length;
                     this.debugLog(`Global rules count: ${globalFiles.length}`);
                 }
@@ -704,8 +704,8 @@ export class StackService extends BaseService {
             // Add state management rules for React if specified
             if (stack === 'react' && meta.stateManagement) {
                 const stateDir = path.join(this.templatesDir, 'stacks', stack, 'state-management', meta.stateManagement);
-                if (await fs.pathExists(stateDir)) {
-                    const stateFiles = (await fs.readdir(stateDir)).filter(f => f.endsWith('.md'));
+                if (await this.pathExistsAsync(stateDir)) {
+                    const stateFiles = await fs.promises.readdir(stateDir);
                     totalFiles += stateFiles.length;
                     this.debugLog(`State management rules count: ${stateFiles.length}`);
                 }
@@ -714,8 +714,8 @@ export class StackService extends BaseService {
             // Add testing rules for React/Angular
             if (['react', 'angular'].includes(stack)) {
                 const testingDir = path.join(this.templatesDir, 'stacks', stack, 'testing');
-                if (await fs.pathExists(testingDir)) {
-                    const testingFiles = (await fs.readdir(testingDir)).filter(f => f.endsWith('.md'));
+                if (await this.pathExistsAsync(testingDir)) {
+                    const testingFiles = await fs.promises.readdir(testingDir);
                     totalFiles += testingFiles.length;
                     this.debugLog(`Testing rules count: ${testingFiles.length}`);
                 }
@@ -728,7 +728,7 @@ export class StackService extends BaseService {
 
                 if (meta.versionRange) {
                     const versionSignalsDir = path.join(this.templatesDir, 'stacks', stack, meta.versionRange);
-                    if (await fs.pathExists(versionSignalsDir)) {
+                    if (await this.pathExistsAsync(versionSignalsDir)) {
                         signalsDir = versionSignalsDir;
                         this.debugLog(`Using version-specific signals from: ${versionSignalsDir}`);
                     }
@@ -737,14 +737,14 @@ export class StackService extends BaseService {
                 // If no version-specific signals found, try the common signals directory
                 if (!signalsDir) {
                     const commonSignalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
-                    if (await fs.pathExists(commonSignalsDir)) {
+                    if (await this.pathExistsAsync(commonSignalsDir)) {
                         signalsDir = commonSignalsDir;
                         this.debugLog(`Using common signals from: ${commonSignalsDir}`);
                     }
                 }
 
                 if (signalsDir) {
-                    const signalsFiles = (await fs.readdir(signalsDir)).filter(f => f.endsWith('.md'));
+                    const signalsFiles = await fs.promises.readdir(signalsDir);
                     totalFiles += signalsFiles.length;
                     this.debugLog(`Angular signals rules count: ${signalsFiles.length}`);
                 }
@@ -773,13 +773,16 @@ export class StackService extends BaseService {
 
         // Create the stack-specific directory
         const stackRulesDir = path.join(rulesDir, stack);
-        await fs.ensureDir(stackRulesDir);
+        await this.ensureDirectoryExistsAsync(stackRulesDir);
 
         // Get a reference to the file service from this instance or from configService
         const fileService = this.fileService || (this.configService?.fileService);
         if (!fileService) {
             throw new Error('File service is required but not available');
         }
+
+        // Map to track file paths by base name for merging duplicates
+        const fileTracker = new Map();
 
         // Process global rules if requested
         if (includeGlobalRules) {
@@ -792,15 +795,15 @@ export class StackService extends BaseService {
 
             if (globalRules.length > 0) {
                 filesToCopy = globalRules;
-            } else if (await fs.pathExists(globalTemplatesDir)) {
+            } else if (await this.pathExistsAsync(globalTemplatesDir)) {
                 // Obtener todos los archivos .md si no hay reglas explícitas
-                const allFiles = await fs.readdir(globalTemplatesDir);
+                const allFiles = await fs.promises.readdir(globalTemplatesDir);
                 filesToCopy = allFiles.filter(file => file.endsWith('.md'));
             }
 
             if (filesToCopy.length > 0) {
                 const globalDir = path.join(rulesDir, 'global');
-                await fs.ensureDir(globalDir);
+                await this.ensureDirectoryExistsAsync(globalDir);
 
                 // Process in batches for better memory usage
                 const batchSize = 10;
@@ -811,7 +814,7 @@ export class StackService extends BaseService {
                         const sourceFile = path.join(globalTemplatesDir, rule);
                         const destFile = path.join(globalDir, rule.replace(/\.md$/, '.mdc'));
 
-                        if (await fs.pathExists(sourceFile)) {
+                        if (await this.pathExistsAsync(sourceFile)) {
                             await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
                             this.debugLog(`Copied global rule: ${rule}`);
 
@@ -827,87 +830,132 @@ export class StackService extends BaseService {
             }
         }
 
-        // Process base rules
+        // Map to collect all file sources by their base name
+        // This helps us identify duplicates across base, version-specific, and architecture folders
+        const trackedFiles = new Map();
+
+        // First collect all files from different sources
+        // Process base rules - just collect paths, don't process yet
         const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
-        if (await fs.pathExists(baseDir)) {
-            const baseFiles = await fs.readdir(baseDir);
-
-            // Process in batches
-            const batchSize = 10;
-            for (let i = 0; i < baseFiles.length; i += batchSize) {
-                const batch = baseFiles.slice(i, i + batchSize);
-
-                await Promise.all(batch.map(async (file) => {
-                    if (file.endsWith('.md')) {
-                        const sourceFile = path.join(baseDir, file);
-                        const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
-
-                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
-
-                        // Update progress
-                        if (typeof progressCallback === 'function') {
-                            progressCallback();
-                        }
+        if (await this.pathExistsAsync(baseDir)) {
+            const baseFiles = await fs.promises.readdir(baseDir);
+            for (const file of baseFiles) {
+                if (file.endsWith('.md')) {
+                    const baseName = file; // e.g. testing_best_practices.md
+                    if (!trackedFiles.has(baseName)) {
+                        trackedFiles.set(baseName, []);
                     }
-                }));
+                    trackedFiles.get(baseName).push({
+                        source: 'base',
+                        path: path.join(baseDir, file)
+                    });
+                }
             }
         }
 
-        // Process version overlay if applicable
+        // Process version overlay if applicable - collect paths
         const versionRange = meta.versionRange;
         if (versionRange) {
             const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
-            if (await fs.pathExists(versionDir)) {
-                const versionFiles = await fs.readdir(versionDir);
-
-                // Process in batches
-                const batchSize = 10;
-                for (let i = 0; i < versionFiles.length; i += batchSize) {
-                    const batch = versionFiles.slice(i, i + batchSize);
-
-                    await Promise.all(batch.map(async (file) => {
-                        if (file.endsWith('.md')) {
-                            const sourceFile = path.join(versionDir, file);
-                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
-
-                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
-
-                            // Update progress
-                            if (typeof progressCallback === 'function') {
-                                progressCallback();
-                            }
+            if (await this.pathExistsAsync(versionDir)) {
+                const versionFiles = await fs.promises.readdir(versionDir);
+                for (const file of versionFiles) {
+                    if (file.endsWith('.md')) {
+                        const baseName = file;
+                        if (!trackedFiles.has(baseName)) {
+                            trackedFiles.set(baseName, []);
                         }
-                    }));
+                        trackedFiles.get(baseName).push({
+                            source: 'version',
+                            path: path.join(versionDir, file)
+                        });
+                    }
                 }
             }
         }
 
-        // Process architecture-specific rules if applicable
+        // Process architecture-specific rules if applicable - collect paths
         const architecture = meta.architecture;
         if (architecture) {
             const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
-            if (await fs.pathExists(archDir)) {
-                const archFiles = await fs.readdir(archDir);
-
-                // Process in batches
-                const batchSize = 10;
-                for (let i = 0; i < archFiles.length; i += batchSize) {
-                    const batch = archFiles.slice(i, i + batchSize);
-
-                    await Promise.all(batch.map(async (file) => {
-                        if (file.endsWith('.md')) {
-                            const sourceFile = path.join(archDir, file);
-                            const destFile = path.join(stackRulesDir, file.replace(/\.md$/, '.mdc'));
-
-                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
-
-                            // Update progress
-                            if (typeof progressCallback === 'function') {
-                                progressCallback();
-                            }
+            if (await this.pathExistsAsync(archDir)) {
+                const archFiles = await fs.promises.readdir(archDir);
+                for (const file of archFiles) {
+                    if (file.endsWith('.md')) {
+                        const baseName = file;
+                        if (!trackedFiles.has(baseName)) {
+                            trackedFiles.set(baseName, []);
                         }
-                    }));
+                        trackedFiles.get(baseName).push({
+                            source: 'architecture',
+                            path: path.join(archDir, file)
+                        });
+                    }
                 }
+            }
+        }
+
+        // Now process all collected files
+        let processedCount = 0;
+        for (const [baseName, fileSources] of trackedFiles.entries()) {
+            const destFile = path.join(stackRulesDir, baseName.replace(/\.md$/, '.mdc'));
+
+            // If we have multiple sources for the same file, we need to merge them
+            if (fileSources.length > 1) {
+                this.debugLog(`Found duplicate file ${baseName} in multiple locations. Merging...`);
+
+                // Sort sources to ensure base comes first, then version, then architecture
+                fileSources.sort((a, b) => {
+                    const order = { base: 1, version: 2, architecture: 3 };
+                    return order[a.source] - order[b.source];
+                });
+
+                // Get the file paths in the correct order
+                const filePaths = fileSources.map(source => source.path);
+
+                try {
+                    // Combine the files
+                    const { frontmatter, content } = await fileService.combineMdFiles(filePaths, meta);
+
+                    // Create the combined .mdc file with a single frontmatter section
+                    let mdcContent = '---\n';
+
+                    if (frontmatter.globs) {
+                        if (Array.isArray(frontmatter.globs)) {
+                            mdcContent += `globs: [${frontmatter.globs.map(g => `'${g}'`).join(', ')}]\n`;
+                        } else {
+                            mdcContent += `globs: '${frontmatter.globs}'\n`;
+                        }
+                    }
+
+                    if (frontmatter.alwaysApply !== undefined) {
+                        mdcContent += `alwaysApply: ${frontmatter.alwaysApply}\n`;
+                    }
+
+                    if (frontmatter.description) {
+                        mdcContent += `description: '${frontmatter.description}'\n`;
+                    }
+
+                    mdcContent += '---\n\n';
+                    mdcContent += content;
+
+                    // Write the combined file
+                    await fs.promises.writeFile(destFile, mdcContent, 'utf8');
+                    this.debugLog(`Created combined file: ${destFile}`);
+                } catch (error) {
+                    this.debugLog(`Error merging files for ${baseName}: ${error.message}`);
+                    // If combining fails, use the version-specific file (highest priority)
+                    await fileService.wrapMdToMdcAsync(fileSources[fileSources.length - 1].path, destFile, meta, config);
+                }
+            } else {
+                // Single source file, process normally
+                await fileService.wrapMdToMdcAsync(fileSources[0].path, destFile, meta, config);
+            }
+
+            // Update progress
+            processedCount++;
+            if (typeof progressCallback === 'function') {
+                progressCallback();
             }
         }
 
@@ -1012,6 +1060,21 @@ export class StackService extends BaseService {
                     }));
                 }
             }
+        }
+    }
+
+    /**
+     * Check if a path exists asynchronously
+     * @param {string} path - Path to check
+     * @returns {Promise<boolean>} - True if exists, false otherwise
+     */
+    async pathExistsAsync(path) {
+        try {
+            await fs.access(path);
+            return true;
+        } catch (error) {
+            this.debugLog(`Path does not exist: ${path}`);
+            return false;
         }
     }
 } 

@@ -72,28 +72,32 @@ export class FileService extends BaseService {
     }
 
     /**
-     * Processes template variables in markdown content
-     * @param {string} content - Markdown content
-     * @param {Object} meta - Metadata for replacements
-     * @returns {string} - Processed markdown content
+     * Process template variables in content
+     * @param {string} content - The content to process
+     * @param {Object} meta - Metadata for template variables
+     * @returns {string} Processed content
      */
     processTemplateVariables(content, meta = {}) {
+        if (!content) return content;
+
         let processedContent = content;
 
-        // Normalize projectPath for variable replacement
-        const projectPath = (!meta.projectPath || meta.projectPath === '.')
-            ? './'
-            : meta.projectPath;
+        // Normalizar projectPath si está vacío o es "."
+        let projectPath = meta.projectPath;
+        if (!projectPath || projectPath === '.') {
+            projectPath = './';
+        }
 
-        // Array of template variables and their corresponding values
+        // Define template variables to replace
         const templateVariables = [
-            { value: meta?.detectedVersion, replace: 'detectedVersion' },
-            { value: meta?.versionRange, replace: 'versionRange' },
+            { value: meta.detectedVersion, replace: 'detectedVersion' },
+            { value: meta.formattedVersionName || meta.versionRange, replace: 'versionRange' },
             { value: projectPath, replace: 'projectPath' },
-            { value: meta?.stack, replace: 'stack' }
+            { value: meta.cursorPath, replace: 'cursorPath' },
+            { value: meta.stack, replace: 'stack' }
         ];
 
-        // Iterate over the array and replace placeholders with their values
+        // Process each template variable
         templateVariables.forEach(({ value, replace }) => {
             if (value) {
                 const regex = new RegExp(`\\{${replace}\\}`, 'g');
@@ -707,6 +711,195 @@ export class FileService extends BaseService {
         } catch (error) {
             this.debugLog(`Error exporting MDC to MD: ${error.message}`);
             throw error;
+        }
+    }
+
+    /**
+     * Extracts frontmatter from markdown content
+     * @param {string} content - Markdown content with optional frontmatter
+     * @returns {Object} - Object with frontmatter and content properties
+     */
+    extractFrontmatter(content) {
+        if (!content || !content.trim().startsWith('---')) {
+            return { frontmatter: {}, content };
+        }
+
+        try {
+            // Find the end of frontmatter
+            const endIndex = content.indexOf('---', 3);
+            if (endIndex === -1) {
+                return { frontmatter: {}, content };
+            }
+
+            // Extract frontmatter and content
+            const frontmatterText = content.substring(3, endIndex).trim();
+            const contentWithoutFrontmatter = content.substring(endIndex + 3).trim();
+
+            // Parse frontmatter
+            const frontmatter = {};
+            const lines = frontmatterText.split('\n');
+
+            for (const line of lines) {
+                if (!line.trim() || !line.includes(':')) continue;
+
+                // Split at first colon
+                const colonIndex = line.indexOf(':');
+                const key = line.substring(0, colonIndex).trim();
+                let value = line.substring(colonIndex + 1).trim();
+
+                // Handle arrays
+                if (value.startsWith('[') && value.endsWith(']')) {
+                    // Remove brackets and split by commas, then trim each value
+                    const arrayValues = value.substring(1, value.length - 1)
+                        .split(',')
+                        .map(item => {
+                            const trimmed = item.trim();
+                            // Remove quotes if present
+                            if ((trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+                                (trimmed.startsWith('"') && trimmed.endsWith('"'))) {
+                                return trimmed.substring(1, trimmed.length - 1);
+                            }
+                            return trimmed;
+                        })
+                        .filter(Boolean); // Remove empty entries
+
+                    frontmatter[key] = arrayValues;
+                    continue;
+                }
+
+                // Handle boolean values
+                if (value === 'true') {
+                    frontmatter[key] = true;
+                    continue;
+                } else if (value === 'false') {
+                    frontmatter[key] = false;
+                    continue;
+                }
+
+                // Handle quoted strings
+                if ((value.startsWith("'") && value.endsWith("'")) ||
+                    (value.startsWith('"') && value.endsWith('"'))) {
+                    frontmatter[key] = value.substring(1, value.length - 1);
+                } else {
+                    frontmatter[key] = value;
+                }
+            }
+
+            return {
+                frontmatter,
+                content: contentWithoutFrontmatter
+            };
+        } catch (error) {
+            this.debugLog(`Error extracting frontmatter: ${error.message}`);
+            return { frontmatter: {}, content };
+        }
+    }
+
+    /**
+     * Combines multiple markdown files with the same base name
+     * @param {string[]} filePaths - Array of file paths to combine
+     * @param {Object} meta - Metadata for template processing
+     * @returns {Promise<Object>} - Object with combined frontmatter and content
+     */
+    async combineMdFiles(filePaths, meta = {}) {
+        if (!filePaths || filePaths.length === 0) {
+            throw new Error('No file paths provided for combination');
+        }
+
+        // If there's only one file, just process it directly
+        if (filePaths.length === 1) {
+            try {
+                // Check if file exists
+                if (!await this.pathExists(filePaths[0])) {
+                    throw new Error(`File does not exist: ${filePaths[0]}`);
+                }
+
+                // Read and process the file
+                const content = await this.readFileOptimized(filePaths[0]);
+                const processed = this.processTemplateVariables(content, meta);
+                const { frontmatter, content: extractedContent } = this.extractFrontmatter(processed);
+
+                return { frontmatter, content: extractedContent };
+            } catch (error) {
+                this.debugLog(`Error processing single file: ${error.message}`);
+                throw error;
+            }
+        }
+
+        // Process multiple files
+        let combinedFrontmatter = {};
+        let combinedContent = '';
+
+        // Classify files into categories for proper override ordering
+        const categories = {
+            base: filePaths.filter(path => path.includes('/base/')),
+            architecture: filePaths.filter(path => path.includes('/architectures/')),
+            version: filePaths.filter(path => path.includes('/v'))
+        };
+
+        // Define processing order to ensure version-specific overrides base
+        const processingOrder = [
+            ...categories.base,
+            ...categories.architecture,
+            ...categories.version
+        ];
+
+        // Process each file in order
+        for (let i = 0; i < processingOrder.length; i++) {
+            const filePath = processingOrder[i];
+
+            try {
+                // Check if file exists
+                if (!await this.pathExists(filePath)) {
+                    this.debugLog(`Skipping non-existent file: ${filePath}`);
+                    continue;
+                }
+
+                // Read and process the file
+                const content = await this.readFileOptimized(filePath);
+                const processed = this.processTemplateVariables(content, meta);
+                const { frontmatter, content: extractedContent } = this.extractFrontmatter(processed);
+
+                // Add file content with appropriate header
+                if (i > 0) {
+                    const fileName = path.basename(filePath, path.extname(filePath));
+                    const fileType = filePath.includes('/architectures/')
+                        ? 'Architecture specific'
+                        : filePath.includes('/v')
+                            ? 'Version specific'
+                            : 'Base';
+
+                    combinedContent += `\n\n## ${fileName} (${fileType})\n\n`;
+                }
+
+                combinedContent += extractedContent;
+
+                // Merge frontmatter - later files override earlier ones
+                combinedFrontmatter = { ...combinedFrontmatter, ...frontmatter };
+            } catch (error) {
+                this.debugLog(`Error processing file ${filePath}: ${error.message}`);
+                // Continue with other files
+            }
+        }
+
+        return {
+            frontmatter: combinedFrontmatter,
+            content: combinedContent.trim()
+        };
+    }
+
+    /**
+     * Utility method to check if a file exists
+     * This can be easily mocked in tests
+     * @param {string} path - Path to check
+     * @returns {Promise<boolean>} - True if exists
+     */
+    async pathExists(path) {
+        try {
+            return await fs.pathExists(path);
+        } catch (error) {
+            this.debugLog(`Error checking if path exists: ${error.message}`);
+            return false;
         }
     }
 } 

@@ -199,4 +199,193 @@ globs: "**/*"
             await expect(fileService.exportMdcToMd('source.mdc', 'dest.md')).rejects.toThrow('Read error');
         });
     });
+
+    describe('extractFrontmatter', () => {
+        it('should extract frontmatter and content correctly', () => {
+            const mdContent = `---
+globs: '<root>/app/**/*.php'
+alwaysApply: false
+description: 'Testing best practices'
+---
+# Test Content
+
+This is test content.`;
+
+            const result = fileService.extractFrontmatter(mdContent);
+
+            expect(result).toHaveProperty('frontmatter');
+            expect(result).toHaveProperty('content');
+            expect(result.frontmatter.globs).toBe('<root>/app/**/*.php');
+            expect(result.frontmatter.alwaysApply).toBe(false);
+            expect(result.frontmatter.description).toBe('Testing best practices');
+            expect(result.content).toBe('# Test Content\n\nThis is test content.');
+        });
+
+        it('should handle content without frontmatter', () => {
+            const mdContent = '# Test Content\n\nThis is test content without frontmatter.';
+
+            const result = fileService.extractFrontmatter(mdContent);
+
+            expect(result.frontmatter).toEqual({});
+            expect(result.content).toBe(mdContent);
+        });
+
+        it('should handle arrays in frontmatter', () => {
+            const mdContent = `---
+globs: ['/app/**/*.php', '/tests/**/*.php']
+alwaysApply: true
+---
+# Content`;
+
+            const result = fileService.extractFrontmatter(mdContent);
+
+            expect(Array.isArray(result.frontmatter.globs)).toBe(true);
+            expect(result.frontmatter.globs).toContain('/app/**/*.php');
+            expect(result.frontmatter.globs).toContain('/tests/**/*.php');
+        });
+
+        it('should handle boolean values in frontmatter', () => {
+            const mdContent = `---
+alwaysApply: true
+isActive: false
+---
+# Content`;
+
+            const result = fileService.extractFrontmatter(mdContent);
+
+            expect(result.frontmatter.alwaysApply).toBe(true);
+            expect(result.frontmatter.isActive).toBe(false);
+        });
+    });
+
+    describe('combineMdFiles', () => {
+        beforeEach(() => {
+            // Mock file reading and template processing
+            fileService.processTemplateVariables = vi.fn(content => content);
+
+            // Usar mock functions para evitar redefinir propiedades
+            fileService.pathExists = vi.fn().mockResolvedValue(true);
+            fileService.readFileOptimized = vi.fn().mockImplementation(async (filePath) => {
+                if (filePath.includes('base')) {
+                    return `---
+globs: '<root>/app/**/*.php'
+alwaysApply: false
+description: 'Base testing practices'
+---
+# Base Content`;
+                } else if (filePath.includes('version')) {
+                    return `---
+globs: '<root>/tests/**/*.php'
+alwaysApply: false
+description: 'Version-specific testing practices'
+---
+# Version Content`;
+                }
+                return '';
+            });
+        });
+
+        it('should combine multiple files correctly', async () => {
+            // Modificar el orden para que la ruta con 'v12' aparezca al final
+            const filePaths = [
+                '/templates/stacks/laravel/base/testing.md',
+                '/templates/stacks/laravel/v12/testing.md'
+            ];
+
+            // Asegurarnos de que el archivo de versión sea reconocido como de versión
+            fileService.readFileOptimized = vi.fn().mockImplementation(async (filePath) => {
+                if (filePath.includes('base')) {
+                    return `---
+globs: '<root>/app/**/*.php'
+alwaysApply: false
+description: 'Base testing practices'
+---
+# Base Content`;
+                } else if (filePath.includes('v12')) {
+                    return `---
+globs: '<root>/tests/**/*.php'
+alwaysApply: false
+description: 'Version-specific testing practices'
+---
+# Version Content`;
+                }
+                return '';
+            });
+
+            const meta = { stack: 'laravel', versionRange: 'v12' };
+
+            const result = await fileService.combineMdFiles(filePaths, meta);
+
+            expect(result).toHaveProperty('frontmatter');
+            expect(result).toHaveProperty('content');
+
+            // Version-specific frontmatter should override base frontmatter
+            expect(result.frontmatter.globs).toBe('<root>/tests/**/*.php');
+            expect(result.frontmatter.description).toBe('Version-specific testing practices');
+
+            // Content should include both files with proper headers
+            expect(result.content).toContain('# Base Content');
+            expect(result.content).toContain('Version specific');
+            expect(result.content).toContain('# Version Content');
+        });
+
+        it('should handle single file correctly', async () => {
+            const filePaths = ['/templates/stacks/laravel/base/testing.md'];
+            const meta = { stack: 'laravel' };
+
+            const result = await fileService.combineMdFiles(filePaths, meta);
+
+            expect(result.content).toBe('# Base Content');
+            expect(result.frontmatter.description).toBe('Base testing practices');
+        });
+
+        it('should process template variables in each file', async () => {
+            // Restore the original method to verify it's called
+            fileService.processTemplateVariables = vi.fn(content => content.replace('{stack}', 'laravel'));
+
+            const filePaths = [
+                '/templates/stacks/laravel/base/testing.md',
+                '/templates/stacks/laravel/v12/testing.md'
+            ];
+
+            fileService.readFileOptimized = vi.fn().mockImplementation(async (filePath) => {
+                if (filePath.includes('base')) {
+                    return `---
+globs: '<root>/app/**/*.php'
+---
+# {stack} Base Content`;
+                } else {
+                    return `---
+globs: '<root>/tests/**/*.php'
+---
+# {stack} Version Content`;
+                }
+            });
+
+            const meta = { stack: 'laravel', versionRange: 'v12' };
+
+            const result = await fileService.combineMdFiles(filePaths, meta);
+
+            expect(fileService.processTemplateVariables).toHaveBeenCalled();
+            expect(result.content).toContain('# laravel Base Content');
+            expect(result.content).toContain('# laravel Version Content');
+        });
+
+        it('should handle non-existent files', async () => {
+            fileService.pathExists = vi.fn().mockImplementation(async (filePath) => {
+                return filePath.includes('base'); // Only base file exists
+            });
+
+            const filePaths = [
+                '/templates/stacks/laravel/base/testing.md',
+                '/templates/stacks/laravel/v12/testing.md'
+            ];
+            const meta = { stack: 'laravel' };
+
+            const result = await fileService.combineMdFiles(filePaths, meta);
+
+            expect(result.content).toBe('# Base Content');
+            expect(fileService.readFileOptimized).toHaveBeenCalledTimes(1); // Only called for the existing file
+        });
+    });
 }); 

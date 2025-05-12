@@ -4,12 +4,25 @@ import { StackService } from '../../../cli/services/stack-service.js';
 
 // Mock fs-extra
 vi.mock('fs-extra', () => {
+    const mockPromises = {
+        readdir: vi.fn().mockResolvedValue(['file1.md', 'file2.md']),
+        writeFile: vi.fn().mockResolvedValue(),
+        mkdir: vi.fn().mockResolvedValue(),
+        access: vi.fn().mockResolvedValue(),
+        stat: vi.fn().mockResolvedValue({ isDirectory: () => true })
+    };
+
     const mockFunctions = {
         existsSync: vi.fn(),
         readFileSync: vi.fn(),
         statSync: vi.fn(() => ({ isDirectory: () => true })),
         readdirSync: vi.fn(),
         copySync: vi.fn(),
+        access: vi.fn(),
+        readdir: vi.fn(),
+        writeFile: vi.fn(),
+        copy: vi.fn(),
+        promises: mockPromises
     };
 
     return {
@@ -280,6 +293,142 @@ describe('StackService', () => {
 
             expect(result).toBe(null);
             expect(stackService.debugLog).toHaveBeenCalledWith(expect.stringContaining('Failed to create backup'));
+        });
+    });
+
+    describe('generateRulesAsync', () => {
+        let mockFileService;
+
+        beforeEach(() => {
+            // Mock fileService methods
+            mockFileService = {
+                wrapMdToMdcAsync: vi.fn().mockResolvedValue(),
+                combineMdFiles: vi.fn().mockResolvedValue({
+                    frontmatter: { globs: '<root>/tests/**/*.php', alwaysApply: false },
+                    content: '# Combined Content'
+                }),
+                pathExists: vi.fn().mockResolvedValue(true)
+            };
+
+            // Provide fileService to stackService
+            stackService.fileService = mockFileService;
+
+            // Mock stackService methods
+            stackService.pathExistsAsync = vi.fn().mockResolvedValue(true);
+            stackService.ensureDirectoryExistsAsync = vi.fn().mockResolvedValue();
+
+            // No need to re-mock fs-extra methods since they're already mocked globally
+        });
+
+        it('should detect and combine duplicate files from different locations', async () => {
+            const rulesDir = '/project/rules';
+            const meta = {
+                stack: 'laravel',
+                versionRange: 'v12',
+                architecture: 'standard'
+            };
+            const config = { laravel: { globs: ['<root>/app/**/*.php'] } };
+            const progressCallback = vi.fn();
+
+            await stackService.generateRulesAsync(rulesDir, meta, config, progressCallback, false);
+
+            // Verify that pathExistsAsync was called
+            expect(stackService.pathExistsAsync).toHaveBeenCalled();
+
+            // Verify that ensureDirectoryExistsAsync was called
+            expect(stackService.ensureDirectoryExistsAsync).toHaveBeenCalled();
+
+            // Verify that fs.promises.readdir was called
+            expect(fs.promises.readdir).toHaveBeenCalled();
+
+            // Verify that fs.promises.writeFile was called for the combined file
+            expect(fs.promises.writeFile).toHaveBeenCalled();
+        });
+
+        it('should handle files that only exist in one location', async () => {
+            // Mock fs.promises.readdir to return different files for each directory
+            const mockReaddir = vi.fn().mockImplementation(async (dir) => {
+                if (dir.includes('base')) {
+                    return ['base_only.md', 'common_file.md'];
+                } else if (dir.includes('v12')) {
+                    return ['version_only.md', 'common_file.md'];
+                } else {
+                    return ['arch_only.md'];
+                }
+            });
+            fs.promises.readdir = mockReaddir;
+
+            const rulesDir = '/project/rules';
+            const meta = {
+                stack: 'laravel',
+                versionRange: 'v12',
+                architecture: 'standard'
+            };
+            const config = {};
+            const progressCallback = vi.fn();
+
+            await stackService.generateRulesAsync(rulesDir, meta, config, progressCallback, false);
+
+            // Verify that fs.promises.readdir was called for each directory
+            expect(mockReaddir).toHaveBeenCalled();
+
+            // Verify that ensureDirectoryExistsAsync was called
+            expect(stackService.ensureDirectoryExistsAsync).toHaveBeenCalled();
+
+            // Verify that pathExistsAsync was called
+            expect(stackService.pathExistsAsync).toHaveBeenCalled();
+        });
+
+        it('should include global rules when includeGlobalRules is true', async () => {
+            // Mock fs methods for global rules
+            const globalDir = '/test/templates/global';
+            const mockReaddir = vi.fn().mockImplementation(async (dir) => {
+                if (dir.includes('global')) {
+                    return ['global1.md', 'global2.md'];
+                } else {
+                    return ['stack_file.md'];
+                }
+            });
+            fs.promises.readdir = mockReaddir;
+
+            const rulesDir = '/project/rules';
+            const meta = { stack: 'laravel' };
+            const config = { global: { always: ['global1.md'] } };
+            const progressCallback = vi.fn();
+
+            await stackService.generateRulesAsync(rulesDir, meta, config, progressCallback, true);
+
+            // Verify that ensureDirectoryExistsAsync is called for the global directory
+            expect(stackService.ensureDirectoryExistsAsync).toHaveBeenCalledWith(expect.stringContaining('global'));
+
+            // Verify that wrapMdToMdcAsync is called for each global rule
+            expect(mockFileService.wrapMdToMdcAsync).toHaveBeenCalledWith(
+                expect.stringContaining('global1.md'),
+                expect.any(String),
+                expect.any(Object),
+                expect.any(Object)
+            );
+        });
+
+        it('should handle errors when combining files fails', async () => {
+            // Mock combineMdFiles to throw an error
+            mockFileService.combineMdFiles.mockRejectedValueOnce(new Error('Combine error'));
+
+            const rulesDir = '/project/rules';
+            const meta = { stack: 'laravel', versionRange: 'v12' };
+            const config = {};
+
+            // Mock multiple files with the same name in different directories
+            const mockReaddir = vi.fn().mockResolvedValue(['duplicate.md']);
+            fs.promises.readdir = mockReaddir;
+
+            // We need to detect that debugLog is called with an error message
+            stackService.debugLog = vi.fn();
+
+            await stackService.generateRulesAsync(rulesDir, meta, config, vi.fn(), false);
+
+            // Check that the error was logged
+            expect(stackService.debugLog).toHaveBeenCalledWith(expect.stringContaining('Error merging files'));
         });
     });
 }); 

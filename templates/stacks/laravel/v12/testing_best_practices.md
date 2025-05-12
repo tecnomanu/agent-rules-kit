@@ -4,7 +4,7 @@ globs: '<root>/tests/**/*.php'
 alwaysApply: false
 ---
 
-# Testing in Laravel 12
+## Testing in Laravel 12
 
 This file complements the base Laravel testing practices with specific aspects for version 12.
 
