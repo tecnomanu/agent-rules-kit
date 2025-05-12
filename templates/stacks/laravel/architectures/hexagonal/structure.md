@@ -1,3 +1,9 @@
+---
+description: Hexagonal (Ports & Adapters) architecture conventions for Laravel
+globs: '<root>/app/Core/**/*.php,<root>/app/Adapters/**/*.php,<root>/app/Ports/**/*.php'
+alwaysApply: false
+---
+
 # Hexagonal Architecture (Ports and Adapters) for Laravel
 
 This project follows the Hexagonal Architecture pattern, which isolates the core application from external concerns.

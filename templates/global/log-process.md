@@ -1,4 +1,5 @@
 ---
+description: Guidelines for process logging
 globs: '**/*'
 alwaysApply: true
 ---

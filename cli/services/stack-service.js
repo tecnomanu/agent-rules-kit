@@ -13,6 +13,7 @@ export class StackService extends BaseService {
     constructor(options = {}) {
         super(options);
         this.configService = options.configService;
+        this.fileService = options.fileService;
         this.templatesDir = options.templatesDir;
     }
 
@@ -123,53 +124,23 @@ export class StackService extends BaseService {
         // Get versions from stack-specific version ranges
         const versionRanges = kitConfig[stack]?.version_ranges || {};
 
-        // Get unique versions from config while preserving order
-        const versionNumbers = Object.keys(versionRanges);
-        this.debugLog(`Version numbers from config for ${stack}: ${versionNumbers.join(', ')}`);
+        // Transform version ranges into an array of version objects
+        const versions = [];
 
-        // Get the unique ranges they map to while preserving order
-        const configVersions = [];
-        const seenRanges = new Set();
-        for (const vNum of versionNumbers) {
-            const range = versionRanges[vNum];
-            if (!seenRanges.has(range)) {
-                seenRanges.add(range);
-                configVersions.push(range);
-            }
-        }
-
-        this.debugLog(`Version ranges for ${stack}: ${configVersions.join(', ')}`);
-
-        // Check for version directories
-        const stackDir = path.join(this.templatesDir, 'stacks', stack);
-        const excludeDirs = ['base', 'architectures', 'testing', 'state-management'];
-        let dirVersions = [];
-
-        if (fs.existsSync(stackDir)) {
-            dirVersions = fs.readdirSync(stackDir)
-                .filter(item =>
-                    fs.statSync(path.join(stackDir, item)).isDirectory() &&
-                    !excludeDirs.includes(item) &&
-                    item.startsWith('v')
-                );
-            this.debugLog(`Version directories for ${stack}: ${dirVersions.join(', ')}`);
-        }
-
-        // Combine while preserving order - first from config, then any additional from directories
-        const allVersions = [...configVersions];
-        dirVersions.forEach(version => {
-            if (!allVersions.includes(version)) {
-                allVersions.push(version);
+        // Process each version entry individually to avoid duplicate options
+        Object.entries(versionRanges).forEach(([versionNum, versionData]) => {
+            // Check if we already added this exact version
+            if (!versions.some(v => v.value === versionNum)) {
+                versions.push({
+                    name: versionNum, // Usar la clave como nombre principal
+                    value: versionNum // Y también como valor
+                });
             }
         });
 
-        this.debugLog(`Combined versions for ${stack}: ${allVersions.join(', ')}`);
+        this.debugLog(`Available versions for ${stack}: ${versions.map(v => v.name).join(', ')}`);
 
-        // Format version names for display
-        return allVersions.map(version => ({
-            name: this.formatVersionName(stack, version),
-            value: version
-        }));
+        return versions;
     }
 
     /**
@@ -192,32 +163,35 @@ export class StackService extends BaseService {
      * @returns {string} - Formatted name
      */
     formatVersionName(stack, version) {
+        // Ensure version is a string
+        const versionStr = String(version);
+
         // Format based on stack and version range
         if (stack === 'laravel') {
-            if (version === 'v10-11') return 'Laravel 10-11';
-            if (version === 'v8-9') return 'Laravel 8-9';
-            if (version === 'v12') return 'Laravel 12';
-            if (version === 'v7') return 'Laravel 7';
+            if (versionStr === 'v10-11') return 'Laravel 10-11';
+            if (versionStr === 'v8-9') return 'Laravel 8-9';
+            if (versionStr === 'v12') return 'Laravel 12';
+            if (versionStr === 'v7') return 'Laravel 7';
         } else if (stack === 'nextjs') {
-            if (version === 'v14') return 'Next.js 14';
-            if (version === 'v13') return 'Next.js 13';
-            if (version === 'v12') return 'Next.js 12';
+            if (versionStr === 'v14') return 'Next.js 14';
+            if (versionStr === 'v13') return 'Next.js 13';
+            if (versionStr === 'v12') return 'Next.js 12';
         } else if (stack === 'react') {
-            if (version === 'v17') return 'React 17';
-            if (version === 'v18') return 'React 18';
+            if (versionStr === 'v17') return 'React 17';
+            if (versionStr === 'v18') return 'React 18';
         } else if (stack === 'vue') {
-            if (version === 'v2') return 'Vue 2';
-            if (version === 'v3') return 'Vue 3';
+            if (versionStr === 'v2') return 'Vue 2';
+            if (versionStr === 'v3') return 'Vue 3';
         } else if (stack === 'nuxt') {
-            if (version === 'v2') return 'Nuxt 2';
-            if (version === 'v3') return 'Nuxt 3';
+            if (versionStr === 'v2') return 'Nuxt 2';
+            if (versionStr === 'v3') return 'Nuxt 3';
         } else if (stack === 'angular') {
-            if (version === 'v14-15') return 'Angular 14-15';
-            if (version === 'v16-17') return 'Angular 16-17';
+            if (versionStr === 'v14-15') return 'Angular 14-15';
+            if (versionStr === 'v16-17') return 'Angular 16-17';
         }
 
         // Default formatting - capitalize and make readable
-        return version
+        return versionStr
             .replace('v', `${stack.charAt(0).toUpperCase() + stack.slice(1)} `)
             .replace('-', ' to ');
     }
@@ -234,32 +208,9 @@ export class StackService extends BaseService {
         const kitConfig = this.configService.loadKitConfig(this.templatesDir);
         const versionRanges = kitConfig[stack]?.version_ranges || {};
 
-        // Handle new version range structure with objects
-        // First, check if the version is already a range key (unlikely but possible)
-        if (Object.values(versionRanges).some(v => v.range_name === version)) {
-            return version;
-        }
-
-        // Try direct mapping first - now with the new structure
-        const versionObj = versionRanges[version];
-        if (versionObj && versionObj.range_name) {
-            this.debugLog(`Direct mapping found for ${stack} version ${version}: ${versionObj.range_name}`);
-            return versionObj.range_name;
-        }
-
-        // If not found, try to find the range it belongs to
-        // If version starts with 'v', extract the number
-        const versionStr = version.startsWith('v') ? version.substring(1) : version;
-        const versionNum = parseInt(versionStr, 10);
-
-        if (!isNaN(versionNum)) {
-            for (const [key, value] of Object.entries(versionRanges)) {
-                const keyNum = parseInt(key, 10);
-                if (!isNaN(keyNum) && keyNum === versionNum) {
-                    this.debugLog(`Numeric mapping found for ${stack} version ${version}: ${value.range_name}`);
-                    return value.range_name;
-                }
-            }
+        // Direct mapping - version is a key in version_ranges
+        if (versionRanges[version]) {
+            return versionRanges[version].range_name;
         }
 
         this.debugLog(`No mapping found for ${stack} version ${version}`);
@@ -279,16 +230,20 @@ export class StackService extends BaseService {
         const kitConfig = this.configService.loadKitConfig(this.templatesDir);
         const versionRanges = kitConfig[stack]?.version_ranges || {};
 
-        // Find the entry where range_name matches versionRange
+        // Check directly if this version exists in the config
+        if (versionRanges[versionRange]) {
+            return versionRanges[versionRange].name;
+        }
+
+        // If we're looking for a range_name, find the entry that matches
         for (const [key, value] of Object.entries(versionRanges)) {
             if (value.range_name === versionRange) {
-                this.debugLog(`Found formatted name for ${versionRange}: ${value.name}`);
                 return value.name;
             }
         }
 
-        // If not found in config, fall back to the formatting function
-        return this.formatVersionName(stack, versionRange);
+        // Default formatting if not found in config
+        return `${stack.charAt(0).toUpperCase() + stack.slice(1)} ${versionRange}`;
     }
 
     /**
@@ -661,8 +616,27 @@ export class StackService extends BaseService {
 
             // Count Angular signals rules if included
             if (stack === 'angular' && meta.includeSignals) {
-                const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
-                if (fs.existsSync(signalsDir)) {
+                // First check for version-specific signals
+                let signalsDir = null;
+
+                if (meta.versionRange) {
+                    const versionSignalsDir = path.join(this.templatesDir, 'stacks', stack, meta.versionRange);
+                    if (fs.existsSync(versionSignalsDir)) {
+                        signalsDir = versionSignalsDir;
+                        this.debugLog(`Using version-specific signals from: ${versionSignalsDir}`);
+                    }
+                }
+
+                // If no version-specific signals found, try the common signals directory
+                if (!signalsDir) {
+                    const commonSignalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+                    if (fs.existsSync(commonSignalsDir)) {
+                        signalsDir = commonSignalsDir;
+                        this.debugLog(`Using common signals from: ${commonSignalsDir}`);
+                    }
+                }
+
+                if (signalsDir) {
                     const signalsFiles = fs.readdirSync(signalsDir).filter(f => f.endsWith('.md'));
                     totalFiles += signalsFiles.length;
                     this.debugLog(`Angular signals rules count: ${signalsFiles.length}`);
@@ -749,8 +723,27 @@ export class StackService extends BaseService {
 
             // Count Angular signals rules if included
             if (stack === 'angular' && meta.includeSignals) {
-                const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
-                if (await fs.pathExists(signalsDir)) {
+                // First check for version-specific signals
+                let signalsDir = null;
+
+                if (meta.versionRange) {
+                    const versionSignalsDir = path.join(this.templatesDir, 'stacks', stack, meta.versionRange);
+                    if (await fs.pathExists(versionSignalsDir)) {
+                        signalsDir = versionSignalsDir;
+                        this.debugLog(`Using version-specific signals from: ${versionSignalsDir}`);
+                    }
+                }
+
+                // If no version-specific signals found, try the common signals directory
+                if (!signalsDir) {
+                    const commonSignalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+                    if (await fs.pathExists(commonSignalsDir)) {
+                        signalsDir = commonSignalsDir;
+                        this.debugLog(`Using common signals from: ${commonSignalsDir}`);
+                    }
+                }
+
+                if (signalsDir) {
                     const signalsFiles = (await fs.readdir(signalsDir)).filter(f => f.endsWith('.md'));
                     totalFiles += signalsFiles.length;
                     this.debugLog(`Angular signals rules count: ${signalsFiles.length}`);
@@ -782,37 +775,52 @@ export class StackService extends BaseService {
         const stackRulesDir = path.join(rulesDir, stack);
         await fs.ensureDir(stackRulesDir);
 
-        // Get a reference to the file service if needed
-        const fileService = this.configService?.fileService;
+        // Get a reference to the file service from this instance or from configService
+        const fileService = this.fileService || (this.configService?.fileService);
         if (!fileService) {
             throw new Error('File service is required but not available');
         }
 
         // Process global rules if requested
         if (includeGlobalRules) {
-            const globalRules = config.global?.rules || [];
+            // Usar always en lugar de rules ya que esa es la nomenclatura en la config
+            const globalRules = config.global?.always || [];
+
+            // Si no hay reglas definidas explícitamente, copiar todos los archivos .md de la carpeta global
+            const globalTemplatesDir = path.join(this.templatesDir, 'global');
+            let filesToCopy = [];
 
             if (globalRules.length > 0) {
+                filesToCopy = globalRules;
+            } else if (await fs.pathExists(globalTemplatesDir)) {
+                // Obtener todos los archivos .md si no hay reglas explícitas
+                const allFiles = await fs.readdir(globalTemplatesDir);
+                filesToCopy = allFiles.filter(file => file.endsWith('.md'));
+            }
+
+            if (filesToCopy.length > 0) {
                 const globalDir = path.join(rulesDir, 'global');
                 await fs.ensureDir(globalDir);
 
-                // Get global templates
-                const globalTemplatesDir = path.join(this.templatesDir, 'global');
-
                 // Process in batches for better memory usage
                 const batchSize = 10;
-                for (let i = 0; i < globalRules.length; i += batchSize) {
-                    const batch = globalRules.slice(i, i + batchSize);
+                for (let i = 0; i < filesToCopy.length; i += batchSize) {
+                    const batch = filesToCopy.slice(i, i + batchSize);
 
                     await Promise.all(batch.map(async (rule) => {
                         const sourceFile = path.join(globalTemplatesDir, rule);
                         const destFile = path.join(globalDir, rule.replace(/\.md$/, '.mdc'));
 
-                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+                        if (await fs.pathExists(sourceFile)) {
+                            await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+                            this.debugLog(`Copied global rule: ${rule}`);
 
-                        // Update progress
-                        if (typeof progressCallback === 'function') {
-                            progressCallback();
+                            // Update progress
+                            if (typeof progressCallback === 'function') {
+                                progressCallback();
+                            }
+                        } else {
+                            this.debugLog(`Global rule not found: ${rule}`);
                         }
                     }));
                 }
@@ -961,8 +969,27 @@ export class StackService extends BaseService {
 
         // Process Angular signals rules if applicable
         if (stack === 'angular' && meta.includeSignals) {
-            const signalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
-            if (await fs.pathExists(signalsDir)) {
+            // First check for version-specific signals
+            let signalsDir = null;
+
+            if (meta.versionRange) {
+                const versionSignalsDir = path.join(this.templatesDir, 'stacks', stack, meta.versionRange);
+                if (await fs.pathExists(versionSignalsDir)) {
+                    signalsDir = versionSignalsDir;
+                    this.debugLog(`Using version-specific signals from: ${versionSignalsDir}`);
+                }
+            }
+
+            // If no version-specific signals found, try the common signals directory
+            if (!signalsDir) {
+                const commonSignalsDir = path.join(this.templatesDir, 'stacks', stack, 'signals');
+                if (await fs.pathExists(commonSignalsDir)) {
+                    signalsDir = commonSignalsDir;
+                    this.debugLog(`Using common signals from: ${commonSignalsDir}`);
+                }
+            }
+
+            if (signalsDir) {
                 const signalsFiles = await fs.readdir(signalsDir);
 
                 // Process in batches

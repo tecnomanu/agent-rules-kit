@@ -1,3 +1,9 @@
+---
+description: Naming conventions for Laravel applications
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: false
+---
+
 # Naming Conventions in Laravel
 
 This document defines standard naming conventions for Laravel projects, following the recommended practices from the Laravel community and the PHP ecosystem.

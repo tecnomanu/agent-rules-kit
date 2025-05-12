@@ -1,6 +1,12 @@
-# Service‑Provider registration – Laravel 12
+---
+description: Service provider guidelines for Laravel 12
+globs: '<root>/bootstrap/app.php'
+alwaysApply: false
+---
 
-From **Laravel 12** onward, providers are registered in
+# Service Providers – Laravel 12
+
+From **Laravel 12** onward, providers are registered in
 `bootstrap/app.php` through `Application::configure()` instead of the
 legacy `config/app.php` array.
 

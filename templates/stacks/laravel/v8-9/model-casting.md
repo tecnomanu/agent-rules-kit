@@ -1,3 +1,9 @@
+---
+description: Model casting features in Laravel 8-9
+globs: '<root>/app/Models/**/*.php'
+alwaysApply: false
+---
+
 # Model Casting – Laravel 8-9
 
 Laravel 8-9 introduced several casting features that should be used for clean data handling:

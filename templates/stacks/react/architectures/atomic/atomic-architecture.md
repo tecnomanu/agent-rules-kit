@@ -1,4 +1,10 @@
-# Atomic Design Architecture in React
+---
+description: Atomic Design architecture for React applications
+globs: '<root>/src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: false
+---
+
+# Atomic Design Architecture
 
 Atomic Design is a methodology composed of five distinct stages working together to create interface design systems in a more deliberate and hierarchical manner.
 

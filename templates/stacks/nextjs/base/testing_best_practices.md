@@ -1,3 +1,9 @@
+---
+description: Testing best practices for Next.js applications
+globs: '<root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/api/**/*.ts,<root>/tests/**/*.{ts,tsx}'
+alwaysApply: false
+---
+
 # Next.js Testing Guide
 
 This guide outlines the recommended approach to testing Next.js applications in {projectPath}.

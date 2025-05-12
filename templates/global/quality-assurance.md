@@ -1,3 +1,9 @@
+---
+description: Quality control practices for all projects
+globs: '**/*'
+alwaysApply: true
+---
+
 # Project Quality Assurance
 
 This document unifies quality control practices applicable to any project, regardless of the technology stack used.

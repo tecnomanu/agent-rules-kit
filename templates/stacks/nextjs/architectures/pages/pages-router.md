@@ -1,3 +1,9 @@
+---
+description: Pages Router architecture guidelines for Next.js
+globs: '<root>/pages/**/*.{ts,tsx}'
+alwaysApply: false
+---
+
 # Next.js Pages Router Guidelines
 
 This project uses Next.js Pages Router (traditional routing). Follow these conventions for consistency.

@@ -1,3 +1,9 @@
+---
+description: Core architectural concepts for Next.js applications
+globs: '<root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/api/**/*.ts,<root>/tests/**/*.{ts,tsx}'
+alwaysApply: false
+---
+
 # Next.js Architecture Concepts
 
 This document outlines the core architectural concepts and patterns used in Next.js applications in {projectPath}.

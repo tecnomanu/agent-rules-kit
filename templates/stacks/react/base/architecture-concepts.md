@@ -1,3 +1,9 @@
+---
+description: Core architectural concepts for React applications
+globs: '<root>/src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: false
+---
+
 # React Architecture Concepts
 
 This document outlines the core architectural concepts and patterns used in React applications in {projectPath}.

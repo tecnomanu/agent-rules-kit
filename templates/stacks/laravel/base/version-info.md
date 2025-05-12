@@ -1,3 +1,9 @@
+---
+description: Version information for Laravel applications
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: true
+---
+
 # Laravel Version Information
 
 This project is using Laravel **{detectedVersion}**.

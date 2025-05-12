@@ -1,3 +1,9 @@
+---
+description: Routing guidelines for Laravel 12
+globs: '<root>/routes/**/*.php'
+alwaysApply: false
+---
+
 # Routes in Laravel 12
 
 Laravel 12 introduces a new routing API with a cleaner and more expressive syntax:

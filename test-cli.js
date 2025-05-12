@@ -3,8 +3,9 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { wrapMdToMdc } from './cli/utils/file-helpers.js';
-import { copyStack } from './cli/utils/stack-helpers.js';
+import { ConfigService } from './cli/services/config-service.js';
+import { FileService } from './cli/services/file-service.js';
+import { StackService } from './cli/services/stack-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, 'templates');
@@ -15,6 +16,21 @@ const DEBUG_MODE = process.argv.includes('--debug');
 async function testCLI() {
     console.log(chalk.blue('🧪 Testing Agent Rules Kit with predefined values'));
 
+    // Instanciar servicios
+    const fileService = new FileService({ debug: DEBUG_MODE });
+    const configService = new ConfigService({ debug: DEBUG_MODE, templatesDir });
+
+    // Asignar fileService a configService
+    configService.fileService = fileService;
+
+    // StackService necesita configService con fileService ya configurado
+    const stackService = new StackService({
+        debug: DEBUG_MODE,
+        configService,
+        fileService,
+        templatesDir
+    });
+
     // Predefined settings
     const settings = {
         selected: 'laravel',
@@ -22,7 +38,7 @@ async function testCLI() {
         root: 'testing',
         projectPath: '.',
         mirrorDocs: false,
-        selectedVersion: 12,
+        selectedVersion: "12", // Convertido a string para evitar errores con version.replace
         architecture: 'standard',
         debug: DEBUG_MODE
     };
@@ -57,26 +73,42 @@ async function testCLI() {
                     projectPath: settings.projectPath,
                     debug: settings.debug
                 };
-                wrapMdToMdc(srcFile, destFile, meta);
+                fileService.wrapMdToMdc(srcFile, destFile, meta);
             });
             console.log(chalk.green(`✅ Applied global rules`));
         }
     }
 
-    // Copy stack rules
-    await copyStack(
-        templatesDir,
-        settings.selected,
-        targetRules,
-        settings.projectPath,
-        {
+    // Generate stack rules
+    try {
+        const meta = {
+            stack: settings.selected,
             architecture: settings.architecture,
-            selectedVersion: settings.selectedVersion,
-            debug: settings.debug
-        }
-    );
+            detectedVersion: settings.selectedVersion,
+            projectPath: settings.projectPath,
+        };
 
-    console.log(chalk.green(`\n✅ Test completed. Check the output files in: ${targetRules}`));
+        const config = {
+            debug: settings.debug
+        };
+
+        await stackService.generateRulesAsync(
+            targetRules,
+            meta,
+            config,
+            (progress) => {
+                if (settings.debug) {
+                    console.log(`Progress: ${progress}%`);
+                }
+            },
+            false // No incluir reglas globales porque ya las copiamos manualmente
+        );
+
+        console.log(chalk.green(`\n✅ Test completed. Check the output files in: ${targetRules}`));
+    } catch (error) {
+        console.error(chalk.red(`❌ Error generating rules: ${error.message}`));
+        throw error;
+    }
 }
 
 // Flag para manejar errores

@@ -1,3 +1,9 @@
+---
+description: Core best practices for Next.js applications
+globs: '<root>/app/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx}'
+alwaysApply: false
+---
+
 # Next.js Best Practices
 
 This document outlines the core best practices and conventions for Next.js applications.

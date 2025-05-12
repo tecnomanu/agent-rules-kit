@@ -1,4 +1,5 @@
 ---
+description: File operation guidelines to prevent content loss
 globs: '**/*'
 alwaysApply: true
 ---

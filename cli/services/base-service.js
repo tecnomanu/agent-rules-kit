@@ -12,6 +12,9 @@ import fs from 'fs-extra';
 export class BaseService {
     constructor(options = {}) {
         this.debug = options.debug || false;
+        this.fileService = options.fileService;
+        this.configService = options.configService;
+        this.stackService = options.stackService;
     }
 
     /**
@@ -210,5 +213,34 @@ export class BaseService {
         }
 
         return results;
+    }
+
+    // Proxy methods to stackService if available
+    getAvailableArchitectures(stack) {
+        if (this.stackService) {
+            return this.stackService.getAvailableArchitectures(stack);
+        }
+        return [];
+    }
+
+    getAvailableVersions(stack) {
+        if (this.stackService) {
+            return this.stackService.getAvailableVersions(stack);
+        }
+        return [];
+    }
+
+    mapVersionToRange(stack, version) {
+        if (this.stackService) {
+            return this.stackService.mapVersionToRange(stack, version);
+        }
+        return version;
+    }
+
+    getFormattedVersionName(stack, versionRange) {
+        if (this.stackService) {
+            return this.stackService.getFormattedVersionName(stack, versionRange);
+        }
+        return versionRange;
     }
 } 

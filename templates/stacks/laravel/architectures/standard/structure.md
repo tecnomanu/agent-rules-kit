@@ -1,3 +1,9 @@
+---
+description: Standard architecture conventions for Laravel projects
+globs: '<root>/app/**/*.php'
+alwaysApply: false
+---
+
 # Standard Laravel Architecture
 
 This project follows the standard Laravel MVC architecture with clearly defined responsibilities.

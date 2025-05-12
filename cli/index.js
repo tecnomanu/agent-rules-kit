@@ -35,6 +35,7 @@ const cliService = new CliService({ debug: debugMode });
 const stackService = new StackService({
     debug: debugMode,
     configService,
+    fileService,
     templatesDir
 });
 
@@ -65,12 +66,13 @@ async function loadStackService(stack) {
             throw new Error(`Service class not found for stack: ${stack}`);
         }
 
-        // Instantiate the service
+        // Instantiate the service with stackService methods
         const serviceInstance = new ServiceClass({
             debug: debugMode,
             fileService,
             configService,
-            templatesDir
+            templatesDir,
+            stackService // Pass stackService to inherit its methods
         });
 
         // Cache the instance
@@ -117,8 +119,11 @@ async function main() {
     // Ask for the relative path to the project
     const projectPath = await cliService.askProjectPath();
 
+    // Ask for the application directory within the project
+    const appDirectory = await cliService.askAppDirectory();
+
     // Try to detect the stack version
-    const detectedVersion = stackService.detectStackVersion(stack, projectPath);
+    const detectedVersion = stackService.detectStackVersion(stack, appDirectory !== './' ? appDirectory : projectPath);
     if (detectedVersion) {
         cliService.info(`Detected ${stack} version: ${detectedVersion}`);
     }
@@ -150,25 +155,25 @@ async function main() {
     await baseService.ensureDirectoryExistsAsync(rulesDir);
 
     // Load the appropriate stack service dynamically
-    const stackService = await loadStackService(stack);
+    const stackSpecificService = await loadStackService(stack);
 
     // Stack-specific questions
     let additionalOptions = {};
 
     if (stack === 'laravel') {
         // Get available architectures for Laravel
-        const architectures = stackService.getAvailableArchitectures(stack);
+        const architectures = stackSpecificService.getAvailableArchitectures(stack);
         const architecture = await cliService.askArchitecture(architectures, stack);
 
         // Get available versions for Laravel
-        const versions = stackService.getAvailableVersions(stack);
+        const versions = stackSpecificService.getAvailableVersions(stack);
         const version = await cliService.askVersion(versions, detectedVersion);
 
         // Map specific version to version range if needed
-        const versionRange = stackService.mapVersionToRange(stack, version);
+        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
 
         // Get formatted version name for display
-        const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
 
         additionalOptions = {
             architecture,
@@ -179,18 +184,18 @@ async function main() {
     }
     else if (stack === 'nextjs') {
         // Get available architectures for Next.js
-        const architectures = stackService.getAvailableArchitectures(stack);
+        const architectures = stackSpecificService.getAvailableArchitectures(stack);
         const architecture = await cliService.askArchitecture(architectures, stack);
 
         // Get available versions for Next.js
-        const versions = stackService.getAvailableVersions(stack);
+        const versions = stackSpecificService.getAvailableVersions(stack);
         const version = await cliService.askVersion(versions, detectedVersion);
 
         // Map specific version to version range if needed
-        const versionRange = stackService.mapVersionToRange(stack, version);
+        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
 
         // Get formatted version name for display
-        const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
 
         additionalOptions = {
             architecture,
@@ -201,7 +206,7 @@ async function main() {
     }
     else if (stack === 'react') {
         // Get available architectures for React
-        const architectures = stackService.getAvailableArchitectures(stack);
+        const architectures = stackSpecificService.getAvailableArchitectures(stack);
         const architecture = await cliService.askArchitecture(architectures, stack);
 
         // Get available state management options
@@ -216,14 +221,14 @@ async function main() {
         const stateManagement = await cliService.askStateManagement(stateManagementOptions);
 
         // Get available versions for React
-        const versions = stackService.getAvailableVersions(stack);
+        const versions = stackSpecificService.getAvailableVersions(stack);
         const version = await cliService.askVersion(versions, detectedVersion);
 
         // Map specific version to version range if needed
-        const versionRange = stackService.mapVersionToRange(stack, version);
+        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
 
         // Get formatted version name for display
-        const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
 
         additionalOptions = {
             architecture,
@@ -235,7 +240,7 @@ async function main() {
     }
     else if (stack === 'angular') {
         // Get available architectures for Angular
-        const architectures = stackService.getAvailableArchitectures(stack);
+        const architectures = stackSpecificService.getAvailableArchitectures(stack);
         const architecture = await cliService.askArchitecture(architectures, stack);
 
         // Ask if Angular signals should be included
@@ -249,14 +254,14 @@ async function main() {
         ]);
 
         // Get available versions for Angular
-        const versions = stackService.getAvailableVersions(stack);
+        const versions = stackSpecificService.getAvailableVersions(stack);
         const version = await cliService.askVersion(versions, detectedVersion);
 
         // Map specific version to version range if needed
-        const versionRange = stackService.mapVersionToRange(stack, version);
+        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
 
         // Get formatted version name for display
-        const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
 
         additionalOptions = {
             architecture,
@@ -267,16 +272,16 @@ async function main() {
         };
     } else {
         // For other stacks, fetch available versions and architectures when available
-        const architectures = stackService.getAvailableArchitectures(stack);
+        const architectures = stackSpecificService.getAvailableArchitectures(stack);
         if (architectures.length > 0) {
             additionalOptions.architecture = await cliService.askArchitecture(architectures, stack);
         }
 
-        const versions = stackService.getAvailableVersions(stack);
+        const versions = stackSpecificService.getAvailableVersions(stack);
         if (versions.length > 0) {
             const version = await cliService.askVersion(versions, detectedVersion);
-            const versionRange = stackService.mapVersionToRange(stack, version);
-            const formattedVersionName = stackService.getFormattedVersionName(stack, versionRange);
+            const versionRange = stackSpecificService.mapVersionToRange(stack, version);
+            const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
 
             additionalOptions = {
                 ...additionalOptions,
@@ -295,7 +300,8 @@ async function main() {
 
     // Prepare metadata for rule generation
     const meta = {
-        projectPath,
+        projectPath: appDirectory,
+        cursorPath: projectPath,
         stack,
         debug: debugMode,
         ...additionalOptions
@@ -309,68 +315,52 @@ async function main() {
         let totalFiles = 0;
         let processedFiles = 0;
 
+        // Count the total number of files to be generated
+        totalFiles = await stackService.countTotalRules(meta);
+
         // Generate rules with different methods depending on stack
         switch (stack) {
             case 'laravel':
-                // Load Laravel service dynamically if needed
-                const laravelService = await loadStackService('laravel');
-                totalFiles = await laravelService.countTotalRules(meta);
-
                 // Set up progress tracking
                 const updateLaravelProgress = () => {
                     processedFiles++;
                     cliService.updateProgress((processedFiles / totalFiles) * 100);
                 };
 
-                await laravelService.generateRulesAsync(rulesDir, meta, config, updateLaravelProgress, includeGlobalRules);
+                await stackService.generateRulesAsync(rulesDir, meta, config, updateLaravelProgress, includeGlobalRules);
                 break;
 
             case 'nextjs':
-                // Load Next.js service dynamically if needed
-                const nextjsService = await loadStackService('nextjs');
-                totalFiles = await nextjsService.countTotalRules(meta);
-
                 // Set up progress tracking
                 const updateNextjsProgress = () => {
                     processedFiles++;
                     cliService.updateProgress((processedFiles / totalFiles) * 100);
                 };
 
-                await nextjsService.generateRulesAsync(rulesDir, meta, config, updateNextjsProgress, includeGlobalRules);
+                await stackService.generateRulesAsync(rulesDir, meta, config, updateNextjsProgress, includeGlobalRules);
                 break;
 
             case 'react':
-                // Load React service dynamically if needed
-                const reactService = await loadStackService('react');
-                totalFiles = await reactService.countTotalRules(meta);
-
                 // Set up progress tracking
                 const updateReactProgress = () => {
                     processedFiles++;
                     cliService.updateProgress((processedFiles / totalFiles) * 100);
                 };
 
-                await reactService.generateRulesAsync(rulesDir, meta, config, updateReactProgress, includeGlobalRules);
+                await stackService.generateRulesAsync(rulesDir, meta, config, updateReactProgress, includeGlobalRules);
                 break;
 
             case 'angular':
-                // Load Angular service dynamically if needed
-                const angularService = await loadStackService('angular');
-                totalFiles = await angularService.countTotalRules(meta);
-
                 // Set up progress tracking
                 const updateAngularProgress = () => {
                     processedFiles++;
                     cliService.updateProgress((processedFiles / totalFiles) * 100);
                 };
 
-                await angularService.generateRulesAsync(rulesDir, meta, config, updateAngularProgress, includeGlobalRules);
+                await stackService.generateRulesAsync(rulesDir, meta, config, updateAngularProgress, includeGlobalRules);
                 break;
 
             default:
-                // For other stacks, use the generic stack service
-                totalFiles = stackService.countTotalRules(meta);
-
                 // Set up progress tracking
                 const updateGenericProgress = () => {
                     processedFiles++;

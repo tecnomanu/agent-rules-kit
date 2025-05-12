@@ -1,3 +1,9 @@
+---
+description: Domain-Driven Design architecture conventions for Laravel
+globs: '<root>/app/Domain/**/*.php,<root>/app/Application/**/*.php,<root>/app/Infrastructure/**/*.php'
+alwaysApply: false
+---
+
 # Domain-Driven Design (DDD) Architecture for Laravel
 
 This project follows the Domain-Driven Design principles, organizing code around the business domain and its rules.

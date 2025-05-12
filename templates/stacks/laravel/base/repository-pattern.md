@@ -1,3 +1,9 @@
+---
+description: Repository pattern implementation for Laravel applications
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: false
+---
+
 # Repository Pattern in Laravel
 
 This document defines best practices for implementing the Repository Pattern in Laravel applications.

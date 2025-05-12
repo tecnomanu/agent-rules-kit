@@ -1,3 +1,9 @@
+---
+description: Feature-Sliced Design architecture for React applications
+globs: '<root>/src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: false
+---
+
 # Feature Sliced Design Architecture in React
 
 Feature Sliced Design (FSD) is a methodology for organizing code in frontend applications by features and layers, emphasizing isolation, domain-driven structure, and explicit relationships between modules.

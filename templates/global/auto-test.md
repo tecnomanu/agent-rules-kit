@@ -1,3 +1,9 @@
+---
+description: Guidelines for automated testing
+globs: '**/*'
+alwaysApply: true
+---
+
 # Automated Testing
 
 Run the test suite after each change and fix issues until all tests pass.

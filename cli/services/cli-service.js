@@ -27,7 +27,8 @@ export class CliService extends BaseService {
             backup: '📦',
             file: '📄',
             global: '🌐',
-            progress: '🔨'
+            progress: '🔨',
+            folder: '📁'
         };
         this.progressBar = null;
     }
@@ -301,5 +302,29 @@ export class CliService extends BaseService {
      */
     backupCreated(originalDir, backupDir) {
         this.success(`Created backup of ${chalk.blue(originalDir)} at ${chalk.green(backupDir)}`);
+    }
+
+    /**
+     * Asks for the path to the application directory within the project
+     * @returns {Promise<string>} The app directory
+     */
+    async askAppDirectory() {
+        const { appDirectory } = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'appDirectory',
+                message: `${this.emoji.folder} Directory of your application (from project root):`,
+                default: '.',
+                validate: input => {
+                    if (!input.trim()) {
+                        return 'Directory cannot be empty';
+                    }
+                    return true;
+                }
+            }
+        ]);
+
+        // If user enters empty or just '.', return './'
+        return appDirectory.trim() === '' || appDirectory.trim() === '.' ? './' : appDirectory.trim();
     }
 } 

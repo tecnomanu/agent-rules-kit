@@ -1,3 +1,9 @@
+---
+description: Testing best practices for Laravel applications
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: false
+---
+
 # Testing Practices in Laravel
 
 ## General Principles

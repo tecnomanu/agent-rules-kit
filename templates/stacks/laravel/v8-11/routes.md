@@ -1,3 +1,9 @@
+---
+description: Routing guidelines for Laravel 8-11
+globs: '<root>/routes/**/*.php'
+alwaysApply: false
+---
+
 # Routes in Laravel 8-11
 
 Laravel 8-11 uses a consistent routing API with the Route facade:

@@ -1,4 +1,5 @@
 ---
+description: General code formatting standards
 globs: '**/*'
 alwaysApply: true
 ---

@@ -1,3 +1,9 @@
+---
+description: Model casting features in Laravel 10-11
+globs: '<root>/app/Models/**/*.php'
+alwaysApply: false
+---
+
 # Model Casting – Laravel 10-11
 
 Laravel 10 and 11 provide enhanced casting features that should be used for clean data handling:

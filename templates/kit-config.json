@@ -31,17 +31,9 @@
 				"range_name": "v12"
 			}
 		},
-		"globs": [
-			"<root>/app/**/*.php",
-			"<root>/bootstrap/**/*.php",
-			"<root>/routes/**/*.php",
-			"<root>/database/migrations/**/*.php",
-			"<root>/config/**/*.php",
-			"<root>/tests/**/*.php"
-		],
 		"pattern_rules": {
 			"<root>/app/Models/**/*.php": [
-				"stacks/laravel/base/laravel-best.md",
+				"stacks/laravel/base/best_practices.md",
 				"stacks/laravel/v8-9/model-casting.md",
 				"stacks/laravel/v10-11/model-casting.md"
 			],
@@ -55,7 +47,6 @@
 		"architectures": {
 			"standard": {
 				"name": "Standard Laravel (MVC with Repositories)",
-				"globs": ["<root>/app/**/*.php", "<root>/routes/**/*.php"],
 				"pattern_rules": {
 					"<root>/app/Models/**/*.php": [
 						"stacks/laravel/architectures/standard/models.md"
@@ -67,11 +58,6 @@
 			},
 			"ddd": {
 				"name": "Domain-Driven Design (DDD)",
-				"globs": [
-					"<root>/app/Domain/**/*.php",
-					"<root>/app/Application/**/*.php",
-					"<root>/app/Infrastructure/**/*.php"
-				],
 				"pattern_rules": {
 					"<root>/app/Domain/**/*.php": [
 						"stacks/laravel/architectures/ddd/domain.md"
@@ -83,11 +69,6 @@
 			},
 			"hexagonal": {
 				"name": "Hexagonal (Ports & Adapters)",
-				"globs": [
-					"<root>/app/Core/**/*.php",
-					"<root>/app/Adapters/**/*.php",
-					"<root>/app/Ports/**/*.php"
-				],
 				"pattern_rules": {
 					"<root>/app/Core/**/*.php": [
 						"stacks/laravel/architectures/hexagonal/core.md"
@@ -115,12 +96,6 @@
 				"range_name": "v14"
 			}
 		},
-		"globs": [
-			"<root>/app/**/*.{ts,tsx}",
-			"<root>/src/**/*.{ts,tsx}",
-			"<root>/pages/api/**/*.ts",
-			"<root>/tests/**/*.{ts,tsx}"
-		],
 		"pattern_rules": {
 			"<root>/app/**/*.{ts,tsx}": [
 				"stacks/nextjs/v13/app-router.md",
@@ -134,7 +109,6 @@
 		"architectures": {
 			"app": {
 				"name": "App Router",
-				"globs": ["<root>/app/**/*.{ts,tsx}"],
 				"pattern_rules": {
 					"<root>/app/**/*.{ts,tsx}": [
 						"stacks/nextjs/architectures/app/app-router.md"
@@ -143,7 +117,6 @@
 			},
 			"pages": {
 				"name": "Pages Router",
-				"globs": ["<root>/pages/**/*.{ts,tsx}"],
 				"pattern_rules": {
 					"<root>/pages/**/*.{ts,tsx}": [
 						"stacks/nextjs/architectures/pages/pages-router.md"
@@ -152,10 +125,6 @@
 			},
 			"hybrid": {
 				"name": "Hybrid (App + Pages)",
-				"globs": [
-					"<root>/app/**/*.{ts,tsx}",
-					"<root>/pages/**/*.{ts,tsx}"
-				],
 				"pattern_rules": {
 					"<root>/app/**/*.{ts,tsx}": [
 						"stacks/nextjs/architectures/app/app-router.md"
@@ -168,7 +137,17 @@
 		}
 	},
 	"nestjs": {
-		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"]
+		"default_architecture": "standard",
+		"version_ranges": {
+			"9": {
+				"name": "NestJS 9",
+				"range_name": "v9"
+			},
+			"10": {
+				"name": "NestJS 10",
+				"range_name": "v10"
+			}
+		}
 	},
 	"react": {
 		"default_architecture": "standard",
@@ -182,10 +161,6 @@
 				"range_name": "v18"
 			}
 		},
-		"globs": [
-			"<root>/src/**/*.{ts,tsx,js,jsx}",
-			"<root>/tests/**/*.{ts,tsx,js,jsx}"
-		],
 		"pattern_rules": {
 			"<root>/src/components/**/*.{ts,tsx,js,jsx}": [
 				"stacks/react/base/react-best-practices.md"
@@ -197,10 +172,25 @@
 		"architectures": {
 			"standard": {
 				"name": "Standard Component Structure",
-				"globs": ["<root>/src/**/*.{ts,tsx,js,jsx}"],
 				"pattern_rules": {
 					"<root>/src/**/*.{ts,tsx,js,jsx}": [
 						"stacks/react/base/architecture-concepts.md"
+					]
+				}
+			},
+			"atomic": {
+				"name": "Atomic Design",
+				"pattern_rules": {
+					"<root>/src/**/*.{ts,tsx,js,jsx}": [
+						"stacks/react/architectures/atomic/atomic-architecture.md"
+					]
+				}
+			},
+			"feature-sliced": {
+				"name": "Feature-Sliced Design",
+				"pattern_rules": {
+					"<root>/src/**/*.{ts,tsx,js,jsx}": [
+						"stacks/react/architectures/feature-sliced/feature-sliced-architecture.md"
 					]
 				}
 			}
@@ -218,10 +208,6 @@
 				"range_name": "v3"
 			}
 		},
-		"globs": [
-			"<root>/src/**/*.{vue,ts,js}",
-			"<root>/tests/**/*.{vue,ts,js}"
-		],
 		"pattern_rules": {
 			"<root>/src/components/**/*.{vue,ts,js}": [
 				"stacks/vue/base/architecture-concepts.md"
@@ -233,7 +219,6 @@
 		"architectures": {
 			"composition": {
 				"name": "Composition API",
-				"globs": ["<root>/src/**/*.{vue,ts,js}"],
 				"pattern_rules": {
 					"<root>/src/composables/**/*.{ts,js}": [
 						"stacks/vue/architectures/composition/composables.md"
@@ -242,7 +227,6 @@
 			},
 			"options": {
 				"name": "Options API",
-				"globs": ["<root>/src/**/*.{vue,ts,js}"],
 				"pattern_rules": {
 					"<root>/src/mixins/**/*.{ts,js}": [
 						"stacks/vue/architectures/options/mixins.md"
@@ -263,10 +247,6 @@
 				"range_name": "v3"
 			}
 		},
-		"globs": [
-			"<root>/{app,pages,components,layouts,composables,plugins,server,middleware}/**/*.{vue,ts,js}",
-			"<root>/tests/**/*.{vue,ts,js}"
-		],
 		"pattern_rules": {
 			"<root>/app.vue": ["stacks/nuxt/base/architecture-concepts.md"],
 			"<root>/components/**/*.{vue,ts,js}": [
@@ -278,14 +258,12 @@
 		},
 		"architectures": {
 			"standard": {
-				"name": "Standard",
-				"globs": [
-					"<root>/{app,pages,components,layouts,composables}/**/*.{vue,ts,js}"
-				]
+				"name": "Standard"
 			}
 		}
 	},
 	"angular": {
+		"default_architecture": "standard",
 		"version_ranges": {
 			"14": {
 				"name": "Angular 14-15",
@@ -304,18 +282,90 @@
 				"range_name": "v16-17"
 			}
 		},
-		"globs": [
-			"<root>/src/app/**/*.ts",
-			"<root>/src/environments/**/*.ts",
-			"<root>/src/**/*.html",
-			"<root>/src/**/*.scss",
-			"<root>/e2e/**/*.ts"
-		]
+		"architectures": {
+			"standard": {
+				"name": "Standard Angular Architecture"
+			}
+		}
+	},
+	"svelte": {
+		"default_architecture": "standard",
+		"version_ranges": {
+			"3": {
+				"name": "Svelte 3",
+				"range_name": "v3"
+			},
+			"4": {
+				"name": "Svelte 4",
+				"range_name": "v4"
+			},
+			"5": {
+				"name": "Svelte 5",
+				"range_name": "v5"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard Svelte Architecture"
+			}
+		}
+	},
+	"sveltekit": {
+		"default_architecture": "standard",
+		"version_ranges": {
+			"1": {
+				"name": "SvelteKit 1",
+				"range_name": "v1"
+			},
+			"2": {
+				"name": "SvelteKit 2",
+				"range_name": "v2"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard SvelteKit Architecture"
+			}
+		}
 	},
 	"astro": {
-		"globs": ["<root>/src/**/*.{astro,ts,tsx,js}", "<root>/public/**/*.*"]
+		"default_architecture": "standard",
+		"version_ranges": {
+			"2": {
+				"name": "Astro 2",
+				"range_name": "v2"
+			},
+			"3": {
+				"name": "Astro 3",
+				"range_name": "v3"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard Astro Architecture"
+			}
+		}
+	},
+	"go": {
+		"default_architecture": "standard",
+		"version_ranges": {
+			"1.20": {
+				"name": "Go 1.20+",
+				"range_name": "v1.20+"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard Go Architecture"
+			}
+		}
 	},
 	"generic": {
-		"globs": ["<root>/**/*.*"]
+		"default_architecture": "standard",
+		"architectures": {
+			"standard": {
+				"name": "Generic Architecture"
+			}
+		}
 	}
 }

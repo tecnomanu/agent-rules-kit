@@ -1,3 +1,9 @@
+---
+description: Service provider guidelines for Laravel 8-11
+globs: '<root>/config/app.php'
+alwaysApply: false
+---
+
 # Service Provider Registration – Laravel 8-11
 
 For Laravel versions 8 through 11, providers are registered in the `config/app.php`

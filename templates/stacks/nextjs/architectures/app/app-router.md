@@ -1,3 +1,9 @@
+---
+description: App Router architecture guidelines for Next.js 13+
+globs: '<root>/app/**/*.{ts,tsx}'
+alwaysApply: false
+---
+
 # Next.js App Router Guidelines
 
 This project uses Next.js App Router (introduced in Next.js 13). Follow these conventions for consistency.

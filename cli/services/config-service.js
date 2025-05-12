@@ -17,30 +17,38 @@ export class ConfigService extends BaseService {
     }
 
     /**
-     * Loads kit configuration from templates/kit-config.json
-     * @param {string} templatesDir - Optional templates directory
-     * @returns {Object} Loaded configuration or default configuration
+     * Loads and validates the kit configuration
+     * @param {string} templatesDir - Templates directory path
+     * @returns {Object} The validated configuration object
      */
-    loadKitConfig(templatesDir = this.templatesDir) {
-        // If we already have cached configuration, return it
-        if (this.configCache) {
-            return this.configCache;
-        }
-
+    loadKitConfig(templatesDir) {
         try {
             const configPath = path.join(templatesDir, 'kit-config.json');
-            this.debugLog(`Loading configuration from: ${configPath}`);
+            this.debugLog(`Loading kit config from ${configPath}`);
 
+            // Check if file exists
             if (!fs.existsSync(configPath)) {
-                this.debugLog('Configuration file not found, using default configuration');
+                this.debugLog(`Kit config not found at ${configPath}`);
                 return this.getDefaultConfig();
             }
 
-            const configText = fs.readFileSync(configPath, 'utf8');
-            this.configCache = JSON.parse(configText);
-            return this.configCache;
-        } catch (err) {
-            console.error(`Error loading kit configuration: ${err}`);
+            // Log the loading attempt
+            this.debugLog(`Reading kit-config.json with size: ${fs.statSync(configPath).size} bytes`);
+
+            // Read and parse the config
+            const configContent = fs.readFileSync(configPath, 'utf8');
+            this.debugLog(`Read kit-config.json with content length: ${configContent.length}`);
+
+            try {
+                const config = JSON.parse(configContent);
+                this.debugLog(`Successfully parsed kit-config.json with ${Object.keys(config).length} entries`);
+                return config;
+            } catch (parseError) {
+                this.debugLog(`Error parsing kit-config.json: ${parseError.message}`);
+                return this.getDefaultConfig();
+            }
+        } catch (error) {
+            this.debugLog(`Error loading kit config: ${error.message}`);
             return this.getDefaultConfig();
         }
     }
@@ -118,7 +126,7 @@ export class ConfigService extends BaseService {
      * @returns {Array<string>} List of global rule filenames
      */
     getGlobalRules() {
-        const config = this.loadKitConfig();
+        const config = this.loadKitConfig(this.templatesDir);
         return config.global?.always || [];
     }
 
@@ -186,7 +194,7 @@ export class ConfigService extends BaseService {
         }
 
         // Check if stack exists in config
-        const config = this.loadKitConfig();
+        const config = this.loadKitConfig(this.templatesDir);
         if (options.stack && !config[options.stack]) {
             result.valid = false;
             result.messages.push(`Stack "${options.stack}" is not supported`);
@@ -234,5 +242,24 @@ export class ConfigService extends BaseService {
             console.error(`Error saving kit configuration: ${err}`);
             return false;
         }
+    }
+
+    /**
+     * Gets the main configuration
+     * @returns {Object} The configuration object
+     */
+    getConfig() {
+        this.debugLog('Loading configuration...');
+
+        // Make sure kitConfig is loaded
+        const kitConfig = this.loadKitConfig(this.templatesDir);
+
+        if (!kitConfig) {
+            this.debugLog('Warning: Kit configuration could not be loaded');
+            return {};
+        }
+
+        this.debugLog(`Loaded configuration with ${Object.keys(kitConfig).length} stack entries`);
+        return kitConfig;
     }
 } 

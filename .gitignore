@@ -6,3 +6,4 @@ docs/agent-process-log/**/*
 *.rar
 *.tar.*
 *.7z
+.history

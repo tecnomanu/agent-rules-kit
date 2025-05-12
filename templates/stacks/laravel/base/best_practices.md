@@ -1,13 +1,7 @@
 ---
-globs:
-    [
-        '<root>/app/**/*.php',
-        '<root>/bootstrap/**/*.php',
-        '<root>/routes/**/*.php',
-        '<root>/database/migrations/**/*.php',
-        '<root>/config/**/*.php',
-        '<root>/tests/**/*.php',
-    ]
+description: Basic Laravel code conventions
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: false
 ---
 
 # Laravel code conventions

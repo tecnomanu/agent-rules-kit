@@ -1,3 +1,9 @@
+---
+description: Testing best practices for React applications
+globs: '<root>/src/**/*.{ts,tsx,js,jsx},<root>/tests/**/*.{ts,tsx,js,jsx}'
+alwaysApply: false
+---
+
 # React Testing Guide
 
 This guide outlines the recommended approach to testing React applications in {projectPath}.

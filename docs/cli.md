@@ -15,7 +15,7 @@ Rule files (.md) in the templates can now include their own frontmatter configur
 
 ```md
 ---
-globs: ['<root>/app/**/*.php', '<root>/routes/**/*.php']
+globs: <root>/app/**/*.php,<root>/routes/**/*.php
 alwaysApply: true
 ---
 

@@ -1,3 +1,9 @@
+---
+description: Core architectural principles for Laravel applications
+globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+alwaysApply: false
+---
+
 # Laravel Architecture Concepts
 
 This document outlines the fundamental architecture concepts that apply to Laravel applications. Specific implementation details for each architecture pattern are available in the respective architecture directories.
