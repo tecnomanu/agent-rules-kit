@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.0...v1.3.1) (2025-05-12)
+
+
+### Bug Fixes
+
+* 🐛 complete Nuxt 3 documentation and test suite ([b8203a7](https://github.com/tecnomanu/agent-rules-kit/commit/b8203a764e7b1b71c31160f6fbaf9d4d460dca00))
+
 # [1.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.2.1...v1.3.0) (2025-05-12)
 
 
