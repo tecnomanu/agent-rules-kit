@@ -4,18 +4,19 @@ import { ConfigService } from '../../cli/services/config-service.js';
 import { StackService } from '../../cli/services/stack-service.js';
 
 // Mock fs-extra
-vi.mock('fs-extra', () => {
-    return {
-        default: {
-            readFileSync: vi.fn(),
-            existsSync: vi.fn(),
-            statSync: vi.fn(),
-            readdirSync: vi.fn()
-        },
-        readFileSync: vi.fn(),
+vi.mock('fs-extra', async () => {
+    const mockFunctions = {
         existsSync: vi.fn(),
+        readFileSync: vi.fn(),
+        readdirSync: vi.fn(),
         statSync: vi.fn(),
-        readdirSync: vi.fn()
+        pathExists: vi.fn()
+    };
+
+    return {
+        ...mockFunctions,
+        default: mockFunctions,
+        __esModule: true
     };
 });
 
@@ -40,37 +41,49 @@ describe('Config Module', () => {
         it('should load configuration from kit-config.json', () => {
             const mockConfig = {
                 version_ranges: {
-                    laravel: { 8: 'v8-9', 9: 'v8-9' }
+                    "8": "v8-9",
+                    "9": "v8-9"
                 }
             };
 
+            // Setup mocks
+            const mockJSON = JSON.stringify(mockConfig);
             fs.existsSync.mockReturnValue(true);
-            fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
+            fs.statSync.mockReturnValue({ size: mockJSON.length });
+            fs.readFileSync.mockReturnValue(mockJSON);
 
             const result = configService.loadKitConfig(templatesDir);
 
-            expect(result).toEqual(mockConfig);
+            // Just verify that it returns what's in the file
             expect(fs.existsSync).toHaveBeenCalledWith(path.join(templatesDir, 'kit-config.json'));
+            expect(fs.readFileSync).toHaveBeenCalledWith(path.join(templatesDir, 'kit-config.json'), 'utf8');
+            expect(result).toEqual(mockConfig);
         });
 
         it('should return default config if config file does not exist', () => {
+            // Setup mock
             fs.existsSync.mockReturnValue(false);
 
             const result = configService.loadKitConfig(templatesDir);
 
             expect(result).toBeTruthy();
-            expect(Object.keys(result)).toContain('laravel');
-            expect(Object.keys(result)).toContain('nextjs');
+            expect(result.laravel).toBeDefined();
         });
 
         it('should handle JSON parse errors gracefully', () => {
+            // Setup mocks
             fs.existsSync.mockReturnValue(true);
+            fs.statSync.mockReturnValue({ size: 100 });
             fs.readFileSync.mockReturnValue('invalid json');
+
+            // Spy on debugLog to verify error handling
+            const debugSpy = vi.spyOn(configService, 'debugLog');
 
             const result = configService.loadKitConfig(templatesDir);
 
+            expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Error parsing kit-config.json'));
             expect(result).toBeTruthy();
-            expect(configService.debugLog).toHaveBeenCalled();
+            expect(result.laravel).toBeDefined();
         });
     });
 

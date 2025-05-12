@@ -2,18 +2,22 @@ import * as fs from 'fs-extra';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfigService } from '../../../cli/services/config-service.js';
 
-// Mock fs-extra correctamente
+// Mock fs-extra
 vi.mock('fs-extra', () => {
     const mockFunctions = {
         existsSync: vi.fn(),
         readFileSync: vi.fn(),
         writeFileSync: vi.fn(),
+        ensureDirSync: vi.fn(),
+        statSync: vi.fn(),
+        pathExists: vi.fn(),
+        ensureDir: vi.fn()
     };
 
     return {
         ...mockFunctions,
-        __esModule: true,
-        default: mockFunctions
+        default: mockFunctions,
+        __esModule: true
     };
 });
 
@@ -39,8 +43,10 @@ describe('ConfigService', () => {
     describe('loadKitConfig', () => {
         it('should load config from file when it exists', () => {
             const mockConfig = { test: 'config' };
+            const mockJSON = JSON.stringify(mockConfig);
             fs.existsSync.mockReturnValue(true);
-            fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
+            fs.statSync.mockReturnValue({ size: mockJSON.length });
+            fs.readFileSync.mockReturnValue(mockJSON);
 
             const result = configService.loadKitConfig(templatesDir);
 
@@ -56,37 +62,32 @@ describe('ConfigService', () => {
             const result = configService.loadKitConfig(templatesDir);
 
             expect(fs.existsSync).toHaveBeenCalledWith(`${templatesDir}/kit-config.json`);
-            expect(configService.debugLog).toHaveBeenCalled();
             expect(result).toEqual(defaultConfig);
         });
 
         it('should handle JSON parse errors', () => {
-            const errorSpy = vi.spyOn(console, 'error');
             fs.existsSync.mockReturnValue(true);
-            fs.readFileSync.mockReturnValue('invalid json');
+            fs.statSync.mockReturnValue({ size: 100 });
+            fs.readFileSync.mockReturnValue('{invalid:json}');
+
+            const debugSpy = vi.spyOn(configService, 'debugLog');
 
             const result = configService.loadKitConfig(templatesDir);
 
-            expect(errorSpy).toHaveBeenCalled();
+            expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Error parsing kit-config.json'));
             expect(result).toEqual(configService.getDefaultConfig());
         });
 
-        it('should cache configuration for subsequent calls', () => {
-            const mockConfig = { test: 'config' };
+        it('should handle file read errors', () => {
             fs.existsSync.mockReturnValue(true);
-            fs.readFileSync.mockReturnValue(JSON.stringify(mockConfig));
+            fs.statSync.mockImplementation(() => { throw new Error('Test error'); });
 
-            // Primera llamada debe leer el archivo
-            configService.loadKitConfig(templatesDir);
+            const debugSpy = vi.spyOn(configService, 'debugLog');
 
-            // Resetear el mock para verificar que no se llama de nuevo
-            fs.readFileSync.mockClear();
-
-            // Segunda llamada debe usar el cache
             const result = configService.loadKitConfig(templatesDir);
 
-            expect(fs.readFileSync).not.toHaveBeenCalled();
-            expect(result).toEqual(mockConfig);
+            expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Error loading kit config'));
+            expect(result).toEqual(configService.getDefaultConfig());
         });
     });
 

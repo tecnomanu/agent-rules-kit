@@ -17,11 +17,8 @@ async function testCLI() {
     console.log(chalk.blue('🧪 Testing Agent Rules Kit with predefined values'));
 
     // Instanciar servicios
-    const fileService = new FileService({ debug: DEBUG_MODE });
+    const fileService = new FileService({ debug: DEBUG_MODE, templatesDir });
     const configService = new ConfigService({ debug: DEBUG_MODE, templatesDir });
-
-    // Asignar fileService a configService
-    configService.fileService = fileService;
 
     // StackService necesita configService con fileService ya configurado
     const stackService = new StackService({
@@ -36,7 +33,8 @@ async function testCLI() {
         selected: 'laravel',
         global: true,
         root: 'testing',
-        projectPath: '.',
+        cursorPath: '.',
+        projectPath: './',
         mirrorDocs: false,
         selectedVersion: "12", // Convertido a string para evitar errores con version.replace
         architecture: 'standard',
@@ -67,13 +65,16 @@ async function testCLI() {
 
         if (fs.existsSync(globalDir)) {
             fs.readdirSync(globalDir).forEach(f => {
-                const srcFile = path.join(globalDir, f);
-                const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
-                const meta = {
-                    projectPath: settings.projectPath,
-                    debug: settings.debug
-                };
-                fileService.wrapMdToMdc(srcFile, destFile, meta);
+                if (f.endsWith('.md')) {
+                    const srcFile = path.join(globalDir, f);
+                    const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
+                    const meta = {
+                        projectPath: settings.projectPath,
+                        cursorPath: settings.cursorPath,
+                        debug: settings.debug
+                    };
+                    fileService.wrapMdToMdc(srcFile, destFile, meta);
+                }
             });
             console.log(chalk.green(`✅ Applied global rules`));
         }
@@ -81,21 +82,24 @@ async function testCLI() {
 
     // Generate stack rules
     try {
+        // Cargar la configuración real
+        const kitConfig = configService.getConfig();
+
+        // Preparar metadata con la nueva estructura
         const meta = {
             stack: settings.selected,
             architecture: settings.architecture,
             detectedVersion: settings.selectedVersion,
             projectPath: settings.projectPath,
-        };
-
-        const config = {
-            debug: settings.debug
+            cursorPath: settings.cursorPath,
+            versionRange: stackService.mapVersionToRange(settings.selected, settings.selectedVersion),
+            formattedVersionName: stackService.getFormattedVersionName(settings.selected, settings.selectedVersion)
         };
 
         await stackService.generateRulesAsync(
             targetRules,
             meta,
-            config,
+            kitConfig,
             (progress) => {
                 if (settings.debug) {
                     console.log(`Progress: ${progress}%`);

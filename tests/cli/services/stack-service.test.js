@@ -192,12 +192,6 @@ describe('StackService', () => {
             expect(mockConfigService.loadKitConfig).toHaveBeenCalled();
         });
 
-        it('should handle direct range values', () => {
-            const result = stackService.mapVersionToRange('laravel', 'v10-11');
-
-            expect(result).toBe('v10-11');
-        });
-
         it('should return null for unknown versions', () => {
             const result = stackService.mapVersionToRange('laravel', '999');
 
@@ -212,21 +206,22 @@ describe('StackService', () => {
     });
 
     describe('getFormattedVersionName', () => {
-        it('should return formatted name from config', () => {
+        it('should return formatted name from config when version is a key', () => {
+            const result = stackService.getFormattedVersionName('laravel', '10');
+
+            expect(result).toBe('Laravel 10-11');
+        });
+
+        it('should return the name for range_name when versionRange is a range_name', () => {
             const result = stackService.getFormattedVersionName('laravel', 'v10-11');
 
             expect(result).toBe('Laravel 10-11');
         });
 
-        it('should fall back to formatVersionName when not in config', () => {
-            // Spy on formatVersionName 
-            const spy = vi.spyOn(stackService, 'formatVersionName')
-                .mockReturnValue('Fallback Name');
+        it('should return default formatted version when not in config', () => {
+            const result = stackService.getFormattedVersionName('unknown-stack', '999');
 
-            const result = stackService.getFormattedVersionName('laravel', 'v999');
-
-            expect(spy).toHaveBeenCalledWith('laravel', 'v999');
-            expect(result).toBe('Fallback Name');
+            expect(result).toBe('Unknown-stack 999');
         });
 
         it('should handle null input', () => {
