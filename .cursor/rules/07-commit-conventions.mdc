@@ -16,7 +16,7 @@ This document outlines the commit conventions used in the Agent Rules Kit projec
 We follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) specification with emojis:
 
 ```
-<emoji> <type>[(scope)]: <description>
+<type>[(scope)]: <emoji> <description>
 
 [optional body]
 
@@ -25,7 +25,7 @@ We follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) spe
 
 ## Emojis and Types
 
-Always include an appropriate emoji as the first character of your commit message, followed by the type.
+Always include an appropriate emoji at the first of your commit message description, before the type and description.
 
 ### Versioning Commits (affect semver)
 
@@ -43,7 +43,7 @@ For major version bumps (BREAKING CHANGES), you MUST:
 
 Example:
 ```
-🎉 feat: redesign user authentication system
+feat:  🎉 redesign user authentication system
 
 Complete overhaul of authentication flow and API
 
@@ -69,7 +69,7 @@ For changes that don't affect the version number:
 
 Example:
 ```
-📝 docs: update README with new architecture documentation
+docs: 📝 update README with new architecture documentation
 ```
 
 ## Best Practices
