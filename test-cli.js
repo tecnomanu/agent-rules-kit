@@ -10,11 +10,79 @@ import { StackService } from './cli/services/stack-service.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, 'templates');
 
-// Verificar si el modo debug está activado
-const DEBUG_MODE = process.argv.includes('--debug');
+// Parse command line arguments
+function parseArgs() {
+    const args = process.argv.slice(2);
+    const options = {
+        stack: 'laravel',
+        global: true,
+        root: 'testing',
+        cursorPath: '.',
+        projectPath: './',
+        mirrorDocs: false,
+        version: "12",
+        architecture: 'standard',
+        debug: false
+    };
+
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+
+        if (arg === '--debug') {
+            options.debug = true;
+            continue;
+        }
+
+        if (arg === '--stack' && i + 1 < args.length) {
+            options.stack = args[++i];
+            continue;
+        }
+
+        if (arg === '--version' && i + 1 < args.length) {
+            options.version = args[++i];
+            continue;
+        }
+
+        if (arg === '--architecture' && i + 1 < args.length) {
+            options.architecture = args[++i];
+            continue;
+        }
+
+        if (arg === '--root' && i + 1 < args.length) {
+            options.root = args[++i];
+            continue;
+        }
+
+        if (arg === '--no-global') {
+            options.global = false;
+            continue;
+        }
+    }
+
+    return options;
+}
 
 async function testCLI() {
     console.log(chalk.blue('🧪 Testing Agent Rules Kit with predefined values'));
+
+    // Get settings from command line args
+    const cmdArgs = parseArgs();
+
+    // Predefined settings
+    const settings = {
+        selected: cmdArgs.stack,
+        global: cmdArgs.global,
+        root: cmdArgs.root,
+        cursorPath: cmdArgs.cursorPath,
+        projectPath: cmdArgs.projectPath,
+        mirrorDocs: cmdArgs.mirrorDocs,
+        selectedVersion: cmdArgs.version,
+        architecture: cmdArgs.architecture,
+        debug: cmdArgs.debug
+    };
+
+    // Set DEBUG_MODE constant
+    const DEBUG_MODE = settings.debug;
 
     // Instanciar servicios
     const fileService = new FileService({ debug: DEBUG_MODE, templatesDir });
@@ -27,19 +95,6 @@ async function testCLI() {
         fileService,
         templatesDir
     });
-
-    // Predefined settings
-    const settings = {
-        selected: 'laravel',
-        global: true,
-        root: 'testing',
-        cursorPath: '.',
-        projectPath: './',
-        mirrorDocs: false,
-        selectedVersion: "12", // Convertido a string para evitar errores con version.replace
-        architecture: 'standard',
-        debug: DEBUG_MODE
-    };
 
     console.log(chalk.cyan('Test settings:'), settings);
 

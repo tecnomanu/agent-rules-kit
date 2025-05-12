@@ -4,7 +4,7 @@ Copy this folder when onboarding a new stack.
 
 ## Required Files in `base/`
 
--   best_practices.md
+-   best-practices.md
 -   testing.md
 -   architecture-concepts.md
 -   naming-conventions.md

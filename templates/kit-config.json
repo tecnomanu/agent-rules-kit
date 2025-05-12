@@ -33,7 +33,7 @@
 		},
 		"pattern_rules": {
 			"<root>/app/Models/**/*.php": [
-				"stacks/laravel/base/best_practices.md",
+				"stacks/laravel/base/best-practices.md",
 				"stacks/laravel/v8-9/model-casting.md",
 				"stacks/laravel/v10-11/model-casting.md"
 			],
@@ -247,18 +247,34 @@
 				"range_name": "v3"
 			}
 		},
+		"globs": [
+			"<root>/app.vue",
+			"<root>/pages/**/*.{vue,js,ts}",
+			"<root>/components/**/*.{vue,js,ts}",
+			"<root>/composables/**/*.{js,ts}",
+			"<root>/server/**/*.{js,ts}",
+			"<root>/nuxt.config.{js,ts}"
+		],
 		"pattern_rules": {
-			"<root>/app.vue": ["stacks/nuxt/base/architecture-concepts.md"],
-			"<root>/components/**/*.{vue,ts,js}": [
-				"stacks/nuxt/base/architecture-concepts.md"
+			"<root>/nuxt.config.{js,ts}": ["stacks/nuxt/base/version-info.md"],
+			"<root>/components/**/*.{vue,js,ts}": [
+				"stacks/nuxt/base/naming-conventions.md",
+				"stacks/nuxt/base/best-practices.md"
 			],
-			"<root>/tests/**/*.{spec,test}.{ts,js}": [
-				"stacks/nuxt/base/nuxt-testing.md"
+			"<root>/server/**/*.{js,ts}": ["stacks/nuxt/v3/nuxt3-features.md"],
+			"<root>/app.vue": ["stacks/nuxt/base/architecture-concepts.md"],
+			"<root>/tests/**/*.{spec,test}.{js,ts}": [
+				"stacks/nuxt/base/testing-best-practices.md"
 			]
 		},
 		"architectures": {
 			"standard": {
-				"name": "Standard"
+				"name": "Standard Architecture",
+				"pattern_rules": {
+					"<root>/components/**/*.{vue,js,ts}": [
+						"stacks/nuxt/architectures/standard/standard-nuxt-architecture.md"
+					]
+				}
 			}
 		}
 	},

@@ -841,7 +841,7 @@ export class StackService extends BaseService {
             const baseFiles = await fs.promises.readdir(baseDir);
             for (const file of baseFiles) {
                 if (file.endsWith('.md')) {
-                    const baseName = file; // e.g. testing_best_practices.md
+                    const baseName = file; // e.g. testing-best-practices.md
                     if (!trackedFiles.has(baseName)) {
                         trackedFiles.set(baseName, []);
                     }

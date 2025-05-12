@@ -1,1 +1,1 @@
-<!-- Placeholder for best_practices -->
+<!-- Placeholder for best-practices -->

@@ -4,9 +4,9 @@ globs: '<root>/src/**/*.svelte,<root>/src/**/*.{js,ts}'
 alwaysApply: false
 ---
 
-# Best_Practices – Svelte
+# best-practices – Svelte
 
 <!--
-TODO: Add content for svelte best_practices.
+TODO: Add content for svelte best-practices.
 Follow unified schema guidelines.
 -->
