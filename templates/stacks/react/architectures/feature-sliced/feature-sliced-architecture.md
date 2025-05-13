@@ -1,6 +1,6 @@
 ---
 description: Feature-Sliced Design architecture for React applications
-globs: '<root>/src/**/*.{ts,tsx,js,jsx}'
+globs: <root>/src/**/*.{ts,tsx,js,jsx}
 alwaysApply: false
 ---
 

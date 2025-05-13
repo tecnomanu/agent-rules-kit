@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for Go applications
-globs: '<root>/**/*_test.go'
+globs: <root>/**/*_test.go
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Global best practices for any development project
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Service provider guidelines for Laravel 8-11
-globs: '<root>/config/app.php'
+globs: <root>/config/app.php
 alwaysApply: false
 ---
 

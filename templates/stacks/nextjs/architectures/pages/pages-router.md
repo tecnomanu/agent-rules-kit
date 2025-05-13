@@ -1,6 +1,6 @@
 ---
 description: Pages Router architecture guidelines for Next.js
-globs: '<root>/pages/**/*.{ts,tsx}'
+globs: <root>/pages/**/*.{ts,tsx}
 alwaysApply: false
 ---
 

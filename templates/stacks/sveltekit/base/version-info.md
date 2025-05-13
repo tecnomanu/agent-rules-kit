@@ -1,6 +1,6 @@
 ---
 description: Version information for SvelteKit applications
-globs: '<root>/svelte.config.js,<root>/package.json'
+globs: <root>/svelte.config.js,<root>/package.json
 alwaysApply: true
 ---
 

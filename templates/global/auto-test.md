@@ -1,6 +1,6 @@
 ---
 description: Guidelines for automated testing
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

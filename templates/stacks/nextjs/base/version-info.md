@@ -1,6 +1,6 @@
 ---
 description: Version information for Next.js applications
-globs: '<root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx},<root>/next.config.{js,ts}'
+globs: <root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx},<root>/next.config.{js,ts}
 alwaysApply: true
 ---
 

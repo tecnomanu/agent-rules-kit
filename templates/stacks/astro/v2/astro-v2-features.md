@@ -2,6 +2,7 @@
 title: Astro v2 Specific Features
 description: Key features and implementation details specific to Astro version 2
 tags: [Astro, v2, Features]
+globs: <root>/src/content/**/*.md,<root>/src/content/**/*.mdx,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
 ---
 
 # Astro v2 Specific Features

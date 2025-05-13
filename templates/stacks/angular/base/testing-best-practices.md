@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for Angular applications
-globs: '<root>/src/**/*.spec.ts'
+globs: <root>/src/**/*.spec.ts
 alwaysApply: false
 ---
 

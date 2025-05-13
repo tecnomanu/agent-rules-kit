@@ -1,6 +1,6 @@
 ---
 description: Version information for Svelte applications
-globs: '<root>/src/**/*.svelte,<root>/package.json'
+globs: <root>/src/**/*.svelte,<root>/package.json
 alwaysApply: true
 ---
 

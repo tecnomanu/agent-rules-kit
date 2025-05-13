@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Go applications
-globs: '<root>/**/*.go'
+globs: <root>/**/*.go
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Standard architecture conventions for Laravel projects
-globs: '<root>/app/**/*.php'
+globs: <root>/app/**/*.php
 alwaysApply: false
 ---
 

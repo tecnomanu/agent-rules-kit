@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for Laravel 12
-globs: '<root>/tests/**/*.php'
+globs: <root>/tests/**/*.php
 alwaysApply: false
 ---
 

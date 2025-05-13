@@ -1,6 +1,6 @@
 ---
 description: Core architectural concepts for Go applications
-globs: '<root>/**/*.go'
+globs: <root>/**/*.go
 alwaysApply: false
 ---
 

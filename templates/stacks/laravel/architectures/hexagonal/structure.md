@@ -1,6 +1,6 @@
 ---
 description: Hexagonal (Ports & Adapters) architecture conventions for Laravel
-globs: '<root>/app/Core/**/*.php,<root>/app/Adapters/**/*.php,<root>/app/Ports/**/*.php'
+globs: <root>/app/Core/**/*.php,<root>/app/Adapters/**/*.php,<root>/app/Ports/**/*.php
 alwaysApply: false
 ---
 

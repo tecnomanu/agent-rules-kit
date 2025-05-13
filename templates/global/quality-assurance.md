@@ -1,6 +1,6 @@
 ---
 description: Quality control practices for all projects
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Domain-Driven Design architecture conventions for Laravel
-globs: '<root>/app/Domain/**/*.php,<root>/app/Application/**/*.php,<root>/app/Infrastructure/**/*.php'
+globs: <root>/app/Domain/**/*.php,<root>/app/Application/**/*.php,<root>/app/Infrastructure/**/*.php
 alwaysApply: false
 ---
 

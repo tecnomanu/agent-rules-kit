@@ -1,6 +1,6 @@
 ---
 description: Guidelines for process logging
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

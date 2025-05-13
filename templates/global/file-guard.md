@@ -1,6 +1,6 @@
 ---
 description: File operation guidelines to prevent content loss
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

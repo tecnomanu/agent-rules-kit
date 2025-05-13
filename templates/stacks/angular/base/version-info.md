@@ -1,6 +1,6 @@
 ---
 description: Version information for Angular applications
-globs: '<root>/src/**/*.{ts,html,scss,css},<root>/angular.json'
+globs: <root>/src/**/*.{ts,html,scss,css},<root>/angular.json
 alwaysApply: true
 ---
 

@@ -2,6 +2,7 @@
 title: Standard Astro Architecture
 description: Guidelines for implementing the standard Astro project architecture
 tags: [Astro, Architecture, Standard]
+globs: <root>/src/**/*.astro
 ---
 
 # Standard Astro Architecture

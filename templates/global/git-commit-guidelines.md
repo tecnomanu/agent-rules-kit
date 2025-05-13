@@ -1,6 +1,6 @@
 ---
 description: Conventions for Git commit messages
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

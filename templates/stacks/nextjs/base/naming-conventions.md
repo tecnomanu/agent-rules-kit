@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Next.js applications
-globs: '<root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx}'
+globs: <root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx}
 alwaysApply: false
 ---
 

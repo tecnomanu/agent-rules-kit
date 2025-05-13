@@ -1,6 +1,6 @@
 ---
 description: App Router architecture guidelines for Next.js 13+
-globs: '<root>/app/**/*.{ts,tsx}'
+globs: <root>/app/**/*.{ts,tsx}
 alwaysApply: false
 ---
 

@@ -2,6 +2,7 @@
 title: Astro Best Practices
 description: General best practices for Astro development
 tags: [Astro, Best Practices, Development]
+always: true
 ---
 
 # Astro Best Practices

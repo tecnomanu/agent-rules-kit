@@ -1,6 +1,6 @@
 ---
 description: Nuxt 3 specific features and best practices
-globs: '<root>/app.vue,<root>/components/**/*.{vue,ts,js},<root>/nuxt.config.{js,ts}'
+globs: <root>/app.vue,<root>/components/**/*.{vue,ts,js},<root>/nuxt.config.{js,ts}
 alwaysApply: false
 ---
 

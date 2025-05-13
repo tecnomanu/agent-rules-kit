@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Laravel applications
-globs: '<root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php'
+globs: <root>/app/**/*.php,<root>/bootstrap/**/*.php,<root>/routes/**/*.php,<root>/database/migrations/**/*.php,<root>/config/**/*.php,<root>/tests/**/*.php
 alwaysApply: false
 ---
 

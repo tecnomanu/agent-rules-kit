@@ -71,6 +71,77 @@ El archivo `kit-config.json` es fundamental para definir cómo se aplican las re
 3. **pattern_rules**: Asignación de reglas a patrones de archivos
 4. **architectures**: Configuración de arquitecturas específicas
 
+## Frontmatter para Reglas
+
+Cada archivo de reglas puede incluir configuración frontmatter:
+
+```markdown
+---
+globs: <root>/app/**/*.php,<root>/routes/**/*.php
+alwaysApply: true
+---
+
+# Regla de Ejemplo
+
+Contenido de la regla...
+```
+
+### Configuración de Encabezados (Frontmatter)
+
+Es crítico que cada archivo de documentación incluya una configuración adecuada en su encabezado para determinar a qué archivos se aplicará. Hay dos enfoques recomendados:
+
+1. **Aplicación Universal** - Usando `always: true`:
+
+    ```markdown
+    ---
+    title: Mejores Prácticas
+    description: Guía de mejores prácticas
+    tags: [Framework, Mejores Prácticas]
+    always: true
+    ---
+    ```
+
+    Este enfoque hace que la regla se aplique a todos los archivos del stack sin importar su tipo o ubicación. Ideal para reglas fundamentales como convenciones de nomenclatura o mejores prácticas.
+
+2. **Aplicación Específica** - Usando `globs`:
+
+    ```markdown
+    ---
+    title: Características de la Versión X
+    description: Funcionalidades específicas de la versión X
+    tags: [Framework, Versión X]
+    globs: <root>/src/**/*.js,<root>/config/*.js
+    ---
+    ```
+
+    Este enfoque especifica patrones glob exactos para determinar a qué archivos se aplica la regla. Esto permite una granularidad precisa y es ideal para reglas específicas de componentes o características.
+
+### Patrones Glob - Consideraciones Importantes
+
+Al definir patrones glob en los frontmatter, es importante considerar estas limitaciones:
+
+1. **No usar llaves con alternativas y comas**: El sistema interpreta las comas dentro de `{...}` como separadores de patrones completos, no como alternativas dentro del mismo patrón. Por ejemplo:
+
+    **Incorrecto (no usar):**
+
+    ```
+    globs: <root>/src/**/*.{md,mdx},<root>/astro.config.{js,mjs,ts}
+    ```
+
+    **Correcto (usar patrones separados):**
+
+    ```
+    globs: <root>/src/**/*.md,<root>/src/**/*.mdx,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
+    ```
+
+2. **Alternativa para archivos similares**: Si necesitas incluir muchas extensiones similares, considera usar un patrón más general:
+    ```
+    globs: <root>/src/**/*.*
+    ```
+    Pero ten en cuenta que esto podría incluir archivos no deseados.
+
+> **IMPORTANTE**: Para stacks como Astro, Vue o React, se recomienda definir las reglas de aplicación directamente en los documentos usando `always: true` o `globs` específicos, en lugar de depender de los patrones en `kit-config.json`. Esto proporciona mayor flexibilidad y claridad.
+
 ## Variables de Plantilla
 
 Utiliza variables de plantilla para hacer tu documentación dinámica:
@@ -89,21 +160,6 @@ Ejemplo:
 # Guía para {stack} {versionRange}
 
 Esta documentación aplica para proyectos usando {stack} versión {detectedVersion}.
-```
-
-## Frontmatter para Reglas
-
-Cada archivo de reglas puede incluir configuración frontmatter:
-
-```markdown
----
-globs: <root>/app/**/*.php,<root>/routes/**/*.php
-alwaysApply: true
----
-
-# Regla de Ejemplo
-
-Contenido de la regla...
 ```
 
 ## Buenas Prácticas para la Documentación

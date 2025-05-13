@@ -2,6 +2,7 @@
 title: Astro Testing Best Practices
 description: Guidelines for testing Astro projects effectively
 tags: [Astro, Testing, Best Practices]
+always: true
 ---
 
 # Astro Testing Best Practices

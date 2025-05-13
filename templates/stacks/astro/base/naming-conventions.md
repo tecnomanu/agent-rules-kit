@@ -2,6 +2,7 @@
 title: Astro Naming Conventions
 description: Standardized naming patterns for Astro projects
 tags: [Astro, Naming Conventions, Standards]
+always: true
 ---
 
 # Astro Naming Conventions

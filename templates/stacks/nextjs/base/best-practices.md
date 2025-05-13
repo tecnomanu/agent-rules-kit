@@ -1,6 +1,6 @@
 ---
 description: Core best practices for Next.js applications
-globs: '<root>/app/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx}'
+globs: <root>/app/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx}
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Testing implementation examples for Nuxt 3
-globs: '<root>/tests/**/*.{spec,test}.{ts,js}'
+globs: <root>/tests/**/*.{spec,test}.{ts,js}
 alwaysApply: false
 ---
 
