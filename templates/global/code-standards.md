@@ -1,6 +1,6 @@
 ---
 description: General code formatting standards
-globs: '**/*'
+globs: **/*
 alwaysApply: true
 ---
 

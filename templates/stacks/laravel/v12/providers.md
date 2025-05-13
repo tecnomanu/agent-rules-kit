@@ -1,6 +1,6 @@
 ---
 description: Service provider guidelines for Laravel 12
-globs: '<root>/bootstrap/app.php'
+globs: <root>/bootstrap/app.php
 alwaysApply: false
 ---
 

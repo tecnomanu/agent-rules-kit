@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Vue applications
-globs: '<root>/src/**/*.vue,<root>/src/**/*.{js,ts}'
+globs: <root>/src/**/*.vue,<root>/src/**/*.{js,ts}
 alwaysApply: false
 ---
 

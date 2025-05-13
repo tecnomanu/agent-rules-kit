@@ -1,6 +1,6 @@
 ---
 description: Routing guidelines for Laravel 12
-globs: '<root>/routes/**/*.php'
+globs: <root>/routes/**/*.php
 alwaysApply: false
 ---
 

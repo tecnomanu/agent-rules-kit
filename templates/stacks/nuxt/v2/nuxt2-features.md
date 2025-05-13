@@ -1,6 +1,6 @@
 ---
 description: Nuxt 2 specific features and best practices
-globs: '<root>/nuxt.config.{js,ts},<root>/pages/**/*.{vue,js,ts}'
+globs: <root>/nuxt.config.{js,ts},<root>/pages/**/*.{vue,js,ts}
 alwaysApply: false
 ---
 

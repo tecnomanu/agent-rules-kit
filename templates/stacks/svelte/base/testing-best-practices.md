@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for Svelte applications
-globs: '<root>/src/**/*.spec.{js,ts},<root>/tests/**/*.{js,ts}'
+globs: <root>/src/**/*.spec.{js,ts},<root>/tests/**/*.{js,ts}
 alwaysApply: false
 ---
 
