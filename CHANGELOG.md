@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.0...v1.4.1) (2025-05-13)
+
+
+### Bug Fixes
+
+* ✨ Make supported stacks list dynamic in info display ([0851ef7](https://github.com/tecnomanu/agent-rules-kit/commit/0851ef77f1d81f114c501153f9ef8d5cf421b492))
+
 # [1.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.3...v1.4.0) (2025-05-13)
 
 
