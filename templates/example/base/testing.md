@@ -1,1 +1,5 @@
-<!-- Placeholder for testing -->
+---
+description: Testing
+globs: ./files, ./directories
+alwaysApply: false/true
+---

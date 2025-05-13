@@ -1,1 +1,5 @@
-<!-- Placeholder for architecture-concepts -->
+---
+description: Architecture concepts for the stack
+globs: ./files, ./directories
+alwaysApply: false/true
+---

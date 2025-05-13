@@ -1,1 +1,5 @@
-<!-- Placeholder for naming-conventions -->
+---
+description: Name conventions
+globs: ./files, ./directories
+alwaysApply: false/true
+---
