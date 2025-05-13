@@ -31,52 +31,15 @@
 				"range_name": "v12"
 			}
 		},
-		"pattern_rules": {
-			"<root>/app/Models/**/*.php": [
-				"stacks/laravel/base/best-practices.md",
-				"stacks/laravel/v8-9/model-casting.md",
-				"stacks/laravel/v10-11/model-casting.md"
-			],
-			"<root>/bootstrap/app.php": ["stacks/laravel/v12/providers.md"],
-			"<root>/config/app.php": ["stacks/laravel/v8-11/providers.md"],
-			"<root>/routes/**/*.php": [
-				"stacks/laravel/v8-11/routes.md",
-				"stacks/laravel/v12/routes.md"
-			]
-		},
 		"architectures": {
 			"standard": {
-				"name": "Standard Laravel (MVC with Repositories)",
-				"pattern_rules": {
-					"<root>/app/Models/**/*.php": [
-						"stacks/laravel/architectures/standard/models.md"
-					],
-					"<root>/app/Http/Controllers/**/*.php": [
-						"stacks/laravel/architectures/standard/controllers.md"
-					]
-				}
+				"name": "Standard Laravel (MVC with Repositories)"
 			},
 			"ddd": {
-				"name": "Domain-Driven Design (DDD)",
-				"pattern_rules": {
-					"<root>/app/Domain/**/*.php": [
-						"stacks/laravel/architectures/ddd/domain.md"
-					],
-					"<root>/app/Application/**/*.php": [
-						"stacks/laravel/architectures/ddd/application.md"
-					]
-				}
+				"name": "Domain-Driven Design (DDD)"
 			},
 			"hexagonal": {
-				"name": "Hexagonal (Ports & Adapters)",
-				"pattern_rules": {
-					"<root>/app/Core/**/*.php": [
-						"stacks/laravel/architectures/hexagonal/core.md"
-					],
-					"<root>/app/Ports/**/*.php": [
-						"stacks/laravel/architectures/hexagonal/ports.md"
-					]
-				}
+				"name": "Hexagonal (Ports & Adapters)"
 			}
 		}
 	},
@@ -96,43 +59,15 @@
 				"range_name": "v14"
 			}
 		},
-		"pattern_rules": {
-			"<root>/app/**/*.{ts,tsx}": [
-				"stacks/nextjs/v13/app-router.md",
-				"stacks/nextjs/v14/app-router.md"
-			],
-			"<root>/pages/**/*.{ts,tsx}": [
-				"stacks/nextjs/v12/pages-router.md",
-				"stacks/nextjs/v13/pages-router.md"
-			]
-		},
 		"architectures": {
 			"app": {
-				"name": "App Router",
-				"pattern_rules": {
-					"<root>/app/**/*.{ts,tsx}": [
-						"stacks/nextjs/architectures/app/app-router.md"
-					]
-				}
+				"name": "App Router"
 			},
 			"pages": {
-				"name": "Pages Router",
-				"pattern_rules": {
-					"<root>/pages/**/*.{ts,tsx}": [
-						"stacks/nextjs/architectures/pages/pages-router.md"
-					]
-				}
+				"name": "Pages Router"
 			},
 			"hybrid": {
-				"name": "Hybrid (App + Pages)",
-				"pattern_rules": {
-					"<root>/app/**/*.{ts,tsx}": [
-						"stacks/nextjs/architectures/app/app-router.md"
-					],
-					"<root>/pages/**/*.{ts,tsx}": [
-						"stacks/nextjs/architectures/pages/pages-router.md"
-					]
-				}
+				"name": "Hybrid (App + Pages)"
 			}
 		}
 	},
@@ -146,6 +81,11 @@
 			"10": {
 				"name": "NestJS 10",
 				"range_name": "v10"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard NestJS Architecture"
 			}
 		}
 	},
@@ -161,38 +101,15 @@
 				"range_name": "v18"
 			}
 		},
-		"pattern_rules": {
-			"<root>/src/components/**/*.{ts,tsx,js,jsx}": [
-				"stacks/react/base/react-best-practices.md"
-			],
-			"<root>/src/tests/**/*.{ts,tsx,js,jsx}": [
-				"stacks/react/base/react-testing.md"
-			]
-		},
 		"architectures": {
 			"standard": {
-				"name": "Standard Component Structure",
-				"pattern_rules": {
-					"<root>/src/**/*.{ts,tsx,js,jsx}": [
-						"stacks/react/base/architecture-concepts.md"
-					]
-				}
+				"name": "Standard Component Structure"
 			},
 			"atomic": {
-				"name": "Atomic Design",
-				"pattern_rules": {
-					"<root>/src/**/*.{ts,tsx,js,jsx}": [
-						"stacks/react/architectures/atomic/atomic-architecture.md"
-					]
-				}
+				"name": "Atomic Design"
 			},
 			"feature-sliced": {
-				"name": "Feature-Sliced Design",
-				"pattern_rules": {
-					"<root>/src/**/*.{ts,tsx,js,jsx}": [
-						"stacks/react/architectures/feature-sliced/feature-sliced-architecture.md"
-					]
-				}
+				"name": "Feature-Sliced Design"
 			}
 		}
 	},
@@ -208,30 +125,12 @@
 				"range_name": "v3"
 			}
 		},
-		"pattern_rules": {
-			"<root>/src/components/**/*.{vue,ts,js}": [
-				"stacks/vue/base/architecture-concepts.md"
-			],
-			"<root>/tests/**/*.{spec,test}.{ts,js}": [
-				"stacks/vue/base/vue-testing.md"
-			]
-		},
 		"architectures": {
 			"composition": {
-				"name": "Composition API",
-				"pattern_rules": {
-					"<root>/src/composables/**/*.{ts,js}": [
-						"stacks/vue/architectures/composition/composables.md"
-					]
-				}
+				"name": "Composition API"
 			},
 			"options": {
-				"name": "Options API",
-				"pattern_rules": {
-					"<root>/src/mixins/**/*.{ts,js}": [
-						"stacks/vue/architectures/options/mixins.md"
-					]
-				}
+				"name": "Options API"
 			}
 		}
 	},
@@ -247,34 +146,9 @@
 				"range_name": "v3"
 			}
 		},
-		"globs": [
-			"<root>/app.vue",
-			"<root>/pages/**/*.{vue,js,ts}",
-			"<root>/components/**/*.{vue,js,ts}",
-			"<root>/composables/**/*.{js,ts}",
-			"<root>/server/**/*.{js,ts}",
-			"<root>/nuxt.config.{js,ts}"
-		],
-		"pattern_rules": {
-			"<root>/nuxt.config.{js,ts}": ["stacks/nuxt/base/version-info.md"],
-			"<root>/components/**/*.{vue,js,ts}": [
-				"stacks/nuxt/base/naming-conventions.md",
-				"stacks/nuxt/base/best-practices.md"
-			],
-			"<root>/server/**/*.{js,ts}": ["stacks/nuxt/v3/nuxt3-features.md"],
-			"<root>/app.vue": ["stacks/nuxt/base/architecture-concepts.md"],
-			"<root>/tests/**/*.{spec,test}.{js,ts}": [
-				"stacks/nuxt/base/testing-best-practices.md"
-			]
-		},
 		"architectures": {
 			"standard": {
-				"name": "Standard Architecture",
-				"pattern_rules": {
-					"<root>/components/**/*.{vue,js,ts}": [
-						"stacks/nuxt/architectures/standard/standard-nuxt-architecture.md"
-					]
-				}
+				"name": "Standard Architecture"
 			}
 		}
 	},
@@ -358,12 +232,7 @@
 		},
 		"architectures": {
 			"standard": {
-				"name": "Standard Astro Architecture",
-				"pattern_rules": {
-					"<root>/src/**/*.astro": [
-						"stacks/astro/architectures/standard/standard-architecture.md"
-					]
-				}
+				"name": "Standard Astro Architecture"
 			}
 		}
 	},

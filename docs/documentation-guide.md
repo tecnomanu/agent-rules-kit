@@ -1,38 +1,38 @@
 # Documentation Guide for Agent Rules Kit
 
-Este documento proporciona lineamientos para crear y mejorar la documentación en Agent Rules Kit, enfocándose en una estructura mantenible y coherente que facilite tanto la generación automática como el uso de las reglas.
+This document provides guidelines for creating and improving documentation in Agent Rules Kit, focusing on a maintainable and coherent structure that facilitates both automatic generation and use of rules.
 
-## Estructura de la Documentación
+## Documentation Structure
 
-### 1. Reglas Globales
+### 1. Global Rules
 
-Las reglas globales se encuentran en `templates/global/` y aplican a todos los proyectos independientemente del framework:
+Global rules are located in `templates/global/` and apply to all projects regardless of framework:
 
 ```
 templates/global/
-├── best-practices.md      # Mejores prácticas generales
-├── code-standards.md      # Estándares de código universales
-├── file-guard.md          # Guía para operaciones seguras de archivos
-└── log-process.md         # Documentación de procesos
+├── best-practices.md      # General best practices
+├── code-standards.md      # Universal code standards
+├── file-guard.md          # Guide for safe file operations
+└── log-process.md         # Process documentation
 ```
 
-### 2. Reglas Específicas por Framework
+### 2. Framework-Specific Rules
 
-Cada framework tiene su propia documentación organizada de la siguiente manera:
+Each framework has its own documentation organized as follows:
 
 ```
 templates/stacks/<framework>/
-├── base/                  # Conceptos fundamentales independientes de versión
-├── architectures/         # Reglas específicas por arquitectura
+├── base/                  # Fundamental concepts independent of version
+├── architectures/         # Architecture-specific rules
 │   ├── standard/
 │   ├── ddd/
 │   └── hexagonal/
-└── v<version>/            # Implementaciones específicas por versión
+└── v<version>/            # Version-specific implementations
 ```
 
-## Configuración en kit-config.json
+## Configuration in kit-config.json
 
-El archivo `kit-config.json` es fundamental para definir cómo se aplican las reglas:
+The `kit-config.json` file is fundamental for defining how rules are applied:
 
 ```json
 {
@@ -64,16 +64,16 @@ El archivo `kit-config.json` es fundamental para definir cómo se aplican las re
 }
 ```
 
-### Elementos Principales
+### Main Elements
 
-1. **default_architecture**: La arquitectura predeterminada para el stack
-2. **version_ranges**: Mapeo de versiones a rangos con nombres descriptivos
-3. **pattern_rules**: Asignación de reglas a patrones de archivos
-4. **architectures**: Configuración de arquitecturas específicas
+1. **default_architecture**: The default architecture for the stack
+2. **version_ranges**: Mapping of versions to ranges with descriptive names
+3. **pattern_rules**: Assignment of rules to file patterns
+4. **architectures**: Configuration of specific architectures
 
-## Frontmatter para Reglas
+## Frontmatter for Rules
 
-Cada archivo de reglas puede incluir configuración frontmatter:
+Each rule file can include frontmatter configuration:
 
 ```markdown
 ---
@@ -81,125 +81,125 @@ globs: <root>/app/**/*.php,<root>/routes/**/*.php
 alwaysApply: true
 ---
 
-# Regla de Ejemplo
+# Example Rule
 
-Contenido de la regla...
+Rule content...
 ```
 
-### Configuración de Encabezados (Frontmatter)
+### Header Configuration (Frontmatter)
 
-Es crítico que cada archivo de documentación incluya una configuración adecuada en su encabezado para determinar a qué archivos se aplicará. Hay dos enfoques recomendados:
+It is critical that each documentation file includes proper configuration in its header to determine which files it will apply to. There are two recommended approaches:
 
-1. **Aplicación Universal** - Usando `always: true`:
+1. **Universal Application** - Using `always: true`:
 
     ```markdown
     ---
-    title: Mejores Prácticas
-    description: Guía de mejores prácticas
-    tags: [Framework, Mejores Prácticas]
+    title: Best Practices
+    description: Best practices guide
+    tags: [Framework, Best Practices]
     always: true
     ---
     ```
 
-    Este enfoque hace que la regla se aplique a todos los archivos del stack sin importar su tipo o ubicación. Ideal para reglas fundamentales como convenciones de nomenclatura o mejores prácticas.
+    This approach makes the rule apply to all files in the stack regardless of their type or location. Ideal for fundamental rules such as naming conventions or best practices.
 
-2. **Aplicación Específica** - Usando `globs`:
+2. **Specific Application** - Using `globs`:
 
     ```markdown
     ---
-    title: Características de la Versión X
-    description: Funcionalidades específicas de la versión X
-    tags: [Framework, Versión X]
+    title: Version X Features
+    description: Specific features of version X
+    tags: [Framework, Version X]
     globs: <root>/src/**/*.js,<root>/config/*.js
     ---
     ```
 
-    Este enfoque especifica patrones glob exactos para determinar a qué archivos se aplica la regla. Esto permite una granularidad precisa y es ideal para reglas específicas de componentes o características.
+    This approach specifies exact glob patterns to determine which files the rule applies to. This allows precise granularity and is ideal for component or feature-specific rules.
 
-### Patrones Glob - Consideraciones Importantes
+### Glob Patterns - Important Considerations
 
-Al definir patrones glob en los frontmatter, es importante considerar estas limitaciones:
+When defining glob patterns in frontmatter, it's important to consider these limitations:
 
-1. **No usar llaves con alternativas y comas**: El sistema interpreta las comas dentro de `{...}` como separadores de patrones completos, no como alternativas dentro del mismo patrón. Por ejemplo:
+1. **Don't use braces with alternatives and commas**: The system interprets commas within `{...}` as separators of complete patterns, not as alternatives within the same pattern. For example:
 
-    **Incorrecto (no usar):**
+    **Incorrect (don't use):**
 
     ```
     globs: <root>/src/**/*.{md,mdx},<root>/astro.config.{js,mjs,ts}
     ```
 
-    **Correcto (usar patrones separados):**
+    **Correct (use separate patterns):**
 
     ```
     globs: <root>/src/**/*.md,<root>/src/**/*.mdx,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
     ```
 
-2. **Alternativa para archivos similares**: Si necesitas incluir muchas extensiones similares, considera usar un patrón más general:
+2. **Alternative for similar files**: If you need to include many similar extensions, consider using a more general pattern:
     ```
     globs: <root>/src/**/*.*
     ```
-    Pero ten en cuenta que esto podría incluir archivos no deseados.
+    But keep in mind that this could include unwanted files.
 
-> **IMPORTANTE**: Para stacks como Astro, Vue o React, se recomienda definir las reglas de aplicación directamente en los documentos usando `always: true` o `globs` específicos, en lugar de depender de los patrones en `kit-config.json`. Esto proporciona mayor flexibilidad y claridad.
+> **IMPORTANT**: For stacks like Astro, Vue, or React, it is recommended to define application rules directly in the documents using `always: true` or specific `globs`, instead of relying on patterns in `kit-config.json`. This provides greater flexibility and clarity.
 
-## Variables de Plantilla
+## Template Variables
 
-Utiliza variables de plantilla para hacer tu documentación dinámica:
+Use template variables to make your documentation dynamic:
 
-| Variable            | Descripción                 | Ejemplo        |
-| ------------------- | --------------------------- | -------------- |
-| `{projectPath}`     | Ruta al proyecto            | `/path/to/app` |
-| `{detectedVersion}` | Versión detectada           | `10`           |
-| `{versionRange}`    | Rango de versión compatible | `v10-11`       |
-| `{stack}`           | Stack tecnológico           | `laravel`      |
-| `{architecture}`    | Arquitectura seleccionada   | `standard`     |
+| Variable            | Description              | Example        |
+| ------------------- | ------------------------ | -------------- |
+| `{projectPath}`     | Path to the project      | `/path/to/app` |
+| `{detectedVersion}` | Detected version         | `10`           |
+| `{versionRange}`    | Compatible version range | `v10-11`       |
+| `{stack}`           | Technology stack         | `laravel`      |
+| `{architecture}`    | Selected architecture    | `standard`     |
 
-Ejemplo:
+Example:
 
 ```markdown
-# Guía para {stack} {versionRange}
+# Guide for {stack} {versionRange}
 
-Esta documentación aplica para proyectos usando {stack} versión {detectedVersion}.
+This documentation applies to projects using {stack} version {detectedVersion}.
 ```
 
-## Buenas Prácticas para la Documentación
+## Documentation Best Practices
 
-### Estructura Coherente
+### Consistent Structure
 
-Cada archivo de reglas debe seguir esta estructura:
+Each rule file should follow this structure:
 
-1. **Título**: Nombre claro que indique el propósito
-2. **Descripción Breve**: Explicación concisa del concepto
-3. **Lineamientos**: Instrucciones específicas
-4. **Ejemplos**: Código ejemplificando la implementación correcta
-5. **Notas de Versión**: Información sobre compatibilidad (si aplica)
+1. **Title**: Clear name indicating the purpose
+2. **Brief Description**: Concise explanation of the concept
+3. **Guidelines**: Specific instructions
+4. **Examples**: Code exemplifying the correct implementation
+5. **Version Notes**: Information about compatibility (if applicable)
 
-### Separación de Conceptos e Implementación
+### Separation of Concepts and Implementation
 
--   En `base/`: Documenta conceptos sin detalles de implementación específicos
--   En `v<version>/`: Proporciona implementaciones concretas con código real
--   En `architectures/`: Detalla patrones arquitectónicos específicos
+-   In `base/`: Document concepts without specific implementation details
+-   In `v<version>/`: Provide concrete implementations with real code
+-   In `architectures/`: Detail specific architectural patterns
 
-### Uso de Ejemplos
+### Use of Examples
 
-Los ejemplos deben ser:
+Examples should be:
 
--   Concisos pero completos
--   Ejecutables sin modificación
--   Representativos de casos de uso reales
--   Con comentarios explicativos
+-   Concise but complete
+-   Executable without modification
+-   Representative of real use cases
+-   With explanatory comments
 
 ```php
-// Ejemplo bueno: Implementación de un modelo Laravel
+// Good example: Laravel model implementation
 class User extends Model
 {
-    // Usar propiedades tipo
+    // Use type properties
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
     ];
 
-    // Usar relaciones con tipo de retorno
+    // Use relationships with return type
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
@@ -207,34 +207,34 @@ class User extends Model
 }
 ```
 
-## Proceso de Actualización de Documentación
+## Documentation Update Process
 
-1. **Identificar Carencias**: Revisar documentación existente y detectar vacíos
-2. **Actualizar kit-config.json**: Añadir nuevos patrones o rangos de versión si es necesario
-3. **Crear/Actualizar Reglas**: Editar archivos .md siguiendo la estructura establecida
-4. **Probar Generación**: Ejecutar `npx agent-rules-kit --debug` para verificar
-5. **Solicitar Revisión**: Pedir feedback antes de integrar cambios grandes
+1. **Identify Gaps**: Review existing documentation and detect gaps
+2. **Update kit-config.json**: Add new patterns or version ranges if necessary
+3. **Create/Update Rules**: Edit .md files following the established structure
+4. **Test Generation**: Run `npx agent-rules-kit --debug` to verify
+5. **Request Review**: Ask for feedback before integrating major changes
 
-## Ejemplo de Desarrollo de Nueva Documentación
+## Example of New Documentation Development
 
-### 1. Identificar Necesidad
+### 1. Identify Need
 
-Supongamos que queremos añadir documentación para patrones de repositorio en Laravel.
+Let's say we want to add documentation for repository patterns in Laravel.
 
-### 2. Estructura de Archivos
+### 2. File Structure
 
 ```
 templates/stacks/laravel/
 ├── base/
-│   └── repository-pattern-concept.md    # Conceptos de repositorio
+│   └── repository-pattern-concept.md    # Repository concepts
 ├── architectures/
 │   └── standard/
-│       └── repository-implementation.md # Implementación específica
+│       └── repository-implementation.md # Specific implementation
 └── v10-11/
-    └── repository-example.md            # Ejemplo concreto para v10-11
+    └── repository-example.md            # Concrete example for v10-11
 ```
 
-### 3. Actualizar kit-config.json
+### 3. Update kit-config.json
 
 ```json
 "pattern_rules": {
@@ -246,28 +246,28 @@ templates/stacks/laravel/
 }
 ```
 
-### 4. Crear los Archivos de Reglas
+### 4. Create the Rule Files
 
-Estructura consistente en cada archivo con conceptos, lineamientos y ejemplos.
+Consistent structure in each file with concepts, guidelines, and examples.
 
-## Mejores Prácticas para Generación de Reglas
+## Best Practices for Rule Generation
 
-1. **Mantén la Documentación en Inglés**: Conforme a las políticas del proyecto
-2. **Sé Conciso**: Evita documentación excesivamente larga
-3. **Actualiza con Cada Versión**: Revisa reglas cuando hay nuevas versiones de frameworks
-4. **Proporciona Contexto**: Explica por qué una práctica es recomendada
-5. **Documenta Trampas Comunes**: Ayuda a evitar errores frecuentes
-6. **Mantén Coherencia Visual**: Usa formatos consistentes en toda la documentación
+1. **Keep Documentation in English**: According to project policies
+2. **Be Concise**: Avoid excessively long documentation
+3. **Update with Each Version**: Review rules when there are new framework versions
+4. **Provide Context**: Explain why a practice is recommended
+5. **Document Common Pitfalls**: Help avoid frequent errors
+6. **Maintain Visual Consistency**: Use consistent formats throughout the documentation
 
-## Uso de Scripts de Generación
+## Using Generation Scripts
 
-Para proyectos complejos, considera crear scripts que generen documentación:
+For complex projects, consider creating scripts that generate documentation:
 
 ```javascript
 const fs = require('fs-extra');
 const path = require('path');
 
-// Ejemplo: generar documentación para múltiples versiones
+// Example: generate documentation for multiple versions
 async function generateVersionDocs(framework, versions, template) {
 	for (const version of versions) {
 		const targetDir = path.join(
@@ -285,7 +285,7 @@ async function generateVersionDocs(framework, versions, template) {
 	}
 }
 
-// Uso
+// Usage
 generateVersionDocs(
 	'laravel',
 	['8', '9', '10', '11'],
@@ -293,6 +293,6 @@ generateVersionDocs(
 );
 ```
 
-## Conclusión
+## Conclusion
 
-La documentación efectiva es esencial para que Agent Rules Kit cumpla su misión de guiar a los agentes de IA. Siguiendo estos lineamientos, contribuirás a mantener un sistema coherente de reglas que evoluciona con las tecnologías que soporta.
+Effective documentation is essential for Agent Rules Kit to fulfill its mission of guiding AI agents. By following these guidelines, you will contribute to maintaining a coherent system of rules that evolves with the technologies it supports.
