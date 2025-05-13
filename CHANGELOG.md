@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.2...v1.4.3) (2025-05-13)
+
+
+### Bug Fixes
+
+* 📝 Implementación de documentación para SvelteKit al 70% ([b76a55b](https://github.com/tecnomanu/agent-rules-kit/commit/b76a55b3e2fd7d15430d06e1ffca427275f15d32))
+
 ## [1.4.2](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.1...v1.4.2) (2025-05-13)
 
 
