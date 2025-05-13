@@ -1,35 +1,18 @@
 ---
-description: Testing best practices for Nuxt applications
+description: Testing implementation examples for Nuxt 3
 globs: '<root>/tests/**/*.{spec,test}.{ts,js}'
 alwaysApply: false
 ---
 
-# Nuxt Testing Best Practices
+# Nuxt 3 Testing Implementation
 
-<!--
-TODO: Add content for Nuxt testing best practices.
-Follow unified schema guidelines.
--->
-
-# Nuxt.js Testing Guide
-
-This guide outlines the recommended approach to testing Nuxt.js applications in {projectPath}.
-
-## Testing Stack
-
-For Nuxt.js applications, we recommend these testing tools:
-
--   **Vitest**: Primary testing framework for unit and component tests
--   **@nuxt/test-utils**: Nuxt-specific testing utilities
--   **Vue Test Utils**: For component testing
--   **Cypress/Playwright**: For end-to-end testing
--   **MSW (Mock Service Worker)**: For API mocking
+This document provides specific code examples for implementing tests in Nuxt 3 applications in {projectPath}.
 
 ## Setting Up Testing Environment
 
-### Vitest with Nuxt
+### Vitest with Nuxt 3
 
-Configure Vitest in your Nuxt project:
+Configure Vitest in your Nuxt 3 project:
 
 ```js
 // vitest.config.ts
@@ -67,15 +50,15 @@ Add necessary scripts to your package.json:
 
 ## Component Testing
 
-### Testing Vue Components in Nuxt
+### Testing Vue Components in Nuxt 3
 
-Nuxt components can be tested like Vue components, with additional Nuxt-specific features:
+Here's how to test components in Nuxt 3:
 
 ```js
 // components/Counter.vue
 <template>
   <div>
-    <p>Count: {{ count }}</p>
+    <p data-test="count">Count: {{ count }}</p>
     <button @click="increment">Increment</button>
   </div>
 </template>
@@ -97,20 +80,20 @@ describe('Counter Component', () => {
     const wrapper = mount(Counter);
 
     // Initial state
-    expect(wrapper.text()).toContain('Count: 0');
+    expect(wrapper.find('[data-test="count"]').text()).toContain('Count: 0');
 
     // Interact with component
     await wrapper.find('button').trigger('click');
 
     // Check updated state
-    expect(wrapper.text()).toContain('Count: 1');
+    expect(wrapper.find('[data-test="count"]').text()).toContain('Count: 1');
   });
 });
 ```
 
 ### Testing Nuxt-Specific Features
 
-For Nuxt-specific features like pages, layouts, and plugins, use `@nuxt/test-utils`:
+For Nuxt 3-specific features:
 
 ```js
 // tests/pages/index.test.js
@@ -129,7 +112,7 @@ describe('Index Page', () => {
 
 ## Testing Composables
 
-Test custom composables with proper Vue and Nuxt context:
+Test custom composables in Nuxt 3:
 
 ```js
 // composables/useCounter.js
@@ -149,7 +132,6 @@ export function useCounter(initialValue = 0) {
 }
 
 // tests/composables/useCounter.test.js
-import { ref } from 'vue';
 import { describe, it, expect } from 'vitest';
 import { useCounter } from '~/composables/useCounter';
 
@@ -172,14 +154,14 @@ describe('useCounter', () => {
 });
 ```
 
-### Testing Nuxt Composables
+### Testing Nuxt-Specific Composables
 
-For Nuxt-specific composables that use Nuxt's runtime context:
+For Nuxt 3 composables that use Nuxt's runtime context:
 
 ```js
 // tests/composables/useNuxtComposable.test.js
 import { describe, it, expect, vi } from 'vitest';
-import { createTestingPinia } from '@pinia/testing';
+import { ref } from 'vue';
 import { mockNuxtImport } from '@nuxt/test-utils/runtime';
 
 // Mock useNuxtApp, useState, etc.
@@ -193,8 +175,13 @@ mockNuxtImport('useNuxtApp', () => {
 	});
 });
 
+mockNuxtImport('useState', () => {
+	return (key, init) => {
+		return ref(init ? init() : null);
+	};
+});
+
 // Import the composable AFTER mocking
-// (This needs to be dynamic to pick up the mocks)
 const { useMyComposable } = await import('~/composables/useMyComposable');
 
 describe('useMyComposable', () => {
@@ -207,7 +194,7 @@ describe('useMyComposable', () => {
 
 ## Testing Pinia Stores
 
-For Nuxt applications using Pinia stores:
+For Nuxt 3 applications using Pinia:
 
 ```js
 // stores/counter.js
@@ -232,6 +219,9 @@ export const useCounterStore = defineStore('counter', {
 				this.loading = false;
 			}
 		},
+	},
+	getters: {
+		doubleCount: (state) => state.count * 2,
 	},
 });
 
@@ -268,12 +258,18 @@ describe('Counter Store', () => {
 		expect(store.count).toBe(42);
 		expect(global.fetch).toHaveBeenCalledWith('/api/count');
 	});
+
+	it('computes double count correctly', () => {
+		const store = useCounterStore();
+		store.count = 5;
+		expect(store.doubleCount).toBe(10);
+	});
 });
 ```
 
-## Testing API Routes (Server Routes)
+## Testing API Routes
 
-For testing Nuxt server API routes:
+Testing Nuxt 3 server API routes:
 
 ```js
 // server/api/users.get.js
@@ -310,14 +306,13 @@ describe('Users API', () => {
 });
 ```
 
-## Testing Pages and Layouts
-
-Test full Nuxt pages with routing context:
+## Testing Pages with Dynamic Routes
 
 ```js
 // tests/pages/user.test.js
 import { describe, it, expect } from 'vitest';
 import { renderSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime';
+import { ref } from 'vue';
 import UserPage from '~/pages/user/[id].vue';
 
 // Mock useAsyncData
@@ -347,28 +342,7 @@ describe('User Page', () => {
 });
 ```
 
-## End-to-End Testing
-
-Use Cypress or Playwright for E2E testing:
-
-```js
-// cypress/e2e/navigation.cy.js
-describe('Navigation', () => {
-	it('navigates from home page to about page', () => {
-		// Visit the home page
-		cy.visit('/');
-
-		// Find the link to the about page and click it
-		cy.get('nav').contains('About').click();
-
-		// Verify we're on the about page
-		cy.url().should('include', '/about');
-		cy.get('h1').should('contain', 'About');
-	});
-});
-```
-
-With Playwright:
+## End-to-End Testing with Playwright
 
 ```js
 // tests/e2e/navigation.spec.js
@@ -385,11 +359,27 @@ test('navigates from home page to about page', async ({ page }) => {
 	expect(page.url()).toContain('/about');
 	await expect(page.locator('h1')).toContainText('About');
 });
+
+test('login flow works correctly', async ({ page }) => {
+	// Go to login page
+	await page.goto('/login');
+
+	// Fill in the form
+	await page.fill('input[name="email"]', 'test@example.com');
+	await page.fill('input[name="password"]', 'password123');
+
+	// Submit form
+	await page.click('button[type="submit"]');
+
+	// Check that we're redirected to dashboard
+	await page.waitForURL('/dashboard');
+
+	// Verify user is logged in
+	await expect(page.locator('.user-info')).toContainText('test@example.com');
+});
 ```
 
-## Mocking HTTP Requests
-
-Mock API calls in component tests:
+## Mocking HTTP Requests with MSW
 
 ```js
 // tests/components/UserList.test.js
@@ -405,6 +395,7 @@ import {
 } from 'vitest';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { flushPromises } from '@vue/test-utils';
 import UserList from '~/components/UserList.vue';
 
 // Setup MSW server
@@ -425,6 +416,22 @@ afterAll(() => server.close());
 
 describe('UserList', () => {
 	it('fetches and displays users', async () => {
+		// Mock useFetch since we're using MSW
+		vi.mock('#app', async (importOriginal) => {
+			const original = await importOriginal();
+			return {
+				...original,
+				useFetch: vi.fn().mockResolvedValue({
+					data: ref([
+						{ id: 1, name: 'John Doe' },
+						{ id: 2, name: 'Jane Smith' },
+					]),
+					pending: ref(false),
+					error: ref(null),
+				}),
+			};
+		});
+
 		const wrapper = mount(UserList);
 
 		// Wait for API call to resolve
@@ -439,15 +446,23 @@ describe('UserList', () => {
 
 ## Testing Universal Components
 
-For components that behave differently in client vs. server environments:
-
 ```js
 // tests/components/universal.test.js
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import UniversalComponent from '~/components/UniversalComponent.vue';
 
 describe('UniversalComponent', () => {
+	let originalProcess;
+
+	beforeEach(() => {
+		originalProcess = global.process;
+	});
+
+	afterEach(() => {
+		global.process = originalProcess;
+	});
+
 	it('behaves correctly on the client side', () => {
 		// Mock process.client to true
 		vi.stubGlobal('process', { client: true, server: false });
@@ -468,8 +483,6 @@ describe('UniversalComponent', () => {
 
 ## Testing Middleware
 
-For testing Nuxt middleware:
-
 ```js
 // middleware/auth.js
 export default defineNuxtRouteMiddleware((to) => {
@@ -485,48 +498,59 @@ import { describe, it, expect, vi } from 'vitest';
 import { mockNuxtImport } from '@nuxt/test-utils/runtime';
 import { ref } from 'vue';
 
-// Mock Nuxt functions
-mockNuxtImport('useState', () => {
-	return (key) => {
-		if (key === 'user') {
-			return ref(null); // Unauthenticated
-		}
-		return ref(null);
-	};
-});
-
-const navigateTo = vi.fn();
-mockNuxtImport('navigateTo', () => navigateTo);
-
 describe('Auth Middleware', () => {
 	it('redirects to login when user is not authenticated', async () => {
-		const middleware = await import('~/middleware/auth');
+		// Mock useState
+		mockNuxtImport('useState', () => {
+			return (key) => {
+				if (key === 'user') {
+					return ref(null); // Unauthenticated
+				}
+				return ref(null);
+			};
+		});
+
+		// Mock navigateTo
+		const navigateTo = vi.fn();
+		mockNuxtImport('navigateTo', () => navigateTo);
+
+		// Import middleware after mocking
+		const { default: authMiddleware } = await import('~/middleware/auth');
 
 		// Call middleware with a route that requires auth
-		middleware.default({
+		authMiddleware({
 			path: '/dashboard',
 		});
 
 		// Check that it redirected to login
 		expect(navigateTo).toHaveBeenCalledWith('/login');
 	});
+
+	it('allows access to protected routes when authenticated', async () => {
+		// Mock useState with authenticated user
+		mockNuxtImport('useState', () => {
+			return (key) => {
+				if (key === 'user') {
+					return ref({ id: 1, name: 'Test User' }); // Authenticated
+				}
+				return ref(null);
+			};
+		});
+
+		// Mock navigateTo
+		const navigateTo = vi.fn();
+		mockNuxtImport('navigateTo', () => navigateTo);
+
+		// Import middleware after mocking
+		const { default: authMiddleware } = await import('~/middleware/auth');
+
+		// Call middleware with a route that requires auth
+		authMiddleware({
+			path: '/dashboard',
+		});
+
+		// Check that it did not redirect
+		expect(navigateTo).not.toHaveBeenCalled();
+	});
 });
 ```
-
-## Best Practices for Nuxt Testing
-
-1. **Isolation**: Test components and functionalities in isolation
-2. **Mocking**: Use mocks for external dependencies and APIs
-3. **E2E for Flows**: Use E2E tests for critical user journeys
-4. **CI Integration**: Run tests in CI pipelines before deployment
-5. **Coverage Tracking**: Track test coverage to identify untested code
-
-## Testing Coverage Goals
-
-Aim for these coverage targets:
-
--   **Components**: 80%+ coverage
--   **Composables**: 90%+ coverage
--   **Stores**: 90%+ coverage
--   **Server Routes**: 90%+ coverage
--   **E2E**: Cover all critical user paths

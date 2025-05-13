@@ -34,29 +34,14 @@ Nuxt supports multiple rendering strategies:
 
 -   Pre-renders all pages at build time
 -   Creates static HTML files for deployment to CDNs
--   Configured via `nuxt.config.ts`:
-    ```js
-    export default defineNuxtConfig({
-    	nitro: {
-    		prerender: {
-    			routes: ['/about', '/blog/article-1'],
-    		},
-    	},
-    });
-    ```
+-   Configured via `nuxt.config.ts`
 
 ### Client-Side Rendering
 
 -   For SPA-like behavior
 -   Render components exclusively on the client
 -   Less optimal for SEO
--   Use with `<ClientOnly>` component or in the Composition API:
-    ```js
-    // Only render on client
-    if (process.client) {
-    	// Client-only code
-    }
-    ```
+-   Use with `<ClientOnly>` component or in the Composition API
 
 ## Directory Structure
 
@@ -95,129 +80,43 @@ One of Nuxt's key features is automatic imports:
 -   **Plugins**: All files in `/plugins` are auto-loaded
 -   **Nuxt APIs**: Built-in functions like `useState`, `useRoute`, etc.
 
-Example of auto-imports in action:
-
-```vue
-<template>
-	<div>
-		<h1>{{ title }}</h1>
-		<AppButton @click="increment">Count: {{ count }}</AppButton>
-	</div>
-</template>
-
-<script setup>
-// No imports needed for these:
-const count = useState('count', () => 0);
-const route = useRoute();
-const title = computed(() => `Page ${route.path}`);
-
-const { increment } = useCounter(); // Auto-imports from /composables
-</script>
-```
-
 ## Routing Architecture
 
-Nuxt uses file-based routing in the `/pages` directory:
+Nuxt uses file-based routing in the `/pages` directory, with the file path determining the URL route. This system supports:
 
-```
-pages/
-├── index.vue              # / route
-├── about.vue              # /about route
-├── users/
-│   ├── index.vue          # /users route
-│   ├── [id].vue           # /users/:id dynamic route
-│   └── profile.vue        # /users/profile route
-└── blog-[slug].vue        # /blog-:slug route
-```
+-   Static routes
+-   Dynamic parameters
+-   Nested routes
+-   Catch-all routes
+-   Route middleware
 
 ### Route Middleware
 
-Middleware runs before navigating to a route:
+Middleware runs before navigating to a route. They can be:
 
-```js
-// middleware/auth.js - Named middleware
-export default defineNuxtRouteMiddleware((to, from) => {
-  const user = useState('user');
-
-  if (!user.value && to.path !== '/login') {
-    return navigateTo('/login');
-  }
-});
-
-// In a page component
-definePageMeta({
-  middleware: ['auth']
-});
-
-// Global middleware applies to all routes
-// middleware/global.global.js
-export default defineNuxtRouteMiddleware((to, from) => {
-  console.log(`Navigating from ${from.path} to ${to.path}`);
-});
-```
+-   Named middleware (specific to certain routes)
+-   Global middleware (applied to all routes)
+-   Anonymous middleware (inline in page components)
 
 ## State Management
 
+Nuxt provides several approaches to state management:
+
 ### Local Component State
 
-For simple state within a component:
-
-```vue
-<script setup>
-const count = ref(0);
-const increment = () => count.value++;
-</script>
-```
+For simple state within a component, use standard Vue reactivity and local state.
 
 ### Shared State with useState
 
-Nuxt provides `useState` for shared state across components:
-
-```js
-// composables/useCounter.js
-export const useCounter = () => {
-	const count = useState('counter', () => 0);
-
-	function increment() {
-		count.value++;
-	}
-
-	return {
-		count,
-		increment,
-	};
-};
-```
+Nuxt provides `useState` for shared state across components, which works on both server and client.
 
 ### Pinia Stores (Recommended for Complex State)
 
-For larger applications, use Pinia:
+For larger applications, Pinia offers a more structured approach with:
 
-```js
-// stores/counter.js
-import { defineStore } from 'pinia';
-
-export const useCounterStore = defineStore('counter', {
-	state: () => ({
-		count: 0,
-		todos: [],
-	}),
-
-	actions: {
-		increment() {
-			this.count++;
-		},
-
-		async fetchTodos() {
-			this.todos = await $fetch('/api/todos');
-		},
-	},
-
-	getters: {
-		doubleCount: (state) => state.count * 2,
-	},
-});
-```
+-   State (reactive data)
+-   Actions (methods that change state)
+-   Getters (computed values based on state)
 
 ## Data Fetching
 
@@ -225,231 +124,64 @@ Nuxt provides several ways to fetch data:
 
 ### useAsyncData
 
-Fetch data before a component renders:
-
-```js
-const { data, pending, refresh } = await useAsyncData(
-	'users', // Unique key
-	() => $fetch('/api/users')
-);
-```
+Fetch data before a component renders, with caching and server-side support.
 
 ### useFetch
 
-Simplified API for common fetch scenarios:
-
-```js
-const { data, pending, error, refresh } = await useFetch('/api/users', {
-	// Options
-	method: 'POST',
-	body: { name: 'John' },
-	query: { limit: 10 },
-	headers: { 'Content-Type': 'application/json' },
-});
-```
+Simplified API for common fetch scenarios, with automatic key generation.
 
 ### Server-Only Data Fetching
 
-For improved security and performance:
-
-```js
-// server/utils/db.js
-export const getUsers = () => {
-	// This code only runs on the server
-	return db.query('SELECT * FROM users');
-};
-
-// pages/users.vue
-const { data } = await useAsyncData('users', () => {
-	return $fetch('/api/users');
-});
-```
+For improved security and performance, certain operations can be restricted to server-side code only.
 
 ## Server Routes
 
-Define API endpoints in the `server/api` directory:
-
-```js
-// server/api/users/index.get.js
-export default defineEventHandler(async (event) => {
-  // This only runs on the server
-  const users = await db.query('SELECT * FROM users');
-  return users;
-});
-
-// server/api/users/[id].get.js
-export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
-  const user = await db.query('SELECT * FROM users WHERE id = ?', [id]);
-  return user;
-});
-```
+Define API endpoints in the `server/api` directory with automatic route mapping based on file names and HTTP methods.
 
 ## Layouts and Page Structure
 
-Nuxt provides a layered approach to page structure:
+Nuxt provides a layered approach to page structure with:
 
-```vue
-<!-- layouts/default.vue -->
-<template>
-	<div>
-		<AppHeader />
-		<main>
-			<slot />
-			<!-- Page content goes here -->
-		</main>
-		<AppFooter />
-	</div>
-</template>
-
-<!-- pages/index.vue -->
-<template>
-	<div>
-		<h1>Home Page</h1>
-		<p>Welcome to my Nuxt app</p>
-	</div>
-</template>
-
-<script setup>
-// Use a specific layout
-definePageMeta({
-	layout: 'custom',
-});
-</script>
-```
+-   Default layouts
+-   Custom layouts per page
+-   Nested layouts
+-   Layout transitions
 
 ## Modularity and Organization
 
-For large Nuxt applications, consider organizing by feature:
-
-```
-src/
-├── components/
-│   ├── ui/                # Design system components
-│   └── common/            # Shared components
-├── features/
-│   ├── auth/
-│   │   ├── components/    # Auth-specific components
-│   │   ├── composables/   # Auth-specific composables
-│   │   └── stores/        # Auth-specific stores
-│   └── products/
-│       ├── components/
-│       ├── composables/
-│       └── stores/
-├── layouts/
-├── pages/
-└── server/
-    ├── api/
-    │   ├── auth/
-    │   └── products/
-    └── utils/
-```
+For large Nuxt applications, consider organizing by feature instead of technical role to improve maintainability and code cohesion.
 
 ## Plugins
 
-Use plugins to add global functionality:
+Use plugins to add global functionality to the application. Plugins can:
 
-```js
-// plugins/api.js
-export default defineNuxtPlugin((nuxtApp) => {
-	const apiClient = {
-		async get(url) {
-			return $fetch(url);
-		},
-		async post(url, data) {
-			return $fetch(url, {
-				method: 'POST',
-				body: data,
-			});
-		},
-	};
-
-	// Make available throughout the app
-	return {
-		provide: {
-			api: apiClient,
-		},
-	};
-});
-
-// Use in components
-<script setup>
-	const {$api} = useNuxtApp(); const data = await $api.get('/users');
-</script>;
-```
+-   Extend the Vue instance
+-   Register global components
+-   Provide functions to the application
+-   Initialize external libraries
 
 ## Composables
 
-Create reusable logic with composables:
-
-```js
-// composables/useAuth.js
-export function useAuth() {
-	const user = useState('user', () => null);
-	const isAuthenticated = computed(() => !!user.value);
-
-	async function login(credentials) {
-		const response = await $fetch('/api/auth/login', {
-			method: 'POST',
-			body: credentials,
-		});
-
-		user.value = response.user;
-		return response;
-	}
-
-	function logout() {
-		user.value = null;
-		return navigateTo('/login');
-	}
-
-	return {
-		user,
-		isAuthenticated,
-		login,
-		logout,
-	};
-}
-```
+Create reusable logic with composables to share functionality across components.
 
 ## SEO and Meta Tags
 
-Manage SEO with the `useHead` composable:
+Manage SEO with the `useHead` composable to set:
 
-```vue
-<script setup>
-useHead({
-	title: 'My Nuxt App',
-	meta: [
-		{ name: 'description', content: 'Welcome to my Nuxt application' },
-		{ property: 'og:title', content: 'My Nuxt App' },
-		{
-			property: 'og:description',
-			content: 'Welcome to my Nuxt application',
-		},
-		{ property: 'og:image', content: '/social-image.jpg' },
-	],
-	link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
-});
-</script>
-```
+-   Title and meta tags
+-   Open Graph and social media tags
+-   Link tags
+-   Script tags
+-   HTML attributes
 
 ## Error Handling
 
-Nuxt provides built-in error handling:
+Nuxt provides built-in error handling with:
 
--   Create `error.vue` in the root directory for a custom error page
--   Use `createError` to create standardized errors:
-
-```js
-if (!user) {
-	throw createError({
-		statusCode: 404,
-		statusMessage: 'User not found',
-		fatal: true,
-	});
-}
-```
+-   Custom error pages
+-   Standardized error objects
+-   Error handling in data fetching
+-   Server-side error logging
 
 ## Performance Patterns
 
