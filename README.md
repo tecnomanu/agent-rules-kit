@@ -4,6 +4,14 @@
   <img src="assets/banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/npm/v/agent-rules-kit.svg" alt="Version" />
+  <img src="https://img.shields.io/npm/dm/agent-rules-kit.svg" alt="Downloads" />
+  <img src="https://img.shields.io/github/license/tecnomanu/agent-rules-kit" alt="License" />
+  <img src="https://img.shields.io/github/last-commit/tecnomanu/agent-rules-kit" alt="Last Commit" />
+  <img src="https://img.shields.io/github/workflow/status/tecnomanu/agent-rules-kit/CI" alt="Build Status" />
+</p>
+
 > Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.
 
 ## What is Agent Rules Kit?
@@ -14,9 +22,9 @@ different technology stacks.
 
 ## 📚 Table of Contents
 
-1. [Quick Start](#quick-start)
-2. [New Architecture](#new-architecture)
-3. [New Features](#new-features)
+1. [Quick Start](#-quick-start)
+2. [New Architecture](#-new-architecture)
+3. [New Features](#-new-features)
 4. [Supported Stacks](#supported-stacks)
 5. [Implementation Status](#implementation-status)
 6. [Contributing](#contributing)
@@ -113,14 +121,14 @@ We've completely redesigned the internal architecture to provide a more maintain
 | Stack                                                                                                                                 | Status                                | Features                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
 | <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>   | ![100%](https://progress-bar.dev/100) | Multiple architectures, version detection, casting rules            |
+| <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>         | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs   |
+| <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>    | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs |
+| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![90%](https://progress-bar.dev/90)   | Architecture options, state management, testing guidelines          |
 | <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/> | ![90%](https://progress-bar.dev/90)   | App & Pages router support, version detection, testing docs         |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>   | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                             |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>      | ![45%](https://progress-bar.dev/45)   | Base project structure, patterns documentation                      |
-| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![90%](https://progress-bar.dev/90)   | Architecture options, state management, testing guidelines          |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>            | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                           |
-| <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>         | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs   |
 | <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>         | ![20%](https://progress-bar.dev/20)   | Basic configuration                                                 |
-| <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>    | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs |
 
 </p>
 
