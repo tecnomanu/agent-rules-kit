@@ -1,6 +1,6 @@
 ---
 description: Version information for Vue applications
-globs: '<root>/src/**/*.vue,<root>/package.json'
+globs: <root>/src/**/*.vue,<root>/package.json
 alwaysApply: true
 ---
 

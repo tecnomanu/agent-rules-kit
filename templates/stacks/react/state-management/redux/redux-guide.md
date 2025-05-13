@@ -1,3 +1,9 @@
+---
+description: Guide for using Redux state management in React applications
+globs: <root>/src/**/*.{ts,tsx,js,jsx}
+alwaysApply: false
+---
+
 # Redux State Management in React
 
 Redux is a predictable state container for JavaScript applications, commonly used with React. It helps you manage global application state in a predictable and maintainable way.

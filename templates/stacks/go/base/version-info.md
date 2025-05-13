@@ -1,6 +1,6 @@
 ---
 description: Version information for Go applications
-globs: '<root>/**/*.go,<root>/go.mod'
+globs: <root>/**/*.go,<root>/go.mod
 alwaysApply: true
 ---
 

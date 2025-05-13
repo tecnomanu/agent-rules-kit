@@ -1,3 +1,9 @@
+---
+description: Guidelines for using Angular Signals in Angular 16-17
+globs: <root>/src/**/*.ts
+alwaysApply: false
+---
+
 # Angular Signals (Angular 16-17)
 
 This project uses Angular Signals, introduced in Angular 16 and enhanced in Angular 17. Follow these guidelines for state management.

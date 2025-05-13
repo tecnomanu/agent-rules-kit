@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Svelte applications
-globs: '<root>/src/**/*.svelte,<root>/src/**/*.{js,ts}'
+globs: <root>/src/**/*.svelte,<root>/src/**/*.{js,ts}
 alwaysApply: false
 ---
 

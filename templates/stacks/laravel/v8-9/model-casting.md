@@ -1,6 +1,6 @@
 ---
 description: Model casting features in Laravel 8-9
-globs: '<root>/app/Models/**/*.php'
+globs: <root>/app/Models/**/*.php
 alwaysApply: false
 ---
 
