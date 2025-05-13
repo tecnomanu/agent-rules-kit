@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/npm/dm/agent-rules-kit.svg" alt="Downloads" />
   <img src="https://img.shields.io/github/license/tecnomanu/agent-rules-kit" alt="License" />
   <img src="https://img.shields.io/github/last-commit/tecnomanu/agent-rules-kit" alt="Last Commit" />
-  <img src="https://img.shields.io/github/workflow/status/tecnomanu/agent-rules-kit/CI" alt="Build Status" />
+  <img src="https://img.shields.io/github/actions/workflow/status/tecnomanu/agent-rules-kit/CI" alt="Build Status" />
 </p>
 
 > Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.
@@ -125,10 +125,10 @@ We've completely redesigned the internal architecture to provide a more maintain
 | <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>    | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs |
 | <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>         | ![90%](https://progress-bar.dev/90)   | Architecture options, state management, testing guidelines          |
 | <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/> | ![90%](https://progress-bar.dev/90)   | App & Pages router support, version detection, testing docs         |
+| <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>         | ![60%](https://progress-bar.dev/60)   | Content collections, static/dynamic content, integration guides     |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>   | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                             |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>      | ![45%](https://progress-bar.dev/45)   | Base project structure, patterns documentation                      |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>            | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                           |
-| <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>         | ![20%](https://progress-bar.dev/20)   | Basic configuration                                                 |
 
 </p>
 

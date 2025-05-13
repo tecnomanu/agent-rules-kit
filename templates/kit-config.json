@@ -356,9 +356,42 @@
 				"range_name": "v3"
 			}
 		},
+		"globs": [
+			"<root>/src/**/*.astro",
+			"<root>/src/**/*.{ts,tsx,js,jsx}",
+			"<root>/src/content/**/*.{md,mdx}",
+			"<root>/astro.config.{js,mjs,ts}"
+		],
+		"pattern_rules": {
+			"<root>/astro.config.{js,mjs,ts}": [
+				"stacks/astro/base/architecture-concepts.md"
+			],
+			"<root>/src/components/**/*.astro": [
+				"stacks/astro/base/naming-conventions.md",
+				"stacks/astro/base/best-practices.md"
+			],
+			"<root>/src/layouts/**/*.astro": [
+				"stacks/astro/base/architecture-concepts.md"
+			],
+			"<root>/src/pages/**/*.astro": [
+				"stacks/astro/base/best-practices.md"
+			],
+			"<root>/src/content/**/*.{md,mdx}": [
+				"stacks/astro/v2/astro-v2-features.md",
+				"stacks/astro/v3/astro-v3-features.md"
+			],
+			"<root>/tests/**/*.{test,spec}.{js,ts}": [
+				"stacks/astro/base/testing-best-practices.md"
+			]
+		},
 		"architectures": {
 			"standard": {
-				"name": "Standard Astro Architecture"
+				"name": "Standard Astro Architecture",
+				"pattern_rules": {
+					"<root>/src/**/*.astro": [
+						"stacks/astro/architectures/standard/standard-architecture.md"
+					]
+				}
 			}
 		}
 	},
