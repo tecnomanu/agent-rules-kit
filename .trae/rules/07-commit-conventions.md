@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
+
 # Commit Conventions
 
 This document outlines the commit conventions used in the Agent Rules Kit project. We use **semantic-release** for automated versioning and CHANGELOG generation.
@@ -16,7 +17,7 @@ This document outlines the commit conventions used in the Agent Rules Kit projec
 We follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) specification with emojis:
 
 ```
-<emoji> <type>[(scope)]: <description>
+<type>[(scope)]: <emoji> <description>
 
 [optional body]
 
@@ -25,25 +26,27 @@ We follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) spe
 
 ## Emojis and Types
 
-Always include an appropriate emoji as the first character of your commit message, followed by the type.
+Always include an appropriate emoji at the first of your commit message description, before the type and description.
 
 ### Versioning Commits (affect semver)
 
 When your changes affect the semantic versioning of the package, use these types:
 
-| Emoji | Type | Description | Versioning Impact |
-|-------|------|-------------|------------------|
-| ✨ | feat | New feature | MINOR |
-| 🐛 | fix | Bug fix | PATCH |
-| 🎉 | feat or fix | Breaking change (with BREAKING CHANGE footer) | MAJOR |
+| Emoji | Type        | Description                                   | Versioning Impact |
+| ----- | ----------- | --------------------------------------------- | ----------------- |
+| ✨    | feat        | New feature                                   | MINOR             |
+| 🐛    | fix         | Bug fix                                       | PATCH             |
+| 🎉    | feat or fix | Breaking change (with BREAKING CHANGE footer) | MAJOR             |
 
 For major version bumps (BREAKING CHANGES), you MUST:
+
 1. Use a normal type (like `feat` or `fix` without exclamation mark)
 2. Include a `BREAKING CHANGE:` section in the footer
 
 Example:
+
 ```
-🎉 feat: redesign user authentication system
+feat:  🎉 redesign user authentication system
 
 Complete overhaul of authentication flow and API
 
@@ -56,20 +59,21 @@ BREAKING CHANGE: The auth token format has changed and all clients will need to 
 
 For changes that don't affect the version number:
 
-| Emoji | Type | Description |
-|-------|------|-------------|
-| 📝 | docs | Documentation changes |
-| 🔧 | chore | Maintenance tasks |
-| ♻️ | refactor | Code changes that neither fix bugs nor add features |
-| 🎨 | style | Code style/formatting changes |
-| ⚡️ | perf | Performance improvements |
-| ✅ | test | Adding or correcting tests |
-| 🔨 | build | Build system changes |
-| 🚀 | ci | CI configuration changes |
+| Emoji | Type     | Description                                         |
+| ----- | -------- | --------------------------------------------------- |
+| 📝    | docs     | Documentation changes                               |
+| 🔧    | chore    | Maintenance tasks                                   |
+| ♻️    | refactor | Code changes that neither fix bugs nor add features |
+| 🎨    | style    | Code style/formatting changes                       |
+| ⚡️   | perf     | Performance improvements                            |
+| ✅    | test     | Adding or correcting tests                          |
+| 🔨    | build    | Build system changes                                |
+| 🚀    | ci       | CI configuration changes                            |
 
 Example:
+
 ```
-📝 docs: update README with new architecture documentation
+docs: 📝 update README with new architecture documentation
 ```
 
 ## Best Practices
@@ -84,7 +88,8 @@ Example:
 ## Branch Naming
 
 Follow a similar convention for branch names:
-- `feature/short-description` - For new features
-- `fix/issue-description` - For bug fixes
-- `docs/update-area` - For documentation updates
-- `refactor/component-name` - For refactoring
+
+-   `feature/short-description` - For new features
+-   `fix/issue-description` - For bug fixes
+-   `docs/update-area` - For documentation updates
+-   `refactor/component-name` - For refactoring

@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
+
 # Architecture Management
 
 This document explains how different architecture styles are managed for each stack in Agent Rules Kit.
@@ -62,7 +63,7 @@ Architectures are configured in `templates/kit-config.json`:
     ],
     "architectures": {
       "standard": {
-        "name": "Standard Architecture", 
+        "name": "Standard Architecture",
         "globs": [...],
         "pattern_rules": {...}
       },
@@ -78,13 +79,13 @@ Architectures are configured in `templates/kit-config.json`:
 
 Key configuration properties:
 
-- `default_architecture`: The default architecture to use if none is specified
-- `version_ranges`: Maps major versions to version range information
-  - `name`: Human-readable name for the version range
-  - `range_name`: Identifier used for version-specific directories
-- `globs`: File patterns to apply rules to
-- `architectures`: Available architecture styles for the stack
-  - Each architecture can have its own `globs` and `pattern_rules`
+-   `default_architecture`: The default architecture to use if none is specified
+-   `version_ranges`: Maps major versions to version range information
+    -   `name`: Human-readable name for the version range
+    -   `range_name`: Identifier used for version-specific directories
+-   `globs`: File patterns to apply rules to
+-   `architectures`: Available architecture styles for the stack
+    -   Each architecture can have its own `globs` and `pattern_rules`
 
 ## Architecture Selection
 
