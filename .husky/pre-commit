@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/zsh -i
 . "$(dirname -- "$0")/_/husky.sh"
-
 
 pnpm test
