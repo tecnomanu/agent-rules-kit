@@ -95,6 +95,12 @@ const version = packageJson.version;
  * Display project information
  */
 function showProjectInfo() {
+    // Get available stacks dynamically from the service
+    const availableStacks = stackService.getAvailableStacks();
+    const formattedStacks = availableStacks
+        .map(stack => `  - ${stack.charAt(0).toUpperCase() + stack.slice(1)}`)
+        .join('\n');
+
     const infoText = `
 ${chalk.bold('Agent Rules Kit')} ${chalk.blue(`v${version}`)}
 
@@ -104,17 +110,7 @@ ${chalk.green('Description:')}
   for multiple frameworks and architectures.
 
 ${chalk.green('Supported Stacks:')}
-  - Laravel
-  - Next.js
-  - React
-  - Angular
-  - Vue
-  - Nuxt
-  - Svelte
-  - SvelteKit
-  - Astro
-  - NestJS
-  - Generic
+${formattedStacks}
 
 ${chalk.green('Usage:')}
   npx agent-rules-kit            # Interactive mode
