@@ -26,6 +26,7 @@ const templatesDir = path.join(__dirname, '../templates');
 const args = process.argv.slice(2);
 const debugMode = args.includes('--debug');
 const updateFlag = args.includes('--update');
+const infoFlag = args.includes('--info');
 
 // Initialize essential services
 const baseService = new BaseService({ debug: debugMode });
@@ -91,10 +92,56 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
 /**
+ * Display project information
+ */
+function showProjectInfo() {
+    const infoText = `
+${chalk.bold('Agent Rules Kit')} ${chalk.blue(`v${version}`)}
+
+${chalk.green('Description:')}
+  Bootstrap Cursor rules (.mdc) for AI agent-guided projects.
+  This tool helps you generate and maintain project-specific rules
+  for multiple frameworks and architectures.
+
+${chalk.green('Supported Stacks:')}
+  - Laravel
+  - Next.js
+  - React
+  - Angular
+  - Vue
+  - Nuxt
+  - Svelte
+  - SvelteKit
+  - Astro
+  - NestJS
+  - Generic
+
+${chalk.green('Usage:')}
+  npx agent-rules-kit            # Interactive mode
+  npx agent-rules-kit --update   # Update existing rules
+  npx agent-rules-kit --info     # Show this information
+
+${chalk.green('Repository:')}
+  https://github.com/tecnomanu/agent-rules-kit
+
+${chalk.green('Author:')}
+  Manuel Bruña
+`;
+
+    console.log(infoText);
+}
+
+/**
  * Main function
  */
 async function main() {
     cliService.showBanner(`🚀 Agent Rules Kit v${version}`, true);
+
+    // Handle info flag
+    if (infoFlag) {
+        showProjectInfo();
+        return;
+    }
 
     // Handle update flag
     if (updateFlag) {
