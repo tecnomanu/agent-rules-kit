@@ -1,34 +1,34 @@
-# Guía de Optimización de Rendimiento
+# Performance Optimization Guide
 
-## Introducción
+## Introduction
 
-Este documento describe las optimizaciones de rendimiento implementadas en el Agent Rules Kit y proporciona recomendaciones para los contribuidores que quieran mantener un alto nivel de rendimiento en futuras versiones.
+This document describes the performance optimizations implemented in Agent Rules Kit and provides recommendations for contributors who want to maintain a high level of performance in future versions.
 
-## Optimizaciones implementadas
+## Implemented Optimizations
 
-### 1. Carga dinámica de servicios
+### 1. Dynamic Service Loading
 
-En lugar de cargar todos los servicios de pila al inicio, ahora se cargan dinámicamente bajo demanda:
+Instead of loading all stack services at startup, they are now dynamically loaded on demand:
 
 ```javascript
-// Antes: Carga estática de todos los servicios
+// Before: Static loading of all services
 import { AngularService } from './services/angular-service.js';
 import { LaravelService } from './services/laravel-service.js';
 import { NextjsService } from './services/nextjs-service.js';
 import { ReactService } from './services/react-service.js';
 
-// Después: Carga dinámica con caché
+// After: Dynamic loading with cache
 async function loadStackService(stack) {
-	// Retorna desde caché si ya fue cargado
+	// Return from cache if already loaded
 	if (stackServices.has(stack)) {
 		return stackServices.get(stack);
 	}
 
-	// Importa dinámicamente el servicio requerido
+	// Dynamically import the required service
 	const servicePath = `./services/${stack}-service.js`;
 	const serviceModule = await import(servicePath);
 
-	// Instanciar y cachear el servicio
+	// Instantiate and cache the service
 	const ServiceClass =
 		serviceModule[
 			`${stack.charAt(0).toUpperCase() + stack.slice(1)}Service`
@@ -37,22 +37,22 @@ async function loadStackService(stack) {
 }
 ```
 
-Beneficios:
+Benefits:
 
--   Tiempo de inicio más rápido
--   Menor uso de memoria cuando solo se necesita un servicio
--   Carga más rápida en sistemas con recursos limitados
+-   Faster startup time
+-   Lower memory usage when only one service is needed
+-   Faster loading on systems with limited resources
 
-### 2. Sistema de caché para plantillas
+### 2. Template Caching System
 
-Se implementó un sistema de caché para evitar cargar repetidamente las mismas plantillas:
+A caching system was implemented to avoid repeatedly loading the same templates:
 
 ```javascript
 class TemplateCache {
 	constructor(options = {}) {
 		this.cache = new Map();
 		this.maxSize = options.maxSize || 100;
-		this.ttl = options.ttl || 300000; // 5 minutos
+		this.ttl = options.ttl || 300000; // 5 minutes
 	}
 
 	get(key) {
@@ -67,41 +67,41 @@ class TemplateCache {
 }
 ```
 
-Beneficios:
+Benefits:
 
--   Reducción de operaciones I/O repetitivas
--   Menor tiempo de generación para reglas con plantillas comunes
--   Control de memoria mediante límite de tamaño y TTL
+-   Reduction of repetitive I/O operations
+-   Faster generation time for rules with common templates
+-   Memory control through size limits and TTL
 
-### 3. Operaciones asíncronas de archivo
+### 3. Asynchronous File Operations
 
-Se reemplazaron las operaciones de archivo síncronas por asíncronas:
+Synchronous file operations were replaced with asynchronous ones:
 
 ```javascript
-// Antes
+// Before
 const files = this.getFilesInDirectory(tmplDir);
 files.forEach((f) => {
-	// Operaciones síncronas
+	// Synchronous operations
 });
 
-// Después
+// After
 const files = await this.getFilesInDirectoryAsync(tmplDir);
 await Promise.all(
 	batch.map(async (f) => {
-		// Operaciones asíncronas
+		// Asynchronous operations
 	})
 );
 ```
 
-Beneficios:
+Benefits:
 
--   Mejor rendimiento en sistemas con I/O lento
--   No bloquea el hilo principal
--   Mejor manejo de errores
+-   Better performance on systems with slow I/O
+-   Doesn't block the main thread
+-   Better error handling
 
-### 4. Procesamiento en lotes
+### 4. Batch Processing
 
-Para mejorar el manejo de memoria, se procesan los archivos en lotes:
+To improve memory handling, files are processed in batches:
 
 ```javascript
 async processBatch(items, processFn, batchSize = 10) {
@@ -114,7 +114,7 @@ async processBatch(items, processFn, batchSize = 10) {
         );
         results.push(...batchResults);
 
-        // Permitir que el event loop maneje otras tareas
+        // Allow event loop to handle other tasks
         if (i + batchSize < items.length) {
             await new Promise(resolve => setTimeout(resolve, 0));
         }
@@ -124,15 +124,15 @@ async processBatch(items, processFn, batchSize = 10) {
 }
 ```
 
-Beneficios:
+Benefits:
 
--   Menor pico de memoria en proyectos grandes
--   Responsividad mejorada durante la generación
--   Evita problemas de "agotamiento de memoria"
+-   Lower memory peak in large projects
+-   Improved responsiveness during generation
+-   Avoids "memory exhaustion" issues
 
-### 5. Actualizaciones incrementales
+### 5. Incremental Updates
 
-Se implementó un sistema para regenerar solo las reglas que han cambiado:
+A system was implemented to regenerate only rules that have changed:
 
 ```javascript
 async needsUpdate(srcFile, destFile) {
@@ -144,27 +144,27 @@ async needsUpdate(srcFile, destFile) {
 
         return srcStat.mtime > destStat.mtime;
     } catch (error) {
-        return true; // En caso de duda, actualizar
+        return true; // When in doubt, update
     }
 }
 ```
 
-Beneficios:
+Benefits:
 
--   Generación más rápida durante actualizaciones
--   Menos operaciones I/O cuando solo cambian algunas reglas
--   Mejor experiencia para desarrollo iterativo
+-   Faster generation during updates
+-   Fewer I/O operations when only some rules change
+-   Better experience for iterative development
 
-### 6. Optimización para archivos grandes
+### 6. Optimization for Large Files
 
-Para archivos grandes, usamos un enfoque optimizado:
+For large files, we use an optimized approach:
 
 ```javascript
 async readFileOptimized(filePath) {
-    // Verificar tamaño para determinar estrategia
+    // Check size to determine strategy
     const stats = await fsPromises.stat(filePath);
 
-    // Para archivos grandes (>1MB), usar streaming
+    // For large files (>1MB), use streaming
     if (stats.size > 1024 * 1024) {
         return new Promise((resolve, reject) => {
             let data = '';
@@ -176,85 +176,85 @@ async readFileOptimized(filePath) {
         });
     }
 
-    // Para archivos pequeños, leer de una vez
+    // For small files, read at once
     return await fsPromises.readFile(filePath, 'utf8');
 }
 ```
 
-Beneficios:
+Benefits:
 
--   Menor uso de memoria para plantillas grandes
--   Mejor rendimiento al manejar archivos grandes
--   Evita bloqueos al cargar archivos extensos
+-   Lower memory usage for large templates
+-   Better performance when handling large files
+-   Avoids blocking when loading extensive files
 
-## Buenas prácticas para contribuidores
+## Best Practices for Contributors
 
-Al contribuir al proyecto, tenga en cuenta estas recomendaciones para mantener un buen rendimiento:
+When contributing to the project, keep these recommendations in mind to maintain good performance:
 
-1. **Priorizar operaciones asíncronas**: Use siempre métodos asíncronos para operaciones I/O.
+1. **Prioritize asynchronous operations**: Always use async methods for I/O operations.
 
-2. **Evitar cargas innecesarias**: No cargue recursos (como plantillas o servicios) hasta que sean necesarios.
+2. **Avoid unnecessary loading**: Don't load resources (like templates or services) until they are needed.
 
-3. **Utilizar procesamiento en lotes**: Para operaciones grandes, divida el trabajo en lotes manejables.
+3. **Use batch processing**: For large operations, divide the work into manageable batches.
 
-4. **Cachear resultados frecuentes**: Use el sistema de caché para resultados que se consultan repetidamente.
+4. **Cache frequent results**: Use the cache system for results that are queried repeatedly.
 
-5. **Verificar operaciones redundantes**: Evite leer/escribir el mismo archivo múltiples veces.
+5. **Check for redundant operations**: Avoid reading/writing the same file multiple times.
 
-6. **Monitorear uso de memoria**: Tenga cuidado con la acumulación de objetos grandes en memoria.
+6. **Monitor memory usage**: Be careful with the accumulation of large objects in memory.
 
-7. **Medir el rendimiento**: Antes y después de cambios importantes, realice pruebas de rendimiento.
+7. **Measure performance**: Before and after significant changes, conduct performance tests.
 
-## Medición de rendimiento
+## Performance Measurement
 
-Para evaluar el rendimiento del proyecto, puede utilizar las siguientes técnicas:
+To evaluate the project's performance, you can use the following techniques:
 
-1. **Registro de tiempos**: Use `Date.now()` para medir el tiempo de operaciones críticas:
+1. **Time logging**: Use `Date.now()` to measure the time of critical operations:
 
 ```javascript
 const startTime = Date.now();
-// Operación a medir
+// Operation to measure
 const endTime = Date.now();
-console.log(`Operación completada en ${endTime - startTime}ms`);
+console.log(`Operation completed in ${endTime - startTime}ms`);
 ```
 
-2. **Monitoreo de memoria**: Use `process.memoryUsage()` para verificar el uso de memoria:
+2. **Memory monitoring**: Use `process.memoryUsage()` to check memory usage:
 
 ```javascript
 console.log(process.memoryUsage());
 ```
 
-3. **Perfilado**: Para análisis más detallado, use herramientas como:
+3. **Profiling**: For more detailed analysis, use tools such as:
     - Node.js Profiler
-    - Chrome DevTools cuando se ejecuta con `--inspect`
-    - Herramientas como `clinic.js`
+    - Chrome DevTools when running with `--inspect`
+    - Tools like `clinic.js`
 
-## Optimizaciones futuras
+## Future Optimizations
 
-Para versiones futuras, se pueden considerar las siguientes optimizaciones:
+For future versions, the following optimizations could be considered:
 
-1. **Workers paralelos**: Utilizar worker threads para tareas CPU-intensivas.
+1. **Parallel workers**: Use worker threads for CPU-intensive tasks.
 
-2. **Compilación de plantillas**: Pre-compilar plantillas frecuentes para una sustitución más rápida.
+2. **Template compilation**: Pre-compile frequent templates for faster substitution.
 
-3. **Carga diferida de configuración**: Cargar secciones de configuración solo cuando sean necesarias.
+3. **Deferred configuration loading**: Load configuration sections only when needed.
 
-4. **Indexación de plantillas**: Crear índices de plantillas para búsquedas más rápidas.
+4. **Template indexing**: Create template indexes for faster searches.
 
-5. **Compresión de caché**: Almacenar plantillas comprimidas en memoria para reducir el uso de RAM.
+5. **Cache compression**: Store compressed templates in memory to reduce RAM usage.
 
-## Consideraciones para proyectos grandes
+## Considerations for Large Projects
 
-Para proyectos con miles de archivos de reglas:
+For projects with thousands of rule files:
 
-1. **Modo de baja memoria**: Implementar un modo que sacrifique velocidad por menor uso de memoria.
+1. **Low memory mode**: Implement a mode that sacrifices speed for lower memory usage.
 
-2. **Fragmentación de reglas**: Dividir conjuntos de reglas grandes en grupos más pequeños.
+2. **Rule fragmentation**: Split large rule sets into smaller groups.
 
-3. **Reglas bajo demanda**: Cargar reglas solo cuando el agente las solicite, no todas al inicio.
+3. **On-demand rules**: Load rules only when the agent requests them, not all at startup.
 
-4. **Configuración adaptativa**: Ajustar automáticamente parámetros de rendimiento según el tamaño del proyecto.
+4. **Adaptive configuration**: Automatically adjust performance parameters based on project size.
 
 ---
 
-Al seguir estas prácticas y consideraciones, podemos mantener el Agent Rules Kit eficiente y responsivo, incluso para proyectos muy grandes y entornos con recursos limitados.
+By following these practices and considerations, we can keep Agent Rules Kit efficient and responsive, even for very large projects and environments with limited resources.
