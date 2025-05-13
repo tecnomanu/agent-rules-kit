@@ -1,3 +1,13 @@
+## [1.3.3](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.2...v1.3.3) (2025-05-13)
+
+
+### Bug Fixes
+
+* :sparkles: Add Astro documentation ([917755a](https://github.com/tecnomanu/agent-rules-kit/commit/917755a46800e89b7995aa23c93987081a593d23))
+* ✅ update documents globs attribute ([0e29c42](https://github.com/tecnomanu/agent-rules-kit/commit/0e29c42c044fcab965775cff54cdf9efb85bcc62))
+* 📝 Add Astro documentation with content collection and integration guides ([a6dcf4a](https://github.com/tecnomanu/agent-rules-kit/commit/a6dcf4afaece94ee6ce8e50fd363dcaf8d5b42c7))
+* 🔧 Remove pattern_rules and globs from kit-config.json ([d882b88](https://github.com/tecnomanu/agent-rules-kit/commit/d882b88f725f9810159163b1ad34d6701c76528b))
+
 ## [1.3.2](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.1...v1.3.2) (2025-05-13)
 
 
