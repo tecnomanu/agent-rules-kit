@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.3...v1.4.0) (2025-05-13)
+
+
+### Features
+
+* ✨ Add --info flag for project information display ([06f1547](https://github.com/tecnomanu/agent-rules-kit/commit/06f1547f7c49df2d47494f431010d92e328dc269))
+
 # [1.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.3.3...v1.4.0) (2025-05-14)
 
 ### Features
