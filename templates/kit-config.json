@@ -247,6 +247,12 @@
 		"architectures": {
 			"standard": {
 				"name": "Standard Go Architecture"
+			},
+			"ddd": {
+				"name": "Domain-Driven Design (DDD)"
+			},
+			"hexagonal": {
+				"name": "Hexagonal (Ports & Adapters)"
 			}
 		}
 	},

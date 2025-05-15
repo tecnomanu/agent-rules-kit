@@ -153,9 +153,11 @@ templates/stacks/[stack]/
 
 ### 11. Go (No especificado)
 
--   Crear estructura básica de documentación
--   Añadir mejores prácticas específicas para Go
--   Documentar patrones comunes en aplicaciones Go
+-   ✅ Crear estructura básica de documentación
+-   ✅ Añadir mejores prácticas específicas para Go
+-   ✅ Documentar patrones comunes en aplicaciones Go
+-   ✅ Implementar arquitecturas estándar, DDD y Hexagonal
+-   ✅ Crear documentación específica para versión 1.20+
 
 ## Progreso de Actualización
 
@@ -203,6 +205,29 @@ Próximos pasos para SvelteKit:
 -   Mejorar documentación de testing específica
 -   Añadir más ejemplos de casos de uso avanzados
 -   Completar integración con herramientas y bibliotecas del ecosistema
+
+### Go (13/05/2023)
+
+Se ha completado la implementación inicial de Go con un 75% de completitud:
+
+1. Se implementó la estructura base para el stack de Go
+2. Se crearon archivos completos de documentación de conceptos de arquitectura, mejores prácticas, convenciones de nombres y prácticas de testing
+3. Se implementaron tres arquitecturas:
+    - Arquitectura Estándar: Enfocada en servicios web RESTful con capas claras
+    - Domain-Driven Design (DDD): Implementación completa de conceptos de DDD en Go
+    - Hexagonal (Ports & Adapters): Implementación de la arquitectura hexagonal
+4. Se creó documentación específica para Go 1.20+ con detalles sobre:
+    - Características nuevas y mejoradas en versiones recientes
+    - Uso de generics, mejoras en error handling
+    - Patrones de implementación específicos de Go 1.20+
+5. Se ejecutaron pruebas con cli/test-cli.js para validar la implementación
+6. Se actualizó el README.md con el nuevo porcentaje de completitud (75%)
+
+Próximos pasos para Go:
+
+-   Añadir ejemplos más detallados para casos de uso complejos
+-   Completar guía para despliegue y observabilidad
+-   Refinar guías de rendimiento y optimización
 
 ## Proceso de actualización
 
