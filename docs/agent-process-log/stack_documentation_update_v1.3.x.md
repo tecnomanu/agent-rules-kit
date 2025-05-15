@@ -159,6 +159,14 @@ templates/stacks/[stack]/
 -   ✅ Implementar arquitecturas estándar, DDD y Hexagonal
 -   ✅ Crear documentación específica para versión 1.20+
 
+### 12. NestJS (15/05/2023)
+
+-   ✅ Crear estructura básica de documentación
+-   ✅ Añadir conceptos de arquitectura específicos
+-   ✅ Crear guías de implementación para NestJS 9.x y 10.x
+-   ✅ Implementar documentación para arquitectura estándar
+-   ✅ Implementar documentación para arquitectura de microservicios
+
 ## Progreso de Actualización
 
 ### Svelte (13/05/2023)
@@ -228,6 +236,19 @@ Próximos pasos para Go:
 -   Añadir ejemplos más detallados para casos de uso complejos
 -   Completar guía para despliegue y observabilidad
 -   Refinar guías de rendimiento y optimización
+
+### NestJS (15/05/2023)
+
+Se ha completado la implementación inicial de NestJS con un 75% de completitud:
+
+1. Se implementó la estructura base con documentación completa de conceptos de arquitectura y prácticas de testing
+2. Se crearon implementaciones detalladas para dos arquitecturas:
+    - Arquitectura Estándar: Organización por módulos, capas bien definidas, patrones de repositorio
+    - Arquitectura de Microservicios: Patrones de comunicación entre servicios, gestión de eventos, despliegue
+3. Se crearon guías de implementación específicas para versiones:
+    - NestJS 9.x: Autenticación, aplicaciones independientes, Apollo Federation 2.0, sistema de plugins
+    - NestJS 10.x: Soporte ESM, Node.js 20, TypeScript 5, mejoras en decoradores, manejo de respuestas y WebSockets
+4. Se actualizó la configuración en kit-config.json y se probó la implementación
 
 ## Proceso de actualización
 

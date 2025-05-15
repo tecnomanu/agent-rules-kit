@@ -75,17 +75,20 @@
 		"default_architecture": "standard",
 		"version_ranges": {
 			"9": {
-				"name": "NestJS 9",
+				"name": "NestJS 9.x",
 				"range_name": "v9"
 			},
 			"10": {
-				"name": "NestJS 10",
+				"name": "NestJS 10.x",
 				"range_name": "v10"
 			}
 		},
 		"architectures": {
 			"standard": {
 				"name": "Standard NestJS Architecture"
+			},
+			"microservices": {
+				"name": "Microservices Architecture"
 			}
 		}
 	},
