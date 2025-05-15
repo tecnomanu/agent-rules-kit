@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.3...v1.5.0) (2025-05-15)
+
+
+### Features
+
+* ✨ implementación completa del stack de Go con múltiples arquitecturas ([c7fa319](https://github.com/tecnomanu/agent-rules-kit/commit/c7fa31928fa4404cce5fdca0445317d8e8838c37))
+
 ## [1.4.3](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.2...v1.4.3) (2025-05-13)
 
 
