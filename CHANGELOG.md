@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.5.0...v1.6.0) (2025-05-15)
+
+
+### Features
+
+* ✨ implementación completa del stack de NestJS con arquitecturas standard y microservicios ([c92d8f7](https://github.com/tecnomanu/agent-rules-kit/commit/c92d8f7b1658d53a853c03fedb90abaa001cb35b))
+
 # [1.5.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.4.3...v1.5.0) (2025-05-15)
 
 
