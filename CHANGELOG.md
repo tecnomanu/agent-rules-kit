@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.6.0...v1.7.0) (2025-05-16)
+
+
+### Features
+
+* Add comprehensive guides for security, SEO, performance optimization, and testing in Nuxt 3 ([082d386](https://github.com/tecnomanu/agent-rules-kit/commit/082d3864924ce33e65d2174d91d22fe3d3ecdcbb))
+
 # [1.6.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.5.0...v1.6.0) (2025-05-15)
 
 
