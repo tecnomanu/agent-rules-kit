@@ -24,12 +24,10 @@ different technology stacks.
 
 Listen to a brief introduction about Agent Rules Kit:
 
-[English Version:](assets/podcast_en.wav)
-
 <p align="center">
   <strong>English Version:</strong><br/>
   <audio controls>
-    <source src="assets/podcast_en.wav" type="audio/wav">
+    <source src="assets/podcast_en.mp3" type="audio/mp3">
     Your browser does not support the audio element.
   </audio>
 </p>
@@ -37,7 +35,7 @@ Listen to a brief introduction about Agent Rules Kit:
 <p align="center">
   <strong>Spanish Version:</strong><br/>
   <audio controls>
-    <source src="assets/podcast_es.wav" type="audio/wav">
+    <source src="assets/podcast_es.mp3" type="audio/mp3">
     Your browser does not support the audio element.
   </audio>
 </p>
