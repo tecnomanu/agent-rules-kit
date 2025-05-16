@@ -27,7 +27,7 @@ Listen to a brief introduction about Agent Rules Kit:
 <p align="center">
   <strong>English Version:</strong><br/>
   <audio controls>
-    <source src="assets/podcast_en.mp3" type="audio/mp3">
+    <source src="assets/podcast_en.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 </p>
@@ -35,7 +35,7 @@ Listen to a brief introduction about Agent Rules Kit:
 <p align="center">
   <strong>Spanish Version:</strong><br/>
   <audio controls>
-    <source src="assets/podcast_es.mp3" type="audio/mp3">
+    <source src="assets/podcast_es.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 </p>
