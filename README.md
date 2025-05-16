@@ -24,21 +24,13 @@ different technology stacks.
 
 Listen to a brief introduction about Agent Rules Kit:
 
-<p align="center">
-  <strong>English Version:</strong><br/>
-  <audio controls>
-    <source src="assets/podcast_en.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-</p>
+https://github.com/user-attachments/assets/7d65c696-245d-421d-9ddc-90331a92c9b2
 
-<p align="center">
-  <strong>Spanish Version:</strong><br/>
-  <audio controls>
-    <source src="assets/podcast_es.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-</p>
+[English Version](assets/podcast_en.mp3)
+
+https://github.com/user-attachments/assets/8e91d651-c15f-4892-a250-684ab60d8594
+
+[Spanish Version](assets/podcast_es.mp3)
 
 ## 📚 Table of Contents
 
