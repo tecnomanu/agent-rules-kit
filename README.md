@@ -20,6 +20,26 @@ Agent Rules Kit is a CLI tool that facilitates the installation and configuratio
 AI-powered IDE. The rules help AI agents better understand the structure, patterns, and best practices of
 different technology stacks.
 
+## 🎧 Audio Introduction
+
+Listen to a brief introduction about Agent Rules Kit:
+
+<p align="center">
+  <strong>English Version:</strong><br/>
+  <audio controls>
+    <source src="assets/podcast_en.wav" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+</p>
+
+<p align="center">
+  <strong>Spanish Version:</strong><br/>
+  <audio controls>
+    <source src="assets/podcast_es.wav" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+</p>
+
 ## 📚 Table of Contents
 
 1. [Quick Start](#-quick-start)
