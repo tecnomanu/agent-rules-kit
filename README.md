@@ -24,6 +24,8 @@ different technology stacks.
 
 Listen to a brief introduction about Agent Rules Kit:
 
+[English Version:](assets/podcast_en.wav)
+
 <p align="center">
   <strong>English Version:</strong><br/>
   <audio controls>
