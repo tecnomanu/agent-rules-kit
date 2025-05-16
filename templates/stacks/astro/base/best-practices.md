@@ -1,7 +1,8 @@
 ---
 title: Astro Best Practices
-description: General best practices for Astro development
+description: Best practices for Astro projects
 tags: [Astro, Best Practices, Development]
+globs: ./**/*
 always: true
 ---
 
@@ -96,10 +97,46 @@ always: true
     - Ensure sufficient color contrast
     - Test with keyboard navigation
 
-## Avoiding Common Pitfalls
+## Content Strategy
 
-1. **Overusing Client Directives**: Only add hydration when necessary
-2. **Mixing Content and UI Logic**: Separate content from presentation
-3. **Inconsistent File Structure**: Follow a consistent naming and organization pattern
-4. **Ignoring TypeScript Benefits**: Use TypeScript for type safety
-5. **Neglecting Documentation**: Document complex components and functionality
+### Static Content Best Practices
+
+1. **Content Collections**
+    - Use TypeScript schemas for content validation
+    - Organize content by type (blog, products, docs)
+    - Leverage frontmatter for metadata
+
+```typescript
+// content/config.ts
+import { defineCollection, z } from 'astro:content';
+
+const blog = defineCollection({
+	type: 'content',
+	schema: z.object({
+		title: z.string(),
+		date: z.date(),
+		tags: z.array(z.string()),
+	}),
+});
+
+export const collections = { blog };
+```
+
+2. **Asset Optimization**
+
+    - Place static assets in `/public` only when needed
+    - Use `src/assets` for images that need optimization
+    - Enable image optimization in `astro.config.mjs`
+
+3. **Markdown/MDX Usage**
+    - Use regular Markdown for simple content
+    - Use MDX when you need component integration
+    - Consider creating custom components for repeated patterns
+
+### Dynamic Content Best Practices
+
+1. **Server-Side Rendering**
+    - Enable SSR only when needed:
+    ```js
+    // astro.config.mjs
+    ```

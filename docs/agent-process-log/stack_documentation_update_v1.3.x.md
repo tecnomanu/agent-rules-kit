@@ -49,19 +49,19 @@ Este documento debe mantenerse actualizado con cada avance para facilitar el seg
 
 Basado en el README del proyecto, el estado de implementación actual es:
 
-| Stack     | Porcentaje actual | Estado                                         |
-| --------- | ----------------- | ---------------------------------------------- |
-| Laravel   | 95%               | Casi completo, múltiples arquitecturas         |
-| Next.js   | 85%               | Buena cobertura, soporte para App/Pages router |
-| React     | 85%               | Buena cobertura, opciones de arquitectura      |
-| Angular   | 55%               | Soporte básico, incluye Signals                |
-| NestJS    | 45%               | Estructura básica del proyecto                 |
-| Vue       | 45%               | Guías de testing, conceptos arquitectura       |
-| Nuxt      | 40%               | Guías de testing, conceptos arquitectura       |
-| Svelte    | 70%               | Estructura base, V3-V5, componentes, runes     |
-| SvelteKit | 70%               | Routing, layouts, SSR/CSR, form actions        |
-| Astro     | 20%               | Configuración básica únicamente                |
-| Go        | No especificado   | Estado desconocido                             |
+| Stack     | Porcentaje actual | Estado                                          |
+| --------- | ----------------- | ----------------------------------------------- |
+| Laravel   | 95%               | Casi completo, múltiples arquitecturas          |
+| Next.js   | 85%               | Buena cobertura, soporte para App/Pages router  |
+| React     | 85%               | Buena cobertura, opciones de arquitectura       |
+| Angular   | 55%               | Soporte básico, incluye Signals                 |
+| NestJS    | 75%               | Documentación completa, múltiples arquitecturas |
+| Vue       | 45%               | Guías de testing, conceptos arquitectura        |
+| Nuxt      | 40%               | Guías de testing, conceptos arquitectura        |
+| Svelte    | 70%               | Estructura base, V3-V5, componentes, runes      |
+| SvelteKit | 70%               | Routing, layouts, SSR/CSR, form actions         |
+| Astro     | 20%               | Configuración básica únicamente                 |
+| Go        | 75%               | Documentación completa, múltiples arquitecturas |
 
 ## Estructura estándar de documentación
 

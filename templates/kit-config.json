@@ -75,20 +75,23 @@
 		"default_architecture": "standard",
 		"version_ranges": {
 			"9": {
-				"name": "NestJS 9.x",
-				"range_name": "v9"
+				"name": "NestJS 9-10",
+				"range_name": "v9-10"
 			},
 			"10": {
-				"name": "NestJS 10.x",
-				"range_name": "v10"
+				"name": "NestJS 9-10",
+				"range_name": "v9-10"
 			}
 		},
+		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"],
 		"architectures": {
 			"standard": {
-				"name": "Standard NestJS Architecture"
+				"name": "Standard Architecture",
+				"globs": ["<root>/src/**/*.ts"]
 			},
-			"microservices": {
-				"name": "Microservices Architecture"
+			"ddd": {
+				"name": "Domain-Driven Design",
+				"globs": ["<root>/src/**/*.ts"]
 			}
 		}
 	},
@@ -185,21 +188,23 @@
 		"default_architecture": "standard",
 		"version_ranges": {
 			"3": {
-				"name": "Svelte 3",
-				"range_name": "v3"
+				"name": "Svelte 3-5",
+				"range_name": "v3-5"
 			},
 			"4": {
-				"name": "Svelte 4",
-				"range_name": "v4"
+				"name": "Svelte 3-5",
+				"range_name": "v3-5"
 			},
 			"5": {
-				"name": "Svelte 5",
-				"range_name": "v5"
+				"name": "Svelte 3-5",
+				"range_name": "v3-5"
 			}
 		},
+		"globs": ["<root>/src/**/*.svelte", "<root>/src/**/*.ts"],
 		"architectures": {
 			"standard": {
-				"name": "Standard Svelte Architecture"
+				"name": "Standard Architecture",
+				"globs": ["<root>/src/**/*.{svelte,ts}"]
 			}
 		}
 	},
@@ -207,17 +212,22 @@
 		"default_architecture": "standard",
 		"version_ranges": {
 			"1": {
-				"name": "SvelteKit 1",
-				"range_name": "v1"
+				"name": "SvelteKit 1-2",
+				"range_name": "v1-2"
 			},
 			"2": {
-				"name": "SvelteKit 2",
-				"range_name": "v2"
+				"name": "SvelteKit 1-2",
+				"range_name": "v1-2"
 			}
 		},
+		"globs": [
+			"<root>/src/**/*.{svelte,ts}",
+			"<root>/routes/**/*.{svelte,ts}"
+		],
 		"architectures": {
 			"standard": {
-				"name": "Standard SvelteKit Architecture"
+				"name": "Standard Architecture",
+				"globs": ["<root>/src/**/*.{svelte,ts}"]
 			}
 		}
 	},
@@ -243,19 +253,31 @@
 		"default_architecture": "standard",
 		"version_ranges": {
 			"1.20": {
-				"name": "Go 1.20+",
-				"range_name": "v1.20+"
+				"name": "Go 1.20-1.22",
+				"range_name": "v1.20-1.22"
+			},
+			"1.21": {
+				"name": "Go 1.20-1.22",
+				"range_name": "v1.20-1.22"
+			},
+			"1.22": {
+				"name": "Go 1.20-1.22",
+				"range_name": "v1.20-1.22"
 			}
 		},
+		"globs": ["<root>/**/*.go", "!<root>/vendor/**"],
 		"architectures": {
 			"standard": {
-				"name": "Standard Go Architecture"
+				"name": "Standard Architecture",
+				"globs": ["<root>/**/*.go"]
 			},
 			"ddd": {
-				"name": "Domain-Driven Design (DDD)"
+				"name": "Domain-Driven Design",
+				"globs": ["<root>/**/*.go"]
 			},
 			"hexagonal": {
-				"name": "Hexagonal (Ports & Adapters)"
+				"name": "Hexagonal Architecture",
+				"globs": ["<root>/**/*.go"]
 			}
 		}
 	},

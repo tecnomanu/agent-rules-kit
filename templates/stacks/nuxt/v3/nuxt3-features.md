@@ -1,309 +1,275 @@
 ---
-description: Nuxt 3 specific features and best practices
-globs: <root>/app.vue,<root>/components/**/*.{vue,ts,js},<root>/nuxt.config.{js,ts}
-alwaysApply: false
+tAbtitle: Nuxt 3 Features and Best Practices
+description: Comprehensive guide for Nuxt 3 features and implementation patterns
+tags: [Nuxt, Vue, SSR, TypeScript]
+globs: ./**/*
+always: true
 ---
 
-# Nuxt 3 Specific Features
+# Nuxt 3 Features Guide
 
-This document outlines features and best practices specific to Nuxt 3 applications in {projectPath}.
+## Core Features
 
-## Key Nuxt 3 Features
+### 1. Composition API Integration
 
-### Composition API by Default
-
-Nuxt 3 fully embraces Vue 3's Composition API as the recommended approach:
-
-```vue
-<script setup>
-const count = ref(0);
-const doubleCount = computed(() => count.value * 2);
-
-function increment() {
-	count.value++;
-}
-</script>
-
-<template>
-	<div>
-		<p>Count: {{ count }}</p>
-		<p>Double: {{ doubleCount }}</p>
-		<button @click="increment">Increment</button>
-	</div>
-</template>
-```
-
-### TypeScript Support
-
-Nuxt 3 is built with TypeScript and provides excellent type support:
-
-```ts
-// types/index.ts
-export interface User {
-	id: string;
-	name: string;
-	email: string;
-}
-
-// In your component
-const user = ref<User | null>(null);
-
-// Type-safe props
-const props = defineProps<{
-	id: string;
-	required: boolean;
-	optional?: string;
-}>();
-```
-
-### Nitro Server Engine
-
-Nuxt 3 uses Nitro, a powerful server engine:
-
-```ts
-// server/api/hello.ts
-export default defineEventHandler((event) => {
-	return {
-		message: 'Hello World',
-	};
-});
-
-// server/api/data.post.ts
-export default defineEventHandler(async (event) => {
-	const body = await readBody(event);
-	return { received: body };
-});
-```
-
-### Improved File-based Routing
-
-Nuxt 3 enhances its file-based routing system:
-
-```
-pages/
-├── index.vue               # /
-├── about.vue               # /about
-├── posts/
-│   ├── index.vue           # /posts
-│   ├── [id].vue            # /posts/:id
-│   └── [...slug].vue       # /posts/** (catch-all)
-└── user-[group]/[id].vue   # /user-admin/123, /user-mod/456
-```
-
-### New Composables
-
-Nuxt 3 provides powerful built-in composables:
-
-```ts
-// Navigation
-const router = useRouter();
-const route = useRoute();
-await navigateTo('/dashboard');
-
-// Data fetching
-const { data: users } = await useFetch('/api/users');
-const { data: user } = await useFetch(() => `/api/users/${id.value}`);
-
-// Runtime config
-const config = useRuntimeConfig();
-console.log(config.public.apiBase);
-
-// Error handling
-throw createError({
-	statusCode: 404,
-	statusMessage: 'Page Not Found',
-});
-```
-
-### Server Components & Islands Architecture
-
-Nuxt 3 supports server-only components and islands:
-
-```vue
-<!-- components/ServerOnly.server.vue -->
-<script setup>
-// This code only runs on the server
-import { sensitiveOperation } from '~/server/utils';
-const result = sensitiveOperation();
-</script>
-
-<template>
-	<div>Result: {{ result }}</div>
-</template>
-```
-
-### Nuxt DevTools
-
-Nuxt 3 includes built-in DevTools:
-
-```ts
-// nuxt.config.ts
-export default defineNuxtConfig({
-	devtools: {
-		enabled: true,
-		timeline: true,
-		// other options
-	},
-});
-```
-
-## State Management in Nuxt 3
-
-### Shared State with useState
-
-```ts
-// Simple shared state
-const counter = useState('counter', () => 0);
-
-// More complex state
-const user = useState('user', () => ({
-	name: '',
-	loggedIn: false,
-	preferences: {},
-}));
-```
-
-### Pinia Integration
-
-```ts
-// stores/counter.ts
-export const useCounterStore = defineStore('counter', () => {
-	// State
+```typescript
+// composables/useCounter.ts
+export const useCounter = () => {
 	const count = ref(0);
+	const increment = () => count.value++;
+	const decrement = () => count.value--;
 
-	// Getters
-	const doubleCount = computed(() => count.value * 2);
-
-	// Actions
-	function increment() {
-		count.value++;
-	}
-
-	return { count, doubleCount, increment };
-});
+	return {
+		count: readonly(count),
+		increment,
+		decrement,
+	};
+};
 ```
 
-## API and Data Fetching
+### 2. Auto-imports
 
-### Handle API Requests
+-   Components in `components/` directory
+-   Composables in `composables/` directory
+-   Utils in `utils/` directory
+-   Server routes in `server/api/` directory
 
-```ts
-// With useFetch (recommended)
-const { data, pending, error, refresh } = await useFetch('/api/users', {
-	method: 'POST',
-	body: { name: 'John' },
-	pick: ['id', 'name'], // Pick specific properties
-	transform: (users) =>
-		users.map((user) => ({
-			...user,
-			fullName: `${user.firstName} ${user.lastName}`,
-		})),
-});
-
-// With useAsyncData for more control
-const { data, pending } = await useAsyncData('users', () =>
-	$fetch('/api/users', {
-		method: 'GET',
-		params: { limit: 10 },
-	})
-);
+```typescript
+// No imports needed
+const { count, increment } = useCounter();
+const { data } = await useFetch('/api/users');
 ```
 
-### Server-Only Data Operations
+### 3. Hybrid Rendering Modes
 
-```ts
-// server/utils/db.js
-export async function getUsers() {
-	// This runs only on the server
-	// Can safely connect to DB, use API keys, etc.
-	return await db.users.findMany();
-}
-
-// In your page
-const { data } = await useAsyncData('users', () => {
-	return $fetch('/api/users'); // This calls a server route
-});
-```
-
-## Modules and Configuration
-
-### Common Nuxt 3 Modules
-
-```ts
+```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
-	modules: [
-		'@pinia/nuxt',
-		'@nuxtjs/tailwindcss',
-		'@nuxtjs/color-mode',
-		'nuxt-icon',
-		'@nuxt/content',
-	],
-
-	// Module configuration
-	tailwindcss: {
-		cssPath: '~/assets/css/tailwind.css',
-		configPath: 'tailwind.config.js',
+	routeRules: {
+		'/': { prerender: true },
+		'/blog/**': { swr: 3600 },
+		'/admin/**': { ssr: false },
 	},
+});
+```
 
-	colorMode: {
-		classSuffix: '',
-	},
+### 4. Server Components and Utils
 
-	// Runtime config
-	runtimeConfig: {
-		// Server-only keys
-		apiSecret: process.env.API_SECRET,
+```typescript
+// server/utils/auth.ts
+export const verifyToken = (token: string) => {
+	// Implementation
+};
 
-		// Public keys
-		public: {
-			apiBase: process.env.API_BASE || '/api',
+// server/api/auth.ts
+export default defineEventHandler(async (event) => {
+	const { token } = await readBody(event);
+	return verifyToken(token);
+});
+```
+
+## Data Management
+
+### 1. State Management
+
+```typescript
+// stores/user.ts
+export const useUserStore = defineStore('user', {
+	state: () => ({
+		user: null,
+		isAuthenticated: false,
+	}),
+	actions: {
+		async login(credentials) {
+			// Implementation
 		},
 	},
 });
 ```
 
-## Performance Best Practices for Nuxt 3
+### 2. Data Fetching
 
-1. **Use Nuxt Image** for optimized images
+```typescript
+// pages/posts/[id].vue
+const route = useRoute();
+const { data: post } = await useFetch(`/api/posts/${route.params.id}`, {
+	transform: (post) => ({
+		...post,
+		createdAt: new Date(post.createdAt),
+	}),
+});
+```
 
-    ```vue
-    <nuxt-img src="/image.jpg" width="200" height="150" format="webp" />
-    ```
+## Performance Optimization
 
-2. **Implement Component Lazy Loading** for non-critical components
+### 1. Asset Handling
 
-    ```vue
-    <LazyMyHeavyComponent v-if="isVisible" />
-    ```
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+	image: {
+		provider: 'cloudinary',
+		cloudinary: {
+			baseURL: 'https://res.cloudinary.com/my-account',
+		},
+	},
+});
+```
 
-3. **Leverage Edge-Side Rendering** when applicable
+### 2. Lazy Loading
 
-    ```ts
-    export default defineNuxtConfig({
-    	nitro: {
-    		preset: 'vercel-edge',
-    	},
-    });
-    ```
+```vue
+<template>
+	<NuxtPage />
+	<LazyHeavyComponent v-if="shouldLoad" />
+</template>
+```
 
-4. **Use Suspense for Loading States**
+## Security Features
 
-    ```vue
-    <Suspense>
-      <template #default>
-        <AsyncComponent />
-      </template>
-      <template #fallback>
-        <LoadingSpinner />
-      </template>
-    </Suspense>
-    ```
+### 1. Runtime Config
 
-5. **Implement Proper Caching Strategies**
-    ```ts
-    const { data } = await useFetch('/api/data', {
-    	key: 'unique-key',
-    	getCachedData: (key) => sessionStorage.getItem(key),
-    });
-    ```
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+	runtimeConfig: {
+		apiSecret: '', // server-only
+		public: {
+			apiBase: '', // client & server
+		},
+	},
+});
+```
+
+### 2. Authentication Handling
+
+```typescript
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware((to) => {
+	const user = useUser(); // custom composable
+	if (!user.value && to.path !== '/login') {
+		return navigateTo('/login');
+	}
+});
+```
+
+## Development Tools
+
+### 1. DevTools Integration
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+	devtools: {
+		enabled: true,
+		timeline: true,
+	},
+});
+```
+
+### 2. TypeScript Support
+
+```typescript
+// types/index.d.ts
+declare module '#app' {
+	interface PageMeta {
+		requiresAuth?: boolean;
+	}
+}
+```
+
+## Testing Integration
+
+### 1. Component Testing
+
+```typescript
+// tests/MyComponent.test.ts
+import { mount } from '@vue/test-utils';
+import MyComponent from '~/components/MyComponent.vue';
+
+describe('MyComponent', () => {
+	test('renders properly', () => {
+		const wrapper = mount(MyComponent);
+		expect(wrapper.text()).toContain('Expected Text');
+	});
+});
+```
+
+### 2. API Testing
+
+```typescript
+// tests/api/users.test.ts
+import { describe, test, expect } from 'vitest';
+import { $fetch } from '@nuxt/test-utils';
+
+describe('/api/users', () => {
+	test('returns users list', async () => {
+		const users = await $fetch('/api/users');
+		expect(users).toBeInstanceOf(Array);
+	});
+});
+```
+
+## Error Handling
+
+### 1. Error Pages
+
+```vue
+<!-- error.vue -->
+<template>
+	<div>
+		<h1>{{ error.statusCode }}</h1>
+		<p>{{ error.message }}</p>
+		<button @click="handleError">Try Again</button>
+	</div>
+</template>
+
+<script setup>
+const error = useError();
+const handleError = () => clearError({ redirect: '/' });
+</script>
+```
+
+### 2. API Error Handling
+
+```typescript
+// server/middleware/error.ts
+export default defineEventHandler((event) => {
+	const error = getError(event);
+	if (error) {
+		setResponseStatus(event, error.statusCode || 500);
+		return {
+			statusCode: error.statusCode,
+			message: error.message,
+		};
+	}
+});
+```
+
+## Build Optimization
+
+### 1. Nitro Configuration
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+	nitro: {
+		preset: 'vercel',
+		minify: true,
+		compressPublicAssets: true,
+	},
+});
+```
+
+### 2. Module Integration
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+	modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxt/image'],
+	tailwindcss: {
+		cssPath: '~/assets/css/tailwind.css',
+		configPath: 'tailwind.config.js',
+	},
+});
+```
