@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.7.0...v1.8.0) (2025-05-25)
+
+
+### Features
+
+* Add initial support for React Native stack ([5f420b6](https://github.com/tecnomanu/agent-rules-kit/commit/5f420b6c287854edb8f6a589af884b557839cf84))
+* Add version-specific rule templates for React and Next.js ([02e0b41](https://github.com/tecnomanu/agent-rules-kit/commit/02e0b418f8271eea996446312fc7aeae7781c75b))
+
 # [1.7.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.6.0...v1.7.0) (2025-05-16)
 
 
