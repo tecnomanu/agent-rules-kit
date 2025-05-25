@@ -119,6 +119,36 @@
 			}
 		}
 	},
+	"react-native": {
+		"default_architecture": "standard",
+		"version_ranges": {
+			"0.60": {
+				"name": "React Native 0.60-0.69",
+				"range_name": "v0.6x"
+			},
+			"0.70": {
+				"name": "React Native 0.70+",
+				"range_name": "v0.7x"
+			}
+		},
+		"architectures": {
+			"standard": {
+				"name": "Standard React Native Structure"
+			}
+		},
+		"globs": [
+			"<root>/**/*.js",
+			"<root>/**/*.jsx",
+			"<root>/**/*.ts",
+			"<root>/**/*.tsx",
+			"<root>/app.json",
+			"<root>/app/(**/)*.{js,jsx,ts,tsx}",
+			"<root>/src/(**/)*.{js,jsx,ts,tsx}"
+		],
+		"pattern_rules": {
+			"version_detection": ["package.json"]
+		}
+	},
 	"vue": {
 		"default_architecture": "composition",
 		"version_ranges": {

@@ -119,6 +119,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 -   Laravel (v8-12)
 -   Next.js (v12-14)
 -   React (v17-18)
+-   React Native
 -   Angular (v14-17)
 -   NestJS
 -   Vue (v2-3)
@@ -138,6 +139,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>          | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs      |
 | <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>     | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs    |
 | <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>          | ![95%](https://progress-bar.dev/95)   | Architecture options, state management, testing guidelines, version-specific guidance (v18 concurrent features)             |
+| <img src="https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" width="100"/> | ![25%](https://progress-bar.dev/25) | Initial base rules (project structure, styling, navigation, state, platform code) |
 | <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/>  | ![95%](https://progress-bar.dev/95)   | App & Pages router support, version detection, testing docs, version-specific guidance (v13 API routes, v14 Server Components)            |
 | <img src="https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte" width="100"/>       | ![70%](https://progress-bar.dev/70)   | Component organization, runes (v5), lifecycle, state management        |
 | <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go" width="100"/>                   | ![75%](https://progress-bar.dev/75)   | Multiple architectures, project structure, error handling patterns     |
