@@ -1,236 +1,234 @@
-# Estructura de Proyecto NestJS
+---
+description: Recommended project structure for NestJS applications, detailing organization of modules, common code, configuration, and testing.
+globs: <root>/**/*.ts # General glob, as structure is broad
+alwaysApply: true
+---
 
-Este documento define las estructuras de proyecto recomendadas para aplicaciones NestJS.
+# NestJS Project Structure
 
-## Estructura Base
+This document defines recommended project structures for NestJS applications developed in {projectPath}.
 
-La estructura estándar recomendada para aplicaciones NestJS:
+## Base Structure
+
+The standard recommended structure for NestJS applications:
 
 ```
-proyecto/
-├── dist/                 # Código compilado
-├── node_modules/         # Dependencias
-├── src/                  # Código fuente
-│   ├── app.module.ts     # Módulo principal
-│   ├── app.controller.ts # Controlador principal
-│   ├── app.service.ts    # Servicio principal
-│   ├── main.ts           # Punto de entrada
-│   ├── common/           # Código compartido
-│   │   ├── constants/    # Constantes globales
-│   │   ├── decorators/   # Decoradores personalizados
-│   │   ├── dto/          # DTOs compartidos
-│   │   ├── entities/     # Entidades compartidas
-│   │   ├── enums/        # Enums globales
-│   │   ├── exceptions/   # Excepciones personalizadas
-│   │   ├── filters/      # Filtros globales
-│   │   ├── guards/       # Guards globales
-│   │   ├── interceptors/ # Interceptores globales
-│   │   ├── interfaces/   # Interfaces compartidas
-│   │   ├── middleware/   # Middleware personalizado
-│   │   ├── pipes/        # Pipes globales
-│   │   └── utils/        # Utilidades compartidas
-│   ├── config/           # Configuración de la aplicación
-│   │   ├── config.module.ts
-│   │   ├── config.service.ts
-│   │   └── configuration.ts
-│   └── modules/          # Módulos de la aplicación
-│       ├── users/        # Módulo de usuarios
-│       │   ├── dto/      # DTOs específicos del módulo
-│       │   ├── entities/ # Entidades específicas del módulo
+{projectPath}/
+├── dist/                 # Compiled code
+├── node_modules/         # Dependencies
+├── src/                  # Source code
+│   ├── app.module.ts     # Main module
+│   ├── app.controller.ts # Main controller (optional, can be removed if not needed)
+│   ├── app.service.ts    # Main service (optional)
+│   ├── main.ts           # Application entry point (bootstraps the app)
+│   ├── common/           # Shared code accessible across modules
+│   │   ├── constants/    # Global constants (e.g., roles, permissions)
+│   │   ├── decorators/   # Custom decorators
+│   │   ├── dto/          # Shared Data Transfer Objects
+│   │   ├── entities/     # Shared Entities (if applicable, less common for base structure)
+│   │   ├── enums/        # Global enums
+│   │   ├── exceptions/   # Custom global exceptions
+│   │   ├── filters/      # Global exception filters
+│   │   ├── guards/       # Global guards (e.g., authentication guard)
+│   │   ├── interceptors/ # Global interceptors (e.g., logging, response transformation)
+│   │   ├── interfaces/   # Shared TypeScript interfaces
+│   │   ├── middleware/   # Custom middleware functions/classes
+│   │   ├── pipes/        # Global pipes (e.g., custom validation pipe)
+│   │   └── utils/        # Shared utility functions
+│   ├── config/           # Application configuration (often using @nestjs/config)
+│   │   ├── config.module.ts    # Optional: if you create a dedicated ConfigModule
+│   │   ├── config.service.ts   # Optional: if you create a dedicated ConfigService
+│   │   └── configuration.ts    # Function to load and validate configuration
+│   └── modules/          # Feature modules (preferred over top-level feature directories for better structure)
+│       ├── users/        # Example: Users feature module
+│       │   ├── dto/      # DTOs specific to the users module
+│       │   │   └── create-user.dto.ts
+│       │   ├── entities/ # Entities specific to the users module (e.g., TypeORM User entity)
+│       │   │   └── user.entity.ts
 │       │   ├── users.controller.ts
 │       │   ├── users.module.ts
 │       │   ├── users.service.ts
-│       │   └── users.service.spec.ts
-│       └── auth/         # Módulo de autenticación
+│       │   └── users.service.spec.ts # Unit tests for the service
+│       └── auth/         # Example: Authentication feature module
 │           ├── dto/
 │           ├── guards/
-│           ├── strategies/
+│           ├── strategies/ # e.g., JWT strategy for Passport
 │           ├── auth.controller.ts
 │           ├── auth.module.ts
 │           ├── auth.service.ts
 │           └── auth.service.spec.ts
-├── test/                 # Tests e2e
+├── test/                 # End-to-end (E2E) tests
 │   ├── app.e2e-spec.ts
-│   └── jest-e2e.json
-├── .env                  # Variables de entorno
-├── .eslintrc.js          # Configuración ESLint
-├── .gitignore            # Configuración Git
-├── .prettierrc           # Configuración Prettier
-├── nest-cli.json         # Configuración NestJS CLI
-├── package.json          # Dependencias y scripts
-├── tsconfig.json         # Configuración TypeScript
-├── tsconfig.build.json   # Config TS para build
-└── README.md             # Documentación
+│   └── jest-e2e.json     # Jest configuration for E2E tests
+├── .env                  # Environment variables (e.g., .env, .env.development)
+├── .eslintrc.js          # ESLint configuration
+├── .gitignore            # Git ignore configuration
+├── .prettierrc           # Prettier configuration
+├── nest-cli.json         # NestJS CLI configuration
+├── package.json          # Project dependencies and scripts
+├── tsconfig.json         # TypeScript compiler configuration
+├── tsconfig.build.json   # TypeScript configuration for the build process
+└── README.md             # Project documentation
 ```
 
-## Estructura por Dominio (DDD)
+## Domain-Driven Design (DDD) Structure
 
-Para proyectos que utilizan Domain-Driven Design:
+For projects applying Domain-Driven Design principles:
 
 ```
-src/
-├── domain/                 # Lógica de dominio
-│   ├── users/              # Dominio de usuarios
-│   │   ├── entities/       # Entidades de dominio
-│   │   ├── value-objects/  # Value Objects
-│   │   ├── interfaces/     # Interfaces del dominio
-│   │   └── events/         # Eventos del dominio
-│   └── products/           # Otro dominio
-│       ├── entities/
+{projectPath}/src/
+├── domain/                 # Core domain logic, entities, value objects, domain services, repository interfaces
+│   ├── users/              # Users bounded context / aggregate
+│   │   ├── model/          # Entities, Value Objects
+│   │   │   └── user.entity.ts
+│   │   │   └── email.value-object.ts
+│   │   ├── services/       # Domain services (if any)
+│   │   ├── repositories/   # Repository interfaces
+│   │   │   └── user.repository.interface.ts
+│   │   └── events/         # Domain events
+│   └── products/           # Another bounded context
 │       └── ...
-├── application/            # Casos de uso
-│   ├── users/              # Casos de uso de usuarios
-│   │   ├── commands/       # Comandos (CQRS)
-│   │   ├── queries/        # Consultas (CQRS)
-│   │   ├── dtos/           # DTOs
-│   │   └── interfaces/     # Interfaces de aplicación
-│   └── products/           # Casos de uso de productos
+├── application/            # Application services / use cases, DTOs for application layer
+│   ├── users/
+│   │   ├── use-cases/      # e.g., create-user.use-case.ts
+│   │   ├── dto/
+│   │   └── services/       # Application services orchestrating domain logic
+│   │       └── user.application.service.ts
+│   └── products/
 │       └── ...
-├── infrastructure/         # Implementaciones concretas
-│   ├── database/           # Configuración y adapters de BD
-│   │   ├── typeorm/        # Implementación TypeORM
-│   │   │   ├── entities/   # Entidades TypeORM
-│   │   │   ├── migrations/ # Migraciones
-│   │   │   └── repositories/ # Repositorios TypeORM
-│   ├── auth/               # Implementación de autenticación
-│   ├── config/             # Configuración de infraestructura
-│   └── logging/            # Implementación de logging
-└── interface/              # Interfaces de usuario
-    ├── api/                # API REST/GraphQL
-    │   ├── controllers/    # Controladores
-    │   ├── dtos/           # DTOs específicos de API
-    │   ├── middlewares/    # Middlewares
-    │   └── presenters/     # Transformadores de respuesta
-    ├── events/             # Controladores de eventos
-    └── jobs/               # Jobs programados
+├── infrastructure/         # Implementations of interfaces defined in domain/application (e.g., database, external services)
+│   ├── database/
+│   │   ├── typeorm/        # Example: TypeORM specific implementation
+│   │   │   ├── entities/   # TypeORM entities (can map to domain entities)
+│   │   │   ├── migrations/
+│   │   │   └── repositories/ # Concrete repository implementations
+│   │   │       └── user.typeorm.repository.ts
+│   ├── auth/               # Auth infrastructure (e.g., JWT services)
+│   └── external-services/  # Clients for external APIs
+└── presentation/           # Entry points to the application (e.g., Controllers, GraphQL Resolvers, CLI commands)
+    ├── rest/               # REST API
+    │   ├── users/
+    │   │   ├── users.controller.ts
+    │   │   └── dto/        # DTOs specific to REST API presentation
+    │   └── auth/
+    │       └── auth.controller.ts
+    ├── graphql/            # GraphQL Resolvers
+    └── cli/                # CLI commands
 ```
+*(This DDD structure is one interpretation; variations exist based on complexity and specific DDD patterns adopted.)*
 
-## Estructura Modular Escalable
+## Scalable Modular Structure (Feature-based)
 
-Para aplicaciones grandes con múltiples módulos relacionados:
-
-```
-src/
-├── core/                   # Módulos centrales
-│   ├── database/           # Configuración BD
-│   ├── auth/               # Autenticación
-│   ├── logging/            # Logging
-│   └── config/             # Configuración
-├── shared/                 # Código compartido
-│   ├── constants/          # Constantes
-│   ├── dto/                # DTOs compartidos
-│   ├── exceptions/         # Excepciones
-│   └── utils/              # Utilidades
-├── modules/                # Módulos de negocio
-│   ├── users/              # Módulo de usuarios
-│   │   ├── domain/         # Entidades y lógica
-│   │   ├── application/    # Servicios y lógica
-│   │   └── infrastructure/ # Implementaciones
-│   ├── products/
-│   └── orders/
-└── main.ts                 # Punto de entrada
-```
-
-## Principios de Organización
-
-1. **Alta Cohesión**: Los archivos relacionados deben estar juntos.
-2. **Bajo Acoplamiento**: Minimizar dependencias entre módulos.
-3. **Encapsulación**: Exponer solo lo necesario desde cada módulo.
-4. **Modularidad**: Estructurar por funcionalidad, no por tipo de archivo.
-
-## Estructuración de Módulos
-
-Cada módulo debe seguir una estructura coherente:
+For large applications, organizing by feature is highly recommended. Each feature becomes a module.
 
 ```
-modulo/
-├── dto/                  # DTOs
-│   ├── create-*.dto.ts
-│   └── update-*.dto.ts
-├── entities/             # Entidades
-│   └── *.entity.ts
-├── interfaces/           # Interfaces
-│   └── *.interface.ts
-├── modulo.controller.ts  # Controlador del módulo
-├── modulo.module.ts      # Definición del módulo
-├── modulo.service.ts     # Servicio del módulo
-└── modulo.service.spec.ts # Tests del servicio
+{projectPath}/src/
+├── app.module.ts           # Root module, imports feature modules
+├── main.ts
+├── core/                   # Core cross-cutting modules (often imported by AppModule)
+│   ├── database/
+│   ├── config/
+│   ├── logger/
+│   └── auth/               # Core auth module (can also be a top-level feature)
+├── shared/                 # Shared utilities, DTOs, interfaces (not NestJS modules)
+│   ├── utils/
+│   ├── constants/
+│   └── exceptions/
+└── modules/                # Top-level directory for all feature modules
+    ├── users/              # Users feature module
+    │   ├── users.controller.ts
+    │   ├── users.service.ts
+    │   ├── users.module.ts
+    │   ├── entities/user.entity.ts
+    │   └── dto/create-user.dto.ts
+    ├── products/           # Products feature module
+    │   └── ...
+    └── orders/             # Orders feature module
+        └── ...
 ```
 
-## Estrategias para Proyectos Grandes
+## Principles of Organization
 
-### Monorepo con NestJS
+1.  **High Cohesion**: Group related files and logic together (typically within a feature module).
+2.  **Low Coupling**: Minimize dependencies between modules. Modules should expose well-defined public APIs (via `exports` in `@Module()`).
+3.  **Encapsulation**: Hide internal implementation details within modules.
+4.  **Modularity by Feature**: Organize code based on application features or domains rather than by technical layers (e.g., avoid having a global `controllers` folder; instead, each feature module has its own controllers).
 
-Estructura para monorepo usando Nx o Lerna:
+## Module Structure (Within a Feature Module)
 
-```
-apps/
-├── api/                  # API principal
-│   └── src/
-├── admin/                # Panel de administración
-│   └── src/
-└── worker/               # Trabajador de procesos
-    └── src/
-libs/
-├── common/               # Código compartido
-│   └── src/
-├── feature-a/            # Librería para característica A
-│   └── src/
-└── feature-b/            # Librería para característica B
-    └── src/
-```
-
-### Microservicios
-
-Estructura para arquitectura de microservicios:
+A typical NestJS feature module should have a consistent internal structure:
 
 ```
-services/
-├── users-service/        # Servicio de usuarios
-│   ├── src/
+users/  (Example: users module directory)
+├── dto/                  # Data Transfer Objects for request/response validation and shaping
+│   ├── create-user.dto.ts
+│   ├── update-user.dto.ts
+│   └── user.response.dto.ts
+├── entities/             # Database entities (e.g., TypeORM, Prisma models)
+│   └── user.entity.ts
+├── guards/               # Guards specific to this module
+│   └── roles.guard.ts
+├── interceptors/         # Interceptors specific to this module
+├── users.controller.ts   # Handles HTTP requests for users
+├── users.module.ts       # Defines the NestJS module for users
+├── users.service.ts      # Contains business logic for users
+├── users.repository.ts   # Optional: custom repository class
+└── users.service.spec.ts # Unit tests for the users service
+```
+
+## Strategies for Large Projects
+
+### Monorepo with NestJS
+
+Using a monorepo (e.g., with Nx, Lerna, or Yarn/PNPM workspaces) is effective for managing multiple related NestJS applications or libraries.
+
+```
+monorepo-root/
+├── apps/
+│   ├── api-gateway/      # Main API Gateway (NestJS app)
+│   │   └── src/
+│   ├── users-microservice/ # Users microservice (NestJS app)
+│   │   └── src/
 │   └── ...
-├── auth-service/         # Servicio de autenticación
-│   ├── src/
+├── libs/
+│   ├── common-utils/     # Shared library (plain TypeScript)
+│   │   └── src/
+│   ├── database-models/  # Shared database entities/models (NestJS library module)
+│   │   └── src/
 │   └── ...
-├── products-service/     # Servicio de productos
-│   ├── src/
-│   └── ...
-└── api-gateway/          # Gateway de API
-    ├── src/
-    └── ...
+├── package.json
+├── nx.json (if using Nx)
+└── ...
 ```
 
-## Buenas Prácticas de Organización
+## Good Organizational Practices
 
-1. **Rutas Absolutas**: Configurar TypeScript para usar rutas absolutas desde la raíz:
-
-```typescript
-// tsconfig.json
-{
-  "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {
-      "@app/*": ["src/*"],
-      "@modules/*": ["src/modules/*"],
-      "@common/*": ["src/common/*"]
+1.  **Absolute Paths (`paths` in `tsconfig.json`)**: Configure TypeScript for absolute paths for cleaner imports.
+    ```json
+    // tsconfig.json
+    {
+      "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+          "@app/*": ["src/*"],
+          "@modules/*": ["src/modules/*"], // If using a top-level modules/ directory
+          "@common/*": ["src/common/*"],
+          "@config/*": ["src/config/*"]
+        }
+      }
     }
-  }
-}
+    ```
+
+2.  **Barrel Files (`index.ts`)**: Use `index.ts` files to re-export entities, DTOs, etc., from directories for simpler import statements from other modules.
+    ```typescript
+    // src/modules/users/dto/index.ts
+    export * from './create-user.dto';
+    export * from './update-user.dto';
+
+    // Importing elsewhere:
+    // import { CreateUserDto, UpdateUserDto } from '@modules/users/dto';
+    ```
+    Use judiciously, as they can sometimes impact build times or create circular dependencies if not managed carefully.
+
+> Note: Regardless of the chosen structure, maintain consistency throughout {projectPath}. Choose a structure that best fits the scale, complexity, and team working on the application.
 ```
-
-2. **Índices de Barril**: Usar archivos index.ts para exportaciones:
-
-```typescript
-// src/common/index.ts
-export * from './constants';
-export * from './utils';
-export * from './dto';
-```
-
-3. **Separación de Responsabilidades**:
-
--   Controladores: Manejan requests HTTP
--   Servicios: Contienen lógica de negocio
--   Repositorios: Acceso a datos
-
-> Nota: Independientemente de la estructura elegida, mantén la coherencia en todo el proyecto.

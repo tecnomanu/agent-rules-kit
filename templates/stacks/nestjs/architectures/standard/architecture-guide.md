@@ -1,6 +1,6 @@
 ---
-description: Standard architecture patterns for NestJS applications
-globs: <root>/**/*.ts
+description: Guide to standard monolithic architecture in NestJS, detailing layers (Presentation, Business Logic, Data Access), project structure, and cross-cutting concerns.
+globs: <root>/src/**/*.ts
 alwaysApply: false
 ---
 

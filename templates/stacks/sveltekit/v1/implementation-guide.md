@@ -1,3 +1,9 @@
+---
+description: Implementation details and key features specific to SvelteKit 1.0.
+globs: <root>/src/**/*.{svelte,js,ts},<root>/svelte.config.js
+alwaysApply: true # Applies if v1 is detected
+---
+
 # SvelteKit 1.0 Implementation Guide
 
 This guide provides implementation details specific to SvelteKit 1.0, including project setup, key features, and best practices.
@@ -124,7 +130,7 @@ export const actions = {
 		const name = data.get('name');
 
 		// Process form data
-		await saveToDatabase(name);
+		await saveToDatabase(name); // Assume saveToDatabase is defined
 
 		return { success: true };
 	},
@@ -153,8 +159,10 @@ SvelteKit 1.0 uses the `load` function for data fetching:
 
 ```javascript
 // +page.server.js
+import { error } from '@sveltejs/kit'; // Import error helper
+
 export async function load({ params, fetch, cookies, locals }) {
-	const response = await fetch(`/api/posts/${params.slug}`);
+	const response = await fetch(`/api/posts/${params.slug}`); // Ensure this API exists or mock fetch
 
 	if (response.ok) {
 		return {
@@ -172,13 +180,14 @@ Access environment variables safely:
 
 ```javascript
 // +page.server.js (server-side)
-import { env } from '$env/dynamic/private';
-const secret = env.SECRET_KEY;
+// import { env } from '$env/dynamic/private'; // Or static if appropriate
+// const secret = env.SECRET_KEY;
 
 // +page.js (shared)
-import { env } from '$env/dynamic/public';
-const publicKey = env.PUBLIC_API_KEY;
+// import { env } from '$env/dynamic/public'; // Or static if appropriate
+// const publicKey = env.PUBLIC_API_KEY;
 ```
+*Note: For SvelteKit 1.0, `$env/static/*` is more common for build-time variables. `$env/dynamic/*` for runtime.*
 
 ## Authentication
 
@@ -186,6 +195,15 @@ Basic authentication pattern:
 
 ```javascript
 // src/hooks.server.js
+// Assume getUser is a function that validates session and returns user data
+async function getUser(session) {
+  // Implement your session validation and user retrieval logic
+  if (session === 'valid-session-id') { // Example
+    return { id: '123', name: 'Test User' };
+  }
+  return null;
+}
+
 export async function handle({ event, resolve }) {
 	const session = event.cookies.get('session');
 
@@ -210,7 +228,7 @@ Custom error pages:
   import { page } from '$app/stores';
 </script>
 
-<h1>{$page.status}: {$page.error.message}</h1>
+<h1>{$page.status}: {$page.error?.message}</h1> <!-- Safe navigation for error.message -->
 ```
 
 ## Best Practices for SvelteKit 1.0
@@ -222,6 +240,7 @@ Custom error pages:
 5. **Leverage form actions** for form handling instead of custom event handlers
 6. **Use layout groups** to share layouts without affecting URLs
 7. **Implement proper error boundaries** with `+error.svelte` files
-8. **Keep API routes in their own directory** (`/api` or similar)
+8. **Keep API routes in their own directory** (`/api` or similar, using `+server.js`)
 9. **Use path aliases** like `$lib` instead of relative paths
 10. **Leverage SvelteKit's built-in hooks** for global middleware
+```

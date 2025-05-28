@@ -1,8 +1,7 @@
 ---
-title: Standard Astro Architecture
-description: Guidelines for implementing the standard Astro project architecture
-tags: [Astro, Architecture, Standard]
-globs: <root>/src/**/*.astro
+description: Guidelines for implementing the standard Astro project architecture, covering directory structure, component organization, layouts, content collections, data fetching patterns, and state management.
+globs: <root>/src/**/*.astro,<root>/astro.config.mjs
+alwaysApply: false
 ---
 
 # Standard Astro Architecture

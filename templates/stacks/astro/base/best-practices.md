@@ -1,9 +1,7 @@
 ---
-title: Astro Best Practices
-description: Best practices for Astro projects
-tags: [Astro, Best Practices, Development]
-globs: ./**/*
-always: true
+description: Best practices for Astro projects, covering component organization, content management (Content Collections), asset management (Image component), performance (partial hydration, build optimization), styling, SEO, and accessibility.
+globs: <root>/src/**/*.{astro,md,mdx,ts,js},<root>/astro.config.mjs
+alwaysApply: true
 ---
 
 # Astro Best Practices

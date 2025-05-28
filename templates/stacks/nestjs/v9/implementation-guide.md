@@ -1,7 +1,7 @@
 ---
-description: Implementation guide for NestJS 9.x applications
-globs: <root>/**/*.ts
-alwaysApply: false
+description: Implementation guide for NestJS 9.x, highlighting key features like authentication enhancements, standalone applications, Apollo Federation 2.0 support, and logger updates.
+globs: <root>/src/**/*.ts
+alwaysApply: true # Applies if v9 is detected
 ---
 
 # NestJS 9.x Implementation Guide
@@ -12,773 +12,243 @@ This document provides specific guidance for developing applications with NestJS
 
 NestJS 9.x, released in June 2022, introduced several important features and improvements:
 
-1. **Authentication Enhancements**
-2. **Standalone Applications**
-3. **Serve Static Enhancement**
-4. **Apollo Federation 2.0 Support**
-5. **CLI Plugin System**
-6. **Logger Update**
-7. **Payload Size Limits**
+1. **Authentication Enhancements**: Improvements to the authentication module and Passport strategies.
+2. **Standalone Applications**: Better support for creating applications without a full HTTP server, useful for CRON jobs, CLI tools, or queue workers.
+3. **Serve Static Enhancement**: More options and better performance for serving static assets.
+4. **Apollo Federation 2.0 Support**: Updated integration for building federated GraphQL services.
+5. **CLI Plugin System**: A more extensible CLI architecture for custom schematics and plugins.
+6. **Logger Update**: The built-in logger received updates, including changes to timestamp formatting.
+7. **Payload Size Limits**: Easier configuration for HTTP request payload size limits.
+8. **REPL (Read-Eval-Print Loop)**: A new REPL for interacting with your application context.
 
 ## Setting Up a NestJS 9.x Project
 
 ### Installation
 
+If starting a new project and aiming for version 9 specifically (though latest is usually recommended):
 ```bash
-npm i -g @nestjs/cli@9
-nest new project-name
+npm i -g @nestjs/cli
+nest new project-name # This will likely install the latest NestJS version.
+# To ensure v9, you might need to adjust package.json versions and reinstall.
+# Example versions for v9 (check specific minor/patch for stability):
+# "@nestjs/common": "^9.0.0",
+# "@nestjs/core": "^9.0.0",
+# "@nestjs/platform-express": "^9.0.0",
+# "reflect-metadata": "^0.1.13",
+# "rxjs": "^7.2.0"
+# "@types/express": "^4.17.13",
+# "@types/node": "^16.0.0",
+# "typescript": "^4.7.4" (NestJS 9 often used with TS 4.x)
 ```
 
 ### Project Configuration
 
-NestJS 9.x projects use the following configuration files:
-
--   `nest-cli.json` - NestJS CLI configuration
--   `tsconfig.json` - TypeScript configuration
--   `package.json` - Project dependencies
-
-Example `tsconfig.json` for NestJS 9.x:
-
-```json
-{
-	"compilerOptions": {
-		"module": "commonjs",
-		"declaration": true,
-		"removeComments": true,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "es2017",
-		"sourceMap": true,
-		"outDir": "./dist",
-		"baseUrl": "./",
-		"incremental": true,
-		"skipLibCheck": true,
-		"strictNullChecks": false,
-		"noImplicitAny": false,
-		"strictBindCallApply": false,
-		"forceConsistentCasingInFileNames": false,
-		"noFallthroughCasesInSwitch": false
-	}
-}
-```
+-   `nest-cli.json`: NestJS CLI configuration.
+-   `tsconfig.json`: TypeScript configuration. NestJS 9 typically targets ES2017 or newer and uses CommonJS modules.
+    ```json
+    // tsconfig.json (example excerpt for v9)
+    {
+      "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2017", // Or ES2018, ES2019
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false, // Or true for stricter checking
+        "noImplicitAny": false,    // Or true
+        // ... other options
+      }
+    }
+    ```
 
 ## Authentication Enhancements
 
-NestJS 9.x introduced improvements to authentication mechanisms:
-
-### JWT Authentication Implementation
+NestJS 9 continued to refine authentication, often used with `@nestjs/passport` and `@nestjs/jwt`.
 
 ```typescript
-// auth.module.ts
+// src/auth/auth.module.ts
+import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthService } from './auth.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
+// import { UsersModule } from '../users/users.module'; // Assuming a UsersModule
+
 @Module({
-	imports: [
-		UsersModule,
-		PassportModule,
-		JwtModule.registerAsync({
-			imports: [ConfigModule],
-			useFactory: async (configService: ConfigService) => ({
-				secret: configService.get<string>('JWT_SECRET'),
-				signOptions: {
-					expiresIn: configService.get<string>(
-						'JWT_EXPIRES_IN',
-						'1d'
-					),
-				},
-			}),
-			inject: [ConfigService],
-		}),
-	],
-	providers: [AuthService, JwtStrategy],
-	exports: [AuthService],
+  imports: [
+    // UsersModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN', '60m') },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
 
-// jwt.strategy.ts
+// src/auth/strategies/jwt.strategy.ts
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-	constructor(private configService: ConfigService) {
-		super({
-			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-			ignoreExpiration: false,
-			secretOrKey: configService.get<string>('JWT_SECRET'),
-		});
-	}
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+    });
+  }
 
-	async validate(payload: any) {
-		return {
-			userId: payload.sub,
-			email: payload.email,
-			roles: payload.roles,
-		};
-	}
-}
-
-// auth.service.ts
-@Injectable()
-export class AuthService {
-	constructor(
-		private usersService: UsersService,
-		private jwtService: JwtService
-	) {}
-
-	async validateUser(email: string, pass: string): Promise<any> {
-		const user = await this.usersService.findByEmail(email);
-		if (user && (await bcrypt.compare(pass, user.password))) {
-			const { password, ...result } = user;
-			return result;
-		}
-		return null;
-	}
-
-	async login(user: any) {
-		const payload = { email: user.email, sub: user.id, roles: user.roles };
-		return {
-			access_token: this.jwtService.sign(payload),
-		};
-	}
+  async validate(payload: any) {
+    // `payload` is the decoded JWT.
+    // This method should return the user object or necessary user info.
+    return { userId: payload.sub, username: payload.username, roles: payload.roles };
+  }
 }
 ```
 
-## Standalone Application Support
+## Standalone Applications
 
-NestJS 9.x improved support for standalone applications, which are useful for serverless environments:
+Create applications that don't listen for HTTP requests, e.g., for CRON jobs or CLI tools.
 
 ```typescript
-// standalone.ts
+// src/run-task.ts (Example standalone script)
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { TasksService } from './modules/tasks/tasks.service'; // Example service
 
-// Create a standalone application context
 async function bootstrap() {
-	const app = await NestFactory.createApplicationContext(AppModule);
+  const applicationContext = await NestFactory.createApplicationContext(AppModule);
+  const tasksService = applicationContext.get(TasksService);
 
-	// Get a service from the container
-	const service = app.get(AppService);
-
-	// Use the service
-	await service.performTask();
-
-	// Close the application when done
-	await app.close();
+  try {
+    await tasksService.runDailyCleanup();
+    console.log('Daily cleanup task completed successfully.');
+  } catch (error) {
+    console.error('Error during daily cleanup task:', error);
+  } finally {
+    await applicationContext.close();
+  }
 }
 bootstrap();
 ```
 
 ## Apollo Federation 2.0 Support
 
-NestJS 9.x added support for Apollo Federation 2.0:
+For building distributed GraphQL applications.
 
 ```typescript
-// app.module.ts
-@Module({
-	imports: [
-		GraphQLModule.forRoot<ApolloGatewayDriverConfig>({
-			driver: ApolloGatewayDriver,
-			server: {
-				cors: true,
-			},
-			gateway: {
-				supergraphSdl: new IntrospectAndCompose({
-					subgraphs: [
-						{ name: 'users', url: 'http://localhost:3001/graphql' },
-						{ name: 'posts', url: 'http://localhost:3002/graphql' },
-					],
-				}),
-			},
-		}),
-	],
-})
-export class AppModule {}
+// src/graphql.module.ts (Example for a subgraph)
+// import { Module } from '@nestjs/common';
+// import { GraphQLModule } from '@nestjs/graphql';
+// import { ApolloFederationDriver, ApolloFederationDriverConfig } from '@nestjs/apollo';
+// import { UsersResolver } from './users/users.resolver'; // Example resolver
 
-// users.resolver.ts (in users subgraph)
-@Resolver('User')
-export class UsersResolver {
-	constructor(private usersService: UsersService) {}
+// @Module({
+//   imports: [
+//     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
+//       driver: ApolloFederationDriver,
+//       autoSchemaFile: { path: 'src/schema.gql', federation: 2 }, // Generates schema with Federation v2 directives
+//       // typePaths: ['./**/*.graphql'], // Alternative: if using schema-first
+//     }),
+//     // ... other modules like UsersModule
+//   ],
+//   // providers: [UsersResolver], // Resolvers are typically in feature modules
+// })
+// export class GraphQLApiModule {}
 
-	@Query('users')
-	async getUsers() {
-		return this.usersService.findAll();
-	}
+// In a resolver for an entity that can be referenced by other subgraphs:
+// src/users/users.resolver.ts
+// @Resolver(() => User) // Assuming User is your GraphQL User type
+// export class UsersResolver {
+//   constructor(private readonly usersService: UsersService) {}
 
-	@ResolveReference()
-	resolveReference(reference: { __typename: string; id: string }) {
-		return this.usersService.findById(reference.id);
-	}
-}
+//   @ResolveReference()
+//   resolveReference(reference: { __typename: string; id: string }): Promise<User> {
+//     return this.usersService.findByIdForFederation(reference.id);
+//   }
+// }
 ```
 
-## Logger Update
+## Logger Update (Timestamp Format)
 
-NestJS 9.x introduced an improved logger with a different timestamp format:
+The default timestamp format in the built-in `Logger` changed in v9. If you have custom loggers or parsing tools that rely on the old ISO format, you might need to adjust them or customize the logger.
 
 ```typescript
-// main.ts
-async function bootstrap() {
-	// Create a custom logger instance
-	const logger = new Logger('Bootstrap');
+// To customize the default logger with specific options:
+// import { Logger, Module } from '@nestjs/common';
 
-	// Create the application with custom logger
-	const app = await NestFactory.create(AppModule, {
-		logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-	});
-
-	// Use the logger
-	logger.log('Application starting up...');
-
-	await app.listen(3000);
-	logger.log(`Application is running on: ${await app.getUrl()}`);
-}
-bootstrap();
-
-// custom-logger.service.ts
-@Injectable()
-export class CustomLoggerService implements LoggerService {
-	private context?: string;
-	private logger = new Logger();
-
-	constructor(context?: string) {
-		this.context = context;
-	}
-
-	log(message: any, context?: string) {
-		this.logger.log(message, context || this.context);
-	}
-
-	error(message: any, trace?: string, context?: string) {
-		this.logger.error(message, trace, context || this.context);
-	}
-
-	warn(message: any, context?: string) {
-		this.logger.warn(message, context || this.context);
-	}
-
-	debug(message: any, context?: string) {
-		this.logger.debug(message, context || this.context);
-	}
-
-	verbose(message: any, context?: string) {
-		this.logger.verbose(message, context || this.context);
-	}
-}
+// @Module({
+//   providers: [
+//     {
+//       provide: Logger,
+//       useValue: new Logger('MyApplicationContext', { timestamp: true }), // Example customization
+//     },
+//   ],
+// })
+// export class CustomLoggerModule {}
 ```
 
 ## Payload Size Limits
 
-NestJS 9.x improved control over HTTP request size limits:
+Configure HTTP request body size limits in `main.ts`:
 
 ```typescript
-// main.ts
-import { json, urlencoded } from 'express';
+// src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { json, urlencoded } from 'express'; // Or from 'fastify' if using FastifyAdapter
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-	// Configure body parser with size limits
-	app.use(json({ limit: '50mb' }));
-	app.use(urlencoded({ limit: '50mb', extended: true }));
+  app.use(json({ limit: '50mb' })); // For JSON payloads
+  app.use(urlencoded({ extended: true, limit: '50mb' })); // For URL-encoded payloads
 
-	await app.listen(3000);
+  await app.listen(3000);
 }
 bootstrap();
 ```
 
-## CLI Plugin System
-
-NestJS 9.x enhanced the CLI plugin system:
-
-```bash
-# Create a custom CLI plugin
-nest generate resource users
-```
-
-Custom CLI plugins can be created:
-
-```typescript
-// my-plugin.js
-module.exports = {
-	name: 'my-plugin',
-	description: 'A custom plugin for NestJS CLI',
-	exec: async (args, options) => {
-		// Plugin logic here
-		console.log('Executing my custom plugin!');
-		// Generate files, etc.
-	},
-};
-```
-
-## Using Interceptors
-
-NestJS 9.x improved interceptor handling:
-
-```typescript
-// logging.interceptor.ts
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const method = request.method;
-    const url = request.url;
-
-    console.log(`[${method}] ${url} - ${new Date().toLocaleTimeString()}`);
-
-    const now = Date.now();
-    return next
-      .handle()
-      .pipe(
-        tap(() => console.log(`[${method}] ${url} - Completed in ${Date.now() - now}ms`)),
-      );
-  }
-}
-
-// app.module.ts
-@Module({
-  imports: [...],
-  controllers: [...],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-  ],
-})
-export class AppModule {}
-```
-
-## Enhanced Exception Handling
-
-NestJS 9.x has improved exception handling:
-
-```typescript
-// http-exception.filter.ts
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-	catch(exception: HttpException, host: ArgumentsHost) {
-		const ctx = host.switchToHttp();
-		const response = ctx.getResponse<Response>();
-		const request = ctx.getRequest<Request>();
-		const status = exception.getStatus();
-		const timestamp = new Date().toLocaleTimeString(); // Updated timestamp format
-
-		const exceptionResponse = exception.getResponse();
-
-		const errorResponse = {
-			statusCode: status,
-			timestamp,
-			path: request.url,
-			method: request.method,
-			message:
-				typeof exceptionResponse === 'object' &&
-				'message' in exceptionResponse
-					? exceptionResponse.message
-					: exception.message,
-		};
-
-		response.status(status).json(errorResponse);
-	}
-}
-```
-
-## Serving Static Files
-
-NestJS 9.x enhanced the serve-static functionality:
-
-```typescript
-// app.module.ts
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-
-@Module({
-	imports: [
-		ServeStaticModule.forRoot({
-			rootPath: join(__dirname, '..', 'public'),
-			serveRoot: '/static',
-			serveStaticOptions: {
-				index: false,
-				maxAge: '1d',
-				etag: true,
-				dotfiles: 'ignore',
-			},
-		}),
-	],
-})
-export class AppModule {}
-```
-
-## Database Integration
-
-NestJS 9.x works well with TypeORM and other database libraries:
-
-```typescript
-// app.module.ts
-@Module({
-	imports: [
-		TypeOrmModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: (configService: ConfigService) => ({
-				type: 'postgres',
-				host: configService.get('DB_HOST'),
-				port: configService.get('DB_PORT'),
-				username: configService.get('DB_USERNAME'),
-				password: configService.get('DB_PASSWORD'),
-				database: configService.get('DB_DATABASE'),
-				entities: [User, Profile, Post],
-				synchronize: configService.get('NODE_ENV') !== 'production',
-				logging: configService.get('DB_LOGGING') === 'true',
-				ssl:
-					configService.get('DB_SSL') === 'true'
-						? {
-								rejectUnauthorized: false,
-						  }
-						: undefined,
-			}),
-			inject: [ConfigService],
-		}),
-	],
-})
-export class AppModule {}
-```
-
-## Swagger Documentation
-
-NestJS 9.x has improved OpenAPI documentation support:
-
-```typescript
-// main.ts
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
-async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
-
-	// Swagger setup
-	const config = new DocumentBuilder()
-		.setTitle('NestJS API')
-		.setDescription('The NestJS API description')
-		.setVersion('1.0')
-		.addTag('nestjs')
-		.addBearerAuth()
-		.build();
-
-	const document = SwaggerModule.createDocument(app, config);
-	SwaggerModule.setup('api', app, document);
-
-	await app.listen(3000);
-}
-bootstrap();
-
-// user.entity.ts
-import { ApiProperty } from '@nestjs/swagger';
-
-export class CreateUserDto {
-	@ApiProperty({
-		example: 'john.doe@example.com',
-		description: 'The email of the user',
-	})
-	email: string;
-
-	@ApiProperty({ example: 'John', description: 'The first name of the user' })
-	firstName: string;
-
-	@ApiProperty({ example: 'Doe', description: 'The last name of the user' })
-	lastName: string;
-
-	@ApiProperty({
-		example: 'password123',
-		description: 'The password of the user',
-	})
-	password: string;
-}
-```
-
-## Testing in NestJS 9.x
-
-NestJS 9.x has improved testing support:
-
-```typescript
-// users.service.spec.ts
-describe('UsersService', () => {
-	let service: UsersService;
-	let repository: Repository<User>;
-
-	beforeEach(async () => {
-		const moduleRef = await Test.createTestingModule({
-			providers: [
-				UsersService,
-				{
-					provide: getRepositoryToken(User),
-					useClass: MockRepository,
-				},
-			],
-		}).compile();
-
-		service = moduleRef.get<UsersService>(UsersService);
-		repository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
-	});
-
-	describe('findAll', () => {
-		it('should return an array of users', async () => {
-			const users = [{ id: 1, name: 'Test User' }];
-			jest.spyOn(repository, 'find').mockResolvedValue(users);
-
-			expect(await service.findAll()).toBe(users);
-		});
-	});
-});
-
-// users.controller.e2e-spec.ts
-describe('UsersController (e2e)', () => {
-	let app: INestApplication;
-
-	beforeEach(async () => {
-		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [AppModule],
-		}).compile();
-
-		app = moduleFixture.createNestApplication();
-		await app.init();
-	});
-
-	it('/GET users', () => {
-		return request(app.getHttpServer())
-			.get('/users')
-			.expect(200)
-			.expect('Content-Type', /json/);
-	});
-
-	afterAll(async () => {
-		await app.close();
-	});
-});
-```
-
-## Caching
-
-NestJS 9.x improved the caching mechanism:
-
-```typescript
-// app.module.ts
-import { CacheModule } from '@nestjs/common';
-import * as redisStore from 'cache-manager-redis-store';
-
-@Module({
-	imports: [
-		CacheModule.registerAsync({
-			isGlobal: true,
-			imports: [ConfigModule],
-			useFactory: (configService: ConfigService) => ({
-				store: redisStore,
-				host: configService.get('REDIS_HOST'),
-				port: configService.get('REDIS_PORT'),
-				ttl: 60, // seconds
-			}),
-			inject: [ConfigService],
-		}),
-	],
-})
-export class AppModule {}
-
-// users.controller.ts
-@Controller('users')
-export class UsersController {
-	constructor(
-		private usersService: UsersService,
-		private cacheManager: Cache
-	) {}
-
-	@Get()
-	@UseInterceptors(CacheInterceptor)
-	findAll() {
-		return this.usersService.findAll();
-	}
-
-	@Get(':id')
-	async findOne(@Param('id') id: string) {
-		// Try to get from cache first
-		const cachedUser = await this.cacheManager.get(`user_${id}`);
-		if (cachedUser) {
-			return cachedUser;
-		}
-
-		// If not in cache, get from service and cache it
-		const user = await this.usersService.findOne(id);
-		await this.cacheManager.set(`user_${id}`, user, { ttl: 300 });
-		return user;
-	}
-}
-```
-
-## Versioning
-
-NestJS 9.x supports API versioning:
-
-```typescript
-// main.ts
-import { VersioningType } from '@nestjs/common';
-
-async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
-
-	// Enable versioning
-	app.enableVersioning({
-		type: VersioningType.URI,
-		// Options: URI, HEADER, MEDIA_TYPE, CUSTOM
-	});
-
-	await app.listen(3000);
-}
-bootstrap();
-
-// users.controller.ts
-@Controller({
-	path: 'users',
-	version: '1',
-})
-export class UsersControllerV1 {
-	// V1 endpoints
-}
-
-@Controller({
-	path: 'users',
-	version: '2',
-})
-export class UsersControllerV2 {
-	// V2 endpoints with breaking changes
-}
-```
-
-## Performance Optimization
-
-Tips for optimizing NestJS 9.x applications:
-
-1. **Use Compression**:
-
-    ```typescript
-    import * as compression from 'compression';
-
-    async function bootstrap() {
-    	const app = await NestFactory.create(AppModule);
-    	app.use(compression());
-    	await app.listen(3000);
-    }
+## Other Notable Points for v9
+
+-   **CLI Plugin System**: Became more mature, allowing developers to extend the NestJS CLI with custom schematics and builders.
+-   **REPL**: A Read-Eval-Print Loop was introduced for interacting with your application's modules and providers directly from the command line.
+    ```bash
+    node dist/main.js repl # (Or however your REPL script is configured)
+    # > await app.get(UsersService).findAll()
     ```
+-   **ServeStaticModule**: Enhancements for serving static assets, providing more configuration options.
+-   **Compatibility**: Node.js v12 was still supported by early v9 releases, but later v9 minors might have shifted minimums. Always check release notes. TypeScript 4.x was common.
 
-2. **Enable Response Caching**:
+## Migration from NestJS 8.x to 9.x
 
-    ```typescript
-    @Get()
-    @CacheKey('all_users')
-    @CacheTTL(30)
-    @UseInterceptors(CacheInterceptor)
-    findAll() {
-      return this.usersService.findAll();
-    }
+1.  **Update Dependencies**:
+    ```bash
+    npm install @nestjs/common@^9.0.0 @nestjs/core@^9.0.0 @nestjs/platform-express@^9.0.0 # and other @nestjs/* packages
+    npm install rxjs@^7.0.0 reflect-metadata@^0.1.13 # Ensure compatible peer dependencies
     ```
+2.  **Logger**: If you have custom logic relying on the exact timestamp format of the default logger, review and adjust.
+3.  **Interceptors/Guards/Pipes**: Review any complex implementations for behavior changes, although most standard usage remained compatible.
+4.  **TypeORM/Mongoose/GraphQL**: If using these, check their specific compatibility notes with NestJS 9 and update related packages accordingly. For example, `TypeORM` versions and `@nestjs/typeorm` need to align.
+5.  **Read Official Migration Guide**: Always consult the official NestJS migration guide for the specific version jump for detailed breaking changes and steps.
 
-3. **Use Class Transformer Efficiently**:
-
-    ```typescript
-    import { Exclude, Expose, Transform } from 'class-transformer';
-
-    export class UserDto {
-    	@Expose()
-    	id: number;
-
-    	@Expose()
-    	name: string;
-
-    	@Exclude()
-    	password: string;
-
-    	@Expose()
-    	@Transform(({ value }) => value.toISOString())
-    	createdAt: Date;
-    }
-    ```
-
-## Securing NestJS 9.x Applications
-
-Best practices for securing NestJS 9.x applications:
-
-1. **Set Security Headers**:
-
-    ```typescript
-    import * as helmet from 'helmet';
-
-    async function bootstrap() {
-    	const app = await NestFactory.create(AppModule);
-    	app.use(helmet());
-    	await app.listen(3000);
-    }
-    ```
-
-2. **Enable CORS with Proper Configuration**:
-
-    ```typescript
-    async function bootstrap() {
-    	const app = await NestFactory.create(AppModule);
-    	app.enableCors({
-    		origin: ['https://yourdomain.com', 'https://admin.yourdomain.com'],
-    		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    		credentials: true,
-    	});
-    	await app.listen(3000);
-    }
-    ```
-
-3. **Set Rate Limiting**:
-
-    ```typescript
-    import { ThrottlerModule } from '@nestjs/throttler';
-
-    @Module({
-    	imports: [
-    		ThrottlerModule.forRoot({
-    			ttl: 60,
-    			limit: 10,
-    		}),
-    	],
-    	providers: [
-    		{
-    			provide: APP_GUARD,
-    			useClass: ThrottlerGuard,
-    		},
-    	],
-    })
-    export class AppModule {}
-    ```
-
-## Best Practices for NestJS 9.x
-
-1. **Use Module Structure Effectively**:
-
-    - Group related functionality in modules
-    - Use feature modules to organize code
-
-2. **Leverage Dependency Injection**:
-
-    - Constructor injection is preferred
-    - Use providers properly
-    - Understand provider scopes (default, request, transient)
-
-3. **Use DTOs and Validation**:
-
-    - Define clear data transfer objects
-    - Use validation pipes
-    - Implement serialization/deserialization
-
-4. **Implement Proper Error Handling**:
-
-    - Use exception filters
-    - Return consistent error responses
-    - Log errors properly
-
-5. **Follow RESTful Conventions**:
-
-    - Use proper HTTP methods
-    - Return appropriate status codes
-    - Structure API endpoints consistently
-
-6. **Write Testable Code**:
-    - Unit test services and controllers
-    - Write integration tests
-    - Implement e2e tests for critical flows
+NestJS 9.x solidified many aspects of the framework and laid groundwork for future enhancements, focusing on developer experience, performance, and broader ecosystem compatibility.
+```

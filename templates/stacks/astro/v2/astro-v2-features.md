@@ -1,8 +1,7 @@
 ---
-title: Astro v2 Specific Features
-description: Key features and implementation details specific to Astro version 2
-tags: [Astro, v2, Features]
-globs: <root>/src/content/**/*.md,<root>/src/content/**/*.mdx,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
+description: Key features and implementation details specific to Astro version 2, including Content Collections, Hybrid Rendering, Markdown/MDX improvements, Image Optimization (astro:assets), built-in Redirects, TypeScript enhancements, and experimental View Transitions.
+globs: <root>/src/**/*.{astro,md,mdx},<root>/astro.config.mjs
+alwaysApply: true # Applies if v2 is detected
 ---
 
 # Astro v2 Specific Features
@@ -42,7 +41,7 @@ export const collections = {
 // src/pages/blog/index.astro
 ---
 import { getCollection } from 'astro:content';
-import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro'; // Assuming layout exists
 
 // Get all blog entries
 const blogEntries = await getCollection('blog');
@@ -63,7 +62,7 @@ const sortedBlogEntries = publishedBlogEntries.sort(
   <ul>
     {sortedBlogEntries.map(post => (
       <li>
-        <a href={`/blog/${post.slug}`}>
+        <a href={`/blog/${post.slug}/`}> {/* Ensure trailing slash for canonical URLs */}
           {post.data.title} - {post.data.date.toLocaleDateString()}
         </a>
       </li>
@@ -78,12 +77,14 @@ const sortedBlogEntries = publishedBlogEntries.sort(
 // src/pages/blog/[...slug].astro
 ---
 import { getCollection } from 'astro:content';
-import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro'; // Assuming layout exists
 
 export async function getStaticPaths() {
-  const blogEntries = await getCollection('blog');
+  const blogEntries = await getCollection('blog', ({data}) => {
+    return import.meta.env.DEV || !data.draft; // Only build published posts in prod
+  });
   return blogEntries.map(entry => ({
-    params: { slug: entry.slug },
+    params: { slug: entry.slug }, // Astro handles slug generation
     props: { entry },
   }));
 }
@@ -114,21 +115,21 @@ Astro 2.0 improves support for hybrid rendering, allowing you to choose between 
 ```javascript
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel/serverless'; // Or your preferred adapter
 
 export default defineConfig({
-	output: 'hybrid',
-	adapter: vercel(),
+	output: 'hybrid', // Can also be 'server' if most pages are dynamic
+	adapter: vercel(), // Example adapter
 });
 ```
 
 ### Static Page Example
 
-```typescript
-// src/pages/about.astro
+```astro
 ---
-// This page will be statically generated at build time
-import BaseLayout from '../layouts/BaseLayout.astro';
+// src/pages/about.astro
+// This page will be statically generated at build time by default
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
 ---
 
 <BaseLayout title="About Us">
@@ -137,42 +138,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 ```
 
-### Dynamic Page Example
+### Dynamic Page Example (Server-Side Rendering)
 
-```typescript
-// src/pages/dashboard.astro
+```astro
 ---
+// src/pages/dashboard.astro
 // This page will be server-rendered on each request
-export const prerender = false;
+export const prerender = false; // Explicitly disable prerendering for this dynamic page
 
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getUser } from '../utils/auth';
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
+// Assume getUser and fetchDashboardData are defined utility functions
+// import { getUser } from '../utils/auth';
+// import { fetchDashboardData } from '../utils/data';
 
-const user = await getUser(Astro.request);
-if (!user) {
-  return Astro.redirect('/login');
-}
-
-const dashboardData = await fetchDashboardData(user.id);
+// Example: This would run on the server for each request
+// const user = await getUser(Astro.request);
+// if (!user) {
+//   return Astro.redirect('/login');
+// }
+// const dashboardData = await fetchDashboardData(user.id);
+const user = { name: 'Current User' }; // Placeholder
+const dashboardData = { info: 'Dynamic Info' }; // Placeholder
 ---
 
 <BaseLayout title="Dashboard">
   <h1>Welcome, {user.name}</h1>
   <div class="dashboard-content">
-    <!-- Dynamic dashboard content -->
+    <p>{dashboardData.info}</p>
   </div>
 </BaseLayout>
 ```
 
 ## Markdown and MDX Improvements
 
-Astro 2.0 enhances its Markdown and MDX support with better frontmatter validation and component usage:
+Astro 2.0 enhances its Markdown and MDX support with better frontmatter validation (via Content Collections schemas) and component usage:
 
 ### MDX with Components
 
-```typescript
-// src/components/CodeBlock.astro
+```astro
 ---
+// src/components/CodeBlock.astro
 interface Props {
   language: string;
   code: string;
@@ -191,10 +196,10 @@ const { language, code } = Astro.props;
 ```mdx
 ---
 title: Using Components in MDX
-layout: ../layouts/BlogPostLayout.astro
+layout: ../../layouts/BlogPostLayout.astro # Adjust path as needed
 ---
 
-import CodeBlock from '../components/CodeBlock.astro';
+import CodeBlock from '../../components/CodeBlock.astro'; # Adjust path as needed
 
 # Using Components in MDX
 
@@ -210,32 +215,34 @@ function greet(name) {
 />
 ```
 
-## Image Optimization
+## Image Optimization (`astro:assets`)
 
-Astro 2.0 features improved image optimization with the `astro:assets` integration:
+Astro 2.0 features improved image optimization with the `astro:assets` integration (which became more stable and feature-rich around this version, officially part of core later).
 
-```typescript
-// src/pages/gallery.astro
+```astro
 ---
+// src/pages/gallery.astro
 import { Image } from 'astro:assets';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import heroImage from '../assets/hero.jpg';
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
+import heroImage from '../assets/hero.jpg'; // Assuming asset exists
 ---
 
 <BaseLayout title="Image Gallery">
   <h1>Image Gallery</h1>
 
-  <!-- Optimized image with automatic width/height -->
+  <!-- Optimized local image -->
   <Image
     src={heroImage}
     alt="Hero image"
+    widths={[300, 600, 900]}
+    sizes="(max-width: 600px) 300px, (max-width: 900px) 600px, 900px"
     quality={80}
   />
 
-  <!-- Remote image with explicit dimensions -->
+  <!-- Remote image requires explicit dimensions for optimization to work best -->
   <Image
-    src="https://example.com/remote-image.jpg"
-    alt="Remote image"
+    src="https://placehold.co/800x600/webp"
+    alt="Remote image placeholder"
     width={800}
     height={600}
     format="webp"
@@ -245,7 +252,7 @@ import heroImage from '../assets/hero.jpg';
 
 ## Redirects
 
-Astro 2.0 introduces built-in redirects:
+Astro 2.0 introduces built-in redirects in `astro.config.mjs`:
 
 ```javascript
 // astro.config.mjs
@@ -253,10 +260,10 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
 	redirects: {
-		'/old-page': '/new-page',
-		'/blog/category/:slug': '/articles/:slug',
-		'/legacy': {
-			status: 302,
+		'/old-page': '/new-page', // Basic 301 redirect
+		'/blog/category/:slug': '/articles/:slug', // Dynamic redirect with parameters
+		'/legacy': { // Object for more options
+			status: 302, // Temporary redirect
 			destination: '/modern',
 		},
 	},
@@ -265,15 +272,15 @@ export default defineConfig({
 
 ## TypeScript Enhancements
 
-Astro 2.0 improves TypeScript integration with better type inference and error reporting:
+Astro 2.0 improves TypeScript integration with better type inference and error reporting, especially with Content Collections providing type safety for frontmatter.
 
 ```typescript
 // src/env.d.ts
 /// <reference types="astro/client" />
 
 interface ImportMetaEnv {
-	readonly PUBLIC_API_URL: string;
-	readonly DATABASE_URL: string;
+	readonly PUBLIC_API_URL: string; // Variables prefixed with PUBLIC_ are client-accessible
+	readonly DATABASE_URL: string; // Server-side only if not prefixed
 }
 
 interface ImportMeta {
@@ -281,22 +288,24 @@ interface ImportMeta {
 }
 ```
 
-## New View Transitions API
+## View Transitions API (Experimental in early v2, stable later)
 
-Astro 2.0 introduces experimental view transitions for smoother page navigation:
+Astro 2.0 timeframe saw the introduction and stabilization of the View Transitions API for smoother page navigation.
 
-```typescript
-// src/layouts/BaseLayout.astro
+```astro
 ---
+// src/layouts/BaseLayout.astro
 import { ViewTransitions } from 'astro:transitions';
+interface Props { title: string; }
+const { title } = Astro.props;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>{Astro.props.title}</title>
-    <ViewTransitions />
+    <title>{title}</title>
+    <ViewTransitions /> {/* Enables View Transitions */}
   </head>
   <body>
     <nav>
@@ -314,9 +323,10 @@ import { ViewTransitions } from 'astro:transitions';
 ## Migration from Astro v1
 
 When migrating from Astro 1.x to 2.0, consider these key changes:
+1.  **Content Collections**: This is a major new way to handle content. You might migrate existing Markdown/MDX from `src/pages` to `src/content/` and define schemas.
+2.  **Image API**: If you were using older community plugins for images, consider migrating to `astro:assets` (which evolved through v2 and became fully integrated).
+3.  **Configuration**: Review `astro.config.mjs` for any deprecated options or new features like `redirects`.
+4.  **Error Overlays**: Astro 2 improved error overlays for a better development experience.
 
-1. **Content Collections**: Replace file-based routing in `src/pages/` with the Content Collections API
-2. **New Image API**: Update to the new image optimization syntax
-3. **Updated Configuration**: Review and update the `astro.config.mjs` file
-4. **TypeScript Improvements**: Leverage enhanced type safety
-5. **View Transitions**: Implement the new transitions API for improved UX
+Always consult the official Astro blog and migration guides for detailed instructions when upgrading versions.
+```

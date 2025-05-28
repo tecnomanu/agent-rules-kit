@@ -1,3 +1,9 @@
+---
+description: Guide to SvelteKit 2.0, focusing on new features like middleware, streaming, and enhanced type safety.
+globs: <root>/src/**/*.{svelte,js,ts},<root>/svelte.config.js
+alwaysApply: true # Applies if v2 is detected
+---
+
 # SvelteKit 2.0 Implementation Guide
 
 This guide provides implementation details specific to SvelteKit 2.0, focusing on the new features and changes from SvelteKit 1.0.
@@ -85,6 +91,8 @@ declare global {
 				avatar: string;
 			};
 		}
+		// interface Error {} // You can also define a type for expected errors
+		// interface Platform {} // For platform-specific context from adapter
 	}
 }
 
@@ -97,16 +105,16 @@ SvelteKit 2.0 strengthens the boundary between server and client code:
 
 ```javascript
 // $lib/server/database.js - Never sent to the browser
-import { DB } from 'some-database';
-export const db = new DB(process.env.DB_URL);
+// import { DB } from 'some-database'; // Replace with your actual DB client
+// export const db = new DB(process.env.DB_URL);
 
 // In +page.server.js
-import { db } from '$lib/server/database';
+// import { db } from '$lib/server/database';
 
-export async function load() {
-	const data = await db.query('SELECT * FROM posts');
-	return { posts: data };
-}
+// export async function load() {
+// 	const data = await db.query('SELECT * FROM posts');
+// 	return { posts: data };
+// }
 ```
 
 ### Streaming Support
@@ -124,7 +132,9 @@ export function load() {
 
 		// Streams in later, without blocking initial render
 		posts: deferred(async () => {
-			const res = await fetch('https://api.example.com/posts');
+			// Simulate a slow fetch
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5'); // Example API
 			return res.json();
 		}),
 	};
@@ -133,10 +143,10 @@ export function load() {
 
 ```svelte
 <!-- +page.svelte -->
-<script>
+<script lang="ts">
   export let data;
 
-  // data.posts is a promise
+  // data.posts is a promise when using deferred
   const { title, posts } = data;
 </script>
 
@@ -150,6 +160,8 @@ export function load() {
       <li>{post.title}</li>
     {/each}
   </ul>
+{:catch error}
+  <p style="color: red;">Error loading posts: {error.message}</p>
 {/await}
 ```
 
@@ -160,20 +172,22 @@ SvelteKit 2.0 simplifies universal (client + server) data loading:
 ```javascript
 // +page.js
 export async function load({ fetch, depends }) {
-	// This runs on server for SSR, then again on client for hydration
-	depends('posts'); // Cache dependency label
+	// This runs on server for SSR, then again on client for hydration (unless data is already there)
+	depends('app:posts'); // Cache dependency label for invalidation
 
-	const response = await fetch('/api/posts');
+	const response = await fetch('/api/posts'); // Assumes an API route at /api/posts
 	return { posts: await response.json() };
 }
 ```
 
 ### Advanced Form Actions
 
-Enhanced form handling:
+Enhanced form handling with `fail` for validation errors and `redirect` for navigation.
 
 ```javascript
 // +page.server.js
+import { fail, redirect } from '@sveltejs/kit';
+
 export const actions = {
 	createPost: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -182,11 +196,15 @@ export const actions = {
 
 		// Validation
 		if (!title || title.length < 3) {
-			return fail(400, { title, missing: true });
+			return fail(400, { title, content, error: 'Title must be at least 3 characters' });
+		}
+		if (!content) {
+			return fail(400, { title, content, error: 'Content cannot be empty' });
 		}
 
-		// Create post
-		const post = await locals.db.posts.create({ title, content });
+		// Create post (example, replace with your DB logic)
+		// const post = await locals.db.posts.create({ title, content });
+        const post = { slug: 'new-post-slug' }; // Placeholder
 
 		// Redirect after successful action
 		throw redirect(303, `/posts/${post.slug}`);
@@ -196,107 +214,70 @@ export const actions = {
 
 ```svelte
 <!-- +page.svelte -->
-<script>
-  export let form;
-</script>
-
-<form method="POST" action="?/createPost">
-  <input name="title" value={form?.title ?? ''}>
-  {#if form?.missing}
-    <p class="error">Title must be at least 3 characters</p>
-  {/if}
-
-  <textarea name="content"></textarea>
-  <button>Create Post</button>
-</form>
-```
-
-### Progressive Enhancement
-
-SvelteKit 2.0 makes progressive enhancement easier:
-
-```svelte
-<!-- +page.svelte -->
-<script>
+<script lang="ts">
   import { enhance } from '$app/forms';
-  export let form;
+  export let form; // ActionData
 </script>
 
 <form
   method="POST"
   action="?/createPost"
-  use:enhance={() => {
-    return {
-      result({ form, update }) {
-        update(); // Update form state
-      }
-    };
-  }}
+  use:enhance
 >
-  <!-- Form fields -->
+  <div>
+    <label for="title">Title</label>
+    <input name="title" id="title" value={form?.title ?? ''}>
+    {#if form?.error && form?.title === undefined /* crude check, refine based on error structure */}
+      <p class="error">{form.error}</p>
+    {/if}
+  </div>
+
+  <div>
+    <label for="content">Content</label>
+    <textarea name="content" id="content">{form?.content ?? ''}</textarea>
+    {#if form?.error && form?.content === undefined}
+        <p class="error">{form.error}</p>
+    {/if}
+  </div>
+  <button>Create Post</button>
+
+  {#if form?.error && form?.title !== undefined && form?.content !== undefined}
+    <p class="error">{form.error}</p>
+  {/if}
 </form>
 ```
+*Note: The `use:enhance` and `form` prop interaction provides progressive enhancement.*
 
 ## Data Fetching Strategies
 
-SvelteKit 2.0 offers multiple data fetching strategies:
+SvelteKit 2.0 continues to offer flexible data fetching strategies:
 
 ### 1. Server-side Rendering (SSR)
-
-```javascript
-// +page.server.js
-export const load = async ({ fetch }) => {
-	const posts = await fetch('/api/posts').then((r) => r.json());
-	return { posts };
-};
-```
+   - Default behavior. `load` functions run on the server.
 
 ### 2. Static Site Generation (SSG)
-
-```javascript
-// +page.server.js
-export const prerender = true;
-
-export const load = async ({ fetch }) => {
-	const posts = await fetch('/api/posts').then((r) => r.json());
-	return { posts };
-};
-```
+   - Use `export const prerender = true;` in `+page.js` or `+page.server.js`.
+   - `entries` export can specify dynamic routes to prerender.
 
 ### 3. Client-side Rendering (CSR)
-
-```javascript
-// +page.js
-export const ssr = false;
-
-export const load = async ({ fetch }) => {
-	const posts = await fetch('/api/posts').then((r) => r.json());
-	return { posts };
-};
-```
+   - `export const ssr = false;` in `+page.js` or `+layout.js`. The page/layout will be client-rendered.
 
 ### 4. Incremental Static Regeneration (ISR)
-
-```javascript
-// +page.server.js
-export const prerender = true;
-export const entries = () => [{ slug: 'first-post' }, { slug: 'second-post' }];
-
-export const load = async ({ params, fetch }) => {
-	const post = await fetch(`/api/posts/${params.slug}`).then((r) => r.json());
-	return { post };
-};
-```
+   - SvelteKit doesn't have a direct "ISR" flag like Next.js. You achieve similar effects by:
+     - Prerendering pages (`prerender = true`).
+     - Using serverless functions (e.g., on Vercel, Netlify) for API routes or server `load` functions that re-fetch data and can be cached by the platform's CDN with stale-while-revalidate (SWR) cache headers.
 
 ## Best Practices for SvelteKit 2.0
 
-1. **Use the new middleware pattern** instead of the legacy hooks approach
-2. **Leverage route groups** for logical organization without affecting URLs
-3. **Keep sensitive code in server-only modules** in `$lib/server`
-4. **Use type-safe forms and actions** for better developer experience
-5. **Implement progressive enhancement** with `use:enhance`
-6. **Use streaming with `deferred`** for improved UX with slow data sources
-7. **Properly type your application** using the App namespace
-8. **Use `@error` and `@catch` blocks** in components for fine-grained error handling
-9. **Take advantage of page options** like `export const prerender = true` for optimal deployment
-10. **Implement proper invalidation strategies** with `depends()` for client-side updates
+1. **Embrace Server-Side Logic**: Utilize `+page.server.js` and `$lib/server/` for secure and efficient data handling.
+2. **Type Safety**: Fully leverage TypeScript with SvelteKit's generated types for `PageData`, `ActionData`, `Locals`, etc. (`./$types`).
+3. **Progressive Enhancement**: Build forms and interactions that work without JavaScript first, then enhance with `use:enhance`.
+4. **Streaming with `deferred`**: Use for non-critical data to improve perceived performance.
+5. **Effective Caching**: Use `depends` for cache invalidation and understand how `fetch` caching works in `load` functions.
+6. **Error Handling**: Utilize `+error.svelte` boundaries and the `handleError` hook for robust error management.
+7. **Security**: Be mindful of XSS (use `{@html}` cautiously), CSRF (form actions help), and properly managing secrets in server-only code.
+8. **Modular Code**: Organize reusable logic and components in `$lib`.
+9. **Adapters**: Choose the correct adapter for your deployment target and understand its capabilities (e.g., support for dynamic environment variables).
+10. **Stay Updated**: Follow SvelteKit releases for new features and performance improvements.
+
+SvelteKit 2.0 continues to refine the developer experience, making it a powerful choice for building modern web applications.

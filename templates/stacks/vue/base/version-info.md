@@ -1,29 +1,17 @@
 ---
-description: Version information for Vue applications
-globs: <root>/src/**/*.vue,<root>/package.json
+description: Version information for Vue.js projects, populated by the CLI.
+globs: <root>/package.json # To detect Vue version
 alwaysApply: true
 ---
-
-# Vue Version Information
+# Vue.js Version Information
 
 This project is using Vue **{detectedVersion}**.
 
-## Version-Specific Considerations
+- **Project Path:** `{projectPath}`
+- **Applicable Vue Version Range Rule:** `{versionRange}` (e.g., v2, v3)
 
-The rules in this folder are adapted for Vue {detectedVersion}, which falls into the "{versionRange}" compatibility range.
+Key configuration files like `vite.config.js` (for Vite-based projects) or `vue.config.js` (for Vue CLI projects) define the build setup.
+`main.js` or `main.ts` is the typical entry point for the application.
 
-## Framework Structure
-
-The Vue application is located at: `{projectPath}`
-
-## Detected Components
-
-The system has detected your Vue installation and will apply appropriate rules for:
-
--   Core Vue functionality
--   Components
--   Directives
--   Composition API / Options API
--   State Management
--   Routing
--   Testing
+<!-- This content is primarily managed by the Agent Rules Kit CLI. -->
+```

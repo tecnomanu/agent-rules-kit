@@ -1,8 +1,7 @@
 ---
-title: Astro Naming Conventions
-description: Standardized naming patterns for Astro projects
-tags: [Astro, Naming Conventions, Standards]
-always: true
+description: Standardized naming patterns for Astro projects, covering files and directories (components, layouts, pages, content collections), code (TypeScript interfaces, variables, functions, props), CSS, and configuration files.
+globs: <root>/src/**/*.{astro,md,mdx,ts,js},<root>/astro.config.mjs
+alwaysApply: true
 ---
 
 # Astro Naming Conventions

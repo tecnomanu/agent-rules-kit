@@ -1,8 +1,7 @@
 ---
-title: Astro v3 Specific Features
-description: Key features and implementation details specific to Astro version 3
-tags: [Astro, v3, Features]
-globs: <root>/src/content/**/*.md,<root>/src/content/**/*.mdx,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
+description: Key features and implementation details specific to Astro version 3, including View Transitions, enhanced Image Optimization, and i18n routing.
+globs: <root>/src/**/*.{astro,md,mdx},<root>/astro.config.mjs
+alwaysApply: true # Applies if v3 is detected
 ---
 
 # Astro v3 Specific Features
@@ -15,9 +14,9 @@ Astro 3.0 introduces several major features and improvements that build on the f
 
 Astro 3.0 makes the View Transitions API official (no longer experimental), providing smooth page transitions for a more app-like experience:
 
-```typescript
-// src/layouts/BaseLayout.astro
+```astro
 ---
+// src/layouts/BaseLayout.astro
 import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
@@ -36,7 +35,7 @@ const { title } = Astro.props;
     <ViewTransitions />
   </head>
   <body>
-    <main transition:animate="slide">
+    <main transition:animate="slide"> {/* Example default animation */}
       <slot />
     </main>
   </body>
@@ -47,10 +46,10 @@ const { title } = Astro.props;
 
 You can specify transitions for individual elements:
 
-```typescript
-// src/pages/index.astro
+```astro
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+// src/pages/index.astro
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
 ---
 
 <BaseLayout title="Home">
@@ -58,7 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <!-- Elements that should persist between pages -->
   <header transition:persist>
-    <!-- Your header content -->
+    <p>My Site Header</p>
   </header>
 
   <!-- Custom transition for specific elements -->
@@ -73,93 +72,83 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 You can define custom transitions:
 
-```typescript
+```javascript
 // src/transitions.js
-export function myFadeTransition(options) {
-	return {
-		forwards: {
-			old: [
-				{
-					name: 'fade',
-					duration: options.duration || '0.3s',
-					easing: options.easing || 'ease-out',
-					fillMode: 'forwards',
-				},
-			],
-			new: [
-				{
-					name: 'fade',
-					duration: options.duration || '0.3s',
-					easing: options.easing || 'ease-in',
-					fillMode: 'backwards',
-					direction: 'reverse',
-				},
-			],
-		},
-	};
+// This is a conceptual example. Actual custom transition API might differ or evolve.
+// Refer to official Astro docs for precise custom transition definition.
+export function myCustomFade(node, params) {
+  const duration = params?.duration || 300;
+  return {
+    duration,
+    css: (t) => `opacity: ${t}`
+  };
 }
 ```
 
-```typescript
-// Using custom transitions
-<div transition:animate={myFadeTransition({ duration: '0.5s' })}>
-	Fades with custom duration
+```astro
+---
+// Using custom transitions (conceptual, ensure API matches Astro docs)
+// import { myCustomFade } from '../transitions.js';
+---
+<div transition:animate={myCustomFade}> {/* Pass options if your custom transition accepts them */}
+	Fades with custom logic
 </div>
 ```
 
 ## Image Optimization Improvements
 
-Astro 3.0 greatly enhances the built-in image optimization features:
+Astro 3.0 greatly enhances the built-in image optimization features (`astro:assets`).
 
-### Image Component
+### Image Component (`<Image />`)
 
-```typescript
-// src/pages/gallery.astro
+```astro
 ---
+// src/pages/gallery.astro
 import { Image } from 'astro:assets';
-import heroImage from '../assets/hero.jpg';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import heroImage from '../assets/hero.jpg'; // Assuming local asset
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
 ---
 
 <BaseLayout title="Gallery">
   <h1>Image Gallery</h1>
 
-  <!-- Local images with automatic width/height -->
+  <!-- Local images with automatic width/height based on import -->
   <Image
     src={heroImage}
     alt="Hero image"
-    format="avif"
-    quality={90}
+    format="avif"     décisions
+    quality={90}      
   />
 
-  <!-- Responsive images -->
+  <!-- Responsive images with explicit widths -->
   <Image
     src={heroImage}
     alt="Responsive hero"
-    densities={[1, 2]}
-    width={800}
-    height={600}
+    widths={[300, 600, 900]} /* Define widths for srcset */
+    sizes="(max-width: 600px) 300px, (max-width: 900px) 600px, 900px" /* Define sizes attribute */
   />
 
-  <!-- Image with explicit output formats -->
+  <!-- Remote image requires width and height -->
   <Image
-    src="https://example.com/image.jpg"
-    alt="Remote image"
+    src="https://placehold.co/400x300/webp"
+    alt="Remote image placeholder"
     width={400}
     height={300}
-    format="webp"
+    format="webp" /* Can specify output format */
   />
 </BaseLayout>
 ```
 
-### Picture Component
+### Picture Component (`<Picture />`)
 
-```typescript
-// src/pages/responsive.astro
+For more control over different image formats and art direction.
+
+```astro
 ---
+// src/pages/responsive.astro
 import { Picture } from 'astro:assets';
-import heroImage from '../assets/hero.jpg';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import heroImage from '../assets/hero.jpg'; // Assuming local asset
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming layout exists
 ---
 
 <BaseLayout title="Responsive Images">
@@ -167,15 +156,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <Picture
     src={heroImage}
-    alt="Responsive hero image"
+    alt="Responsive hero image, art directed"
     widths={[400, 800, 1200]}
     sizes="(max-width: 767px) 400px, (max-width: 1199px) 800px, 1200px"
-    formats={['avif', 'webp', 'jpeg']}
+    formats={['avif', 'webp', 'jpeg']} /* Specify desired output formats */
   />
 </BaseLayout>
 ```
 
 ### Improved Optimization Configuration
+
+Configuration in `astro.config.mjs` for the image service (e.g., Sharp or Squoosh).
 
 ```javascript
 // astro.config.mjs
@@ -183,25 +174,18 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
 	image: {
-		service: {
-			entrypoint: 'astro/assets/services/sharp',
-			config: {
-				quality: 80,
-				defaults: {
-					format: 'webp',
-					cacheDir: './node_modules/.astro/cache/assets',
-				},
-			},
-		},
-		domains: ['trusted-image-domain.com'],
-		remotePatterns: [{ protocol: 'https' }],
+		// For local processing with Sharp (default) or Squoosh
+		service: { entrypoint: 'astro/assets/services/sharp' }, // or 'astro/assets/services/squoosh'
+		// Example: configure domains for remote images if using a specific service that requires it.
+		// domains: ['trusted-image-domain.com'],
+		// remotePatterns: [{ protocol: 'https', hostname: 'example.com' }], // More granular control
 	},
 });
 ```
 
-## React Server Components (Experimental)
+## React Server Components (Experimental in Astro 3, more focus later)
 
-Astro 3.0 adds experimental support for React Server Components (RSC):
+Astro 3.0 continued experimental support for React Server Components (RSC), allowing server-only React components.
 
 ```javascript
 // astro.config.mjs
@@ -211,51 +195,58 @@ import react from '@astrojs/react';
 export default defineConfig({
 	integrations: [
 		react({
-			experimentalReactComponents: true,
+			experimentalReactServerComponents: true, // Flag name might vary slightly by minor version
 		}),
 	],
 });
 ```
 
 Using RSC in Astro:
-
 ```tsx
-// src/components/ServerComponent.tsx
-export default function ServerComponent() {
-	// This component runs on the server only
-	const data = await fetch('https://api.example.com/data').then((r) =>
-		r.json()
-	);
+// src/components/ServerDataFetcher.jsx (Note: .jsx or .tsx for React components)
+// This component is intended to run on the server.
+// Actual RSCs are more nuanced and depend on React's specific RSC implementation.
+// Astro's integration aims to make this possible within the Astro model.
 
-	return (
-		<div>
-			<h2>Server-Fetched Data</h2>
-			<ul>
-				{data.map((item) => (
-					<li key={item.id}>{item.name}</li>
-				))}
-			</ul>
-		</div>
-	);
+async function fetchData() {
+  // Simulate fetching data
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return [{ id: 1, name: "Server Data Item 1" }, { id: 2, name: "Server Data Item 2" }];
+}
+
+export default async function ServerDataFetcher() {
+  const data = await fetchData();
+
+  return (
+    <div>
+      <h2>Server-Fetched Data (RSC Example)</h2>
+      <ul>
+        {data.map((item) => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 ```
 
-```typescript
-// src/pages/with-rsc.astro
+```astro
 ---
+// src/pages/with-rsc.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ServerComponent from '../components/ServerComponent';
+import ServerDataFetcher from '../components/ServerDataFetcher.jsx';
 ---
 
-<BaseLayout title="React Server Components">
+<BaseLayout title="React Server Components with Astro">
   <h1>Using React Server Components</h1>
-  <ServerComponent />
+  <ServerDataFetcher client:only="jsx" /> {/* Hydration strategy still applies for client interactivity if any */}
 </BaseLayout>
 ```
+*Note: RSC support in Astro was experimental and evolved. The exact syntax and capabilities should be checked against specific Astro 3.x minor version docs.*
 
-## i18n Routing
+## i18n Routing (Internationalization)
 
-Astro 3.0 introduces built-in support for internationalization routing:
+Astro 3.0 introduced more built-in support for internationalization routing strategies.
 
 ```javascript
 // astro.config.mjs
@@ -266,216 +257,111 @@ export default defineConfig({
 		defaultLocale: 'en',
 		locales: ['en', 'es', 'fr'],
 		routing: {
-			strategy: 'prefix-always', // 'prefix-always' or 'prefix-other-locales'
+			prefixDefaultLocale: false, // e.g., /about vs /en/about
+			// strategy: 'pathname' // or 'domain' - check Astro docs for specific v3 options
 		},
-		fallback: {
-			es: 'en',
-			fr: 'en',
-		},
+		// fallback: { // Define fallbacks if content for a locale is missing
+		//  'es': 'en'
+		// }
 	},
 });
 ```
 
-Using i18n in your code:
-
-```typescript
+Using i18n in your code (conceptual, relies on how you structure content and use `Astro.currentLocale`):
+```astro
+---
 // src/pages/index.astro
----
-import { getI18n } from 'astro:i18n';
+// This is a simplified example. Actual i18n content fetching would use Content Collections.
 import BaseLayout from '../layouts/BaseLayout.astro';
+// import { getCollection } from 'astro:content';
 
-const i18n = getI18n(Astro.currentLocale);
+// const localizedContent = await getCollection('pages', ({id}) => id.startsWith(Astro.currentLocale));
+// const homeContent = localizedContent.find(p => p.slug.endsWith('home')); // Example
+const homeContent = { title: "Welcome", greeting: "Hello World" }; // Placeholder
 ---
 
-<BaseLayout title={i18n.t('home.title')}>
-  <h1>{i18n.t('home.heading')}</h1>
-  <p>{i18n.t('home.welcome')}</p>
-
-  <div>
-    <a href={i18n.link('/about')}>{i18n.t('nav.about')}</a>
-    <a href={i18n.link('/contact')}>{i18n.t('nav.contact')}</a>
-  </div>
+<BaseLayout title={homeContent.title}>
+  <h1>{homeContent.greeting} ({Astro.currentLocale})</h1>
+  <nav>
+    <a href="/en/">English</a> | <a href="/es/">Español</a> | <a href="/fr/">Français</a>
+  </nav>
 </BaseLayout>
-```
-
-## TypeScript Improvements
-
-Astro 3.0 improves TypeScript support with stricter types and better developer experience:
-
-```typescript
-// src/types.ts
-import type { APIRoute } from 'astro';
-
-// Define a type for route parameters
-export interface BlogPostParams {
-	slug: string;
-}
-
-// Define a type for API responses
-export type APIResponse<T> = {
-	success: boolean;
-	data?: T;
-	error?: string;
-};
-
-// Use with API routes
-export const GET: APIRoute<BlogPostParams> = async ({ params, request }) => {
-	const { slug } = params;
-
-	try {
-		const data = await fetchBlogPost(slug);
-		return new Response(
-			JSON.stringify({
-				success: true,
-				data,
-			} as APIResponse<typeof data>)
-		);
-	} catch (error) {
-		return new Response(
-			JSON.stringify({
-				success: false,
-				error: error.message,
-			} as APIResponse<never>),
-			{ status: 500 }
-		);
-	}
-};
 ```
 
 ## Content Collections Enhancements
 
-Astro 3.0 adds more features to Content Collections:
+Astro 3.0 continued to refine Content Collections:
+-   **Data Collections**: Support for JSON/YAML files in `src/content/` alongside Markdown/MDX.
+-   **References**: Improved ability to link between collections (e.g., an author collection referenced by blog posts).
 
 ```typescript
 // src/content/config.ts
 import { defineCollection, reference, z } from 'astro:content';
 
-// Author collection with references
 const authorsCollection = defineCollection({
-	type: 'data', // JSON/YAML data collection
+	type: 'data', // For JSON/YAML files
 	schema: z.object({
 		name: z.string(),
-		bio: z.string(),
-		avatar: z.string(),
+		bio: z.string().optional(),
 	}),
 });
 
-// Blog collection with references to authors
 const blogCollection = defineCollection({
-	type: 'content', // Markdown/MDX content
+	type: 'content', // For Markdown/MDX
 	schema: z.object({
 		title: z.string(),
-		date: z.date(),
-		author: reference('authors'), // Reference to authors collection
-		tags: z.array(reference('tags')), // Reference to tags collection
-		image: z.string().optional(),
-		draft: z.boolean().default(false),
-	}),
-});
-
-// Tags collection
-const tagsCollection = defineCollection({
-	type: 'data',
-	schema: z.object({
-		name: z.string(),
-		description: z.string().optional(),
+		pubDate: z.date(),
+		author: reference('authors'), // Reference to an entry in the 'authors' collection
+		tags: z.array(z.string()).optional(),
 	}),
 });
 
 export const collections = {
 	blog: blogCollection,
 	authors: authorsCollection,
-	tags: tagsCollection,
 };
 ```
 
 Using referenced collections:
-
-```typescript
-// src/pages/blog/[slug].astro
+```astro
 ---
+// src/pages/blog/[...slug].astro
 import { getCollection, getEntry } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjust path
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: { post }
+    props: { post },
   }));
 }
 
 const { post } = Astro.props;
+const author = await getEntry(post.data.author); // Resolves the reference
 const { Content } = await post.render();
-
-// Retrieve referenced author
-const author = await getEntry(post.data.author);
-
-// Retrieve referenced tags
-const tags = await Promise.all(
-  post.data.tags.map(tagRef => getEntry(tagRef))
-);
 ---
-
 <BaseLayout title={post.data.title}>
-  <article>
-    <h1>{post.data.title}</h1>
-    <p>By {author.data.name} • {post.data.date.toLocaleDateString()}</p>
-
-    <div class="tags">
-      {tags.map(tag => (
-        <span class="tag">{tag.data.name}</span>
-      ))}
-    </div>
-
-    <Content />
-
-    <div class="author-bio">
-      <img src={author.data.avatar} alt={author.data.name} />
-      <p>{author.data.bio}</p>
-    </div>
-  </article>
+  <h1>{post.data.title}</h1>
+  <p>By {author.data.name}</p>
+  <Content />
 </BaseLayout>
 ```
 
 ## Performance Optimizations
 
-Astro 3.0 includes performance improvements for faster builds and runtime:
-
-### Bundle Splitting
-
-```javascript
-// astro.config.mjs
-import { defineConfig } from 'astro/config';
-
-export default defineConfig({
-	build: {
-		splitting: true, // Enable code splitting for improved loading performance
-		inlineStylesheets: 'auto', // 'auto', 'always', or 'never'
-	},
-	vite: {
-		build: {
-			cssCodeSplit: true,
-			rollupOptions: {
-				output: {
-					manualChunks: {
-						// Define custom chunk splitting
-						vendor: ['react', 'react-dom'],
-						utils: ['./src/utils/index.ts'],
-					},
-				},
-			},
-		},
-	},
-});
-```
+Astro 3.0 included further performance improvements for faster builds and runtime, including optimizations in how CSS is handled and JavaScript is bundled.
+- **Vite 4**: Astro 3 upgraded to Vite 4, bringing its own set of performance benefits.
+- **Faster HMR**: Hot Module Replacement in development became faster.
 
 ## Migration from Astro v2
 
-When upgrading from Astro 2.x to 3.0, consider these key changes:
+When upgrading from Astro 2.x to 3.0:
+1.  Review the official Astro blog for the v3 release announcement and migration guide.
+2.  Update dependencies: `npm install astro@latest @astrojs/react@latest ...` (and other integrations).
+3.  **View Transitions**: If you were using the experimental API, adapt to the stable `astro:transitions` API.
+4.  **Image Optimization**: Ensure your image configurations in `astro.config.mjs` are up-to-date if you use advanced features.
+5.  Test your build and deployments thoroughly.
 
-1. **View Transitions**: Update to the official View Transitions API
-2. **Image Optimization**: Use the enhanced image components with better optimization
-3. **TypeScript Updates**: Leverage improved type checking and definitions
-4. **Content Collections**: Utilize reference support for more complex content relationships
-5. **i18n Support**: Implement built-in internationalization if needed
+Astro 3.0 solidified many features introduced in v2 and set the stage for future enhancements, particularly around app-like experiences and developer tooling.
+```

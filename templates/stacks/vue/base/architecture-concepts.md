@@ -1,522 +1,270 @@
+---
+description: Core architectural concepts for Vue.js applications, including component design, state management, routing, Options API vs. Composition API, and project structure.
+globs: <root>/src/**/*.{vue,js,ts},<root>/{vite,vue}.config.{js,ts}
+alwaysApply: true
+---
+
 # Vue.js Architecture Concepts
 
 This document outlines the core architectural concepts and patterns used in Vue.js applications in {projectPath}.
 
 ## Component Architecture
 
+Vue.js applications are built as a tree of reusable components.
+
 ### Vue Component Types
 
-1. **Base/UI Components**
+1.  **Base/UI Components (Presentational Components)**
+    -   Lowest level reusable components focusing on presentation.
+    -   Examples: Custom buttons (`BaseButton.vue`), form inputs (`BaseInput.vue`), cards, modals.
+    -   Should be highly reusable, stateless (or with minimal UI state), and receive data via props, emitting events for interactions.
+    -   Often found in a UI library or a dedicated `src/components/base/` or `src/components/ui/` directory.
 
-    - Lowest level reusable components
-    - Form inputs, buttons, cards, etc.
-    - Should be highly reusable and presentational
-    - Often found in a UI library or component library
+2.  **Composite Components (Smart/Container Components - partial)**
+    -   Composed of multiple base components and/or other composite components.
+    -   Implement specific features or parts of features (e.g., `UserCard.vue`, `ProductList.vue`, `NavigationBar.vue`).
+    -   May have internal state and logic related to their specific responsibility.
+    -   Can emit events to parent components or interact with state management stores.
 
-2. **Composite Components**
+3.  **Page/View Components (Route-Level Components)**
+    -   Top-level components typically rendered by Vue Router for a specific route.
+    -   Organize the layout of a page by composing various composite and base components.
+    -   Often responsible for fetching page-specific data and passing it down to child components.
+    -   Handle page-level logic and state. Usually found in `src/views/` or `src/pages/`.
 
-    - Composed of multiple base components
-    - Implement specific features (SearchBar, UserProfile)
-    - May have internal state and logic
-    - Can emit events to parent components
-
-3. **Page/View Components**
-
-    - Top-level components rendered by a router
-    - Organize the layout of a page
-    - Coordinate data flow between components
-    - Handle page-level logic and state
-
-4. **Layout Components**
-    - Define the overall structure of the app
-    - Often contain slots for content projection
-    - Examples: AppHeader, AppSidebar, PageLayout
+4.  **Layout Components**
+    -   Define the overall structure of the application or sections of it (e.g., main layout with header, sidebar, footer).
+    -   Often contain `<slot />` (default or named) for content projection from page components.
+    -   Examples: `AppLayout.vue`, `DashboardLayout.vue`.
 
 ### Props Down, Events Up Pattern
 
-The core Vue data flow pattern:
+This is the core data flow pattern in Vue, ensuring unidirectional data flow:
 
--   Parent components pass data to children via props
--   Child components communicate with parents via events
--   Maintains clear unidirectional data flow
--   Makes component relationships explicit
+-   **Props Down**: Parent components pass data to child components via props. Props are one-way reactive bindings from parent to child.
+-   **Events Up**: Child components communicate changes or actions back to their parent components by emitting custom events.
 
 ```vue
-<!-- Parent.vue -->
+<!-- ParentComponent.vue -->
 <template>
-	<Child :data="parentData" @update="handleUpdate" />
+  <ChildComponent :message="parentMessage" @update-message="handleMessageUpdate" />
+  <p>Message in parent: {{ parentMessage }}</p>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import Child from './Child.vue';
+import ChildComponent from './ChildComponent.vue';
 
-const parentData = ref('Hello');
-const handleUpdate = (newValue) => {
-	parentData.value = newValue;
-};
+const parentMessage = ref('Hello from parent');
+
+function handleMessageUpdate(newMessage) {
+  parentMessage.value = newMessage;
+}
 </script>
 
-<!-- Child.vue -->
+<!-- ChildComponent.vue -->
 <template>
-	<div>
-		<p>{{ data }}</p>
-		<button @click="emitUpdate">Update</button>
-	</div>
+  <div>
+    <p>Received: {{ message }}</p>
+    <button @click="sendMessageToParent">Update Parent's Message</button>
+  </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps(['data']);
-const emit = defineEmits(['update']);
+const props = defineProps({
+  message: String
+});
 
-const emitUpdate = () => {
-	emit('update', 'New value');
-};
+const emit = defineEmits(['update-message']);
+
+function sendMessageToParent() {
+  emit('update-message', 'Hello from child!');
+}
+</script>
+```
+This pattern makes component relationships explicit and data flow easier to trace.
+
+## Options API vs. Composition API
+
+Vue offers two main styles for writing component logic:
+
+### Options API (Vue 2 and still available in Vue 3)
+- Organizes component logic by options: `data()`, `methods`, `computed`, `watch`, `created`, `mounted`, etc.
+- Logic related to a single feature can be spread across multiple options, which can be challenging in large components.
+- Example structure:
+  ```vue
+  <script>
+  export default {
+    name: 'MyComponent', // Component name
+    props: { /* ... */ },
+    data() {
+      return {
+        message: 'Hello',
+        count: 0
+      };
+    },
+    computed: {
+      doubledCount() {
+        return this.count * 2;
+      }
+    },
+    watch: {
+      count(newVal, oldVal) { /* ... */ }
+    },
+    methods: {
+      increment() {
+        this.count++;
+      },
+      async fetchData() { /* ... */ }
+    },
+    mounted() {
+      this.fetchData();
+    }
+    // ... other lifecycle hooks like created, updated, unmounted
+  }
+  </script>
+  ```
+
+### Composition API (Introduced in Vue 3)
+- Allows organizing component logic by logical concern/feature rather than by option type.
+- Uses reactive functions like `ref()`, `reactive()`, `computed()`, `watch()`, and lifecycle hooks directly within a `setup()` function (or the more concise `<script setup>`).
+- Promotes reusability through "Composables" (standalone reactive functions).
+- Offers better TypeScript inference and integration.
+- Can be used alongside the Options API in Vue 3, but `<script setup>` encourages a full Composition API approach.
+
+**Why Composition API?**
+- **Better Logic Organization**: Code related to the same logical concern can be grouped together, making components easier to read and maintain, especially as they grow.
+- **Improved Reusability**: Logic can be extracted into composable functions and reused across multiple components without mixins (which have drawbacks like namespace collisions and unclear origins of properties).
+- **Enhanced Type Inference**: More robust and easier to type with TypeScript.
+- **Smaller Production Bundles**: More tree-shakable, as only the imported functions are bundled.
+
+While Vue 3 supports both, the **Composition API with `<script setup>` is the recommended approach for new Vue 3 projects** due to its benefits in organization, reusability, and type safety. The Options API remains available for existing Vue 2 codebases and simpler components if preferred.
+
+```vue
+<!-- Component using Composition API with <script setup> -->
+<template>
+  <p>Count: {{ count }}</p>
+  <p>Doubled: {{ doubledCount }}</p>
+  <button @click="increment">Increment</button>
+</template>
+
+<script setup lang="ts"> // lang="ts" for TypeScript
+import { ref, computed, onMounted, watch } from 'vue';
+
+// Props (if any)
+// interface Props { title?: string }
+// const props = defineProps<Props>();
+
+// Reactive state
+const count = ref(0);
+
+// Computed property
+const doubledCount = computed(() => count.value * 2);
+
+// Methods
+function increment() {
+  count.value++;
+}
+
+async function fetchData() {
+  // const response = await fetch('/api/data');
+  // data.value = await response.json();
+}
+
+// Watcher
+watch(count, (newVal, oldVal) => {
+  console.log(`Count changed from ${oldVal} to ${newVal}`);
+});
+
+// Lifecycle hook
+onMounted(() => {
+  fetchData();
+  console.log('Component mounted!');
+});
 </script>
 ```
 
 ## State Management Patterns
 
-### Component Local State
+(Covered in detail in `state-management.md`. This section provides a brief overview.)
 
-For simple components with self-contained state:
-
-```vue
-<script setup>
-import { ref, computed } from 'vue';
-
-// Local state
-const count = ref(0);
-const doubleCount = computed(() => count.value * 2);
-
-// Methods
-const increment = () => count.value++;
-</script>
-```
-
-### Composition API Patterns
-
-Vue 3's Composition API enables better code organization:
-
-1. **Composables**: Reusable logic extracted into functions
-2. **Reactive References**: `ref()` and `reactive()`
-3. **Computed Properties**: Derived state with `computed()`
-4. **Watchers**: Side effects with `watch()` and `watchEffect()`
-5. **Lifecycle Hooks**: `onMounted()`, `onUnmounted()`, etc.
-
-```js
-// composables/useUsers.js
-import { ref, computed, onMounted } from 'vue';
-
-export function useUsers() {
-	const users = ref([]);
-	const loading = ref(true);
-	const error = ref(null);
-
-	const userCount = computed(() => users.value.length);
-
-	async function fetchUsers() {
-		loading.value = true;
-		try {
-			const response = await fetch('/api/users');
-			users.value = await response.json();
-		} catch (e) {
-			error.value = e;
-		} finally {
-			loading.value = false;
-		}
-	}
-
-	onMounted(fetchUsers);
-
-	return {
-		users,
-		loading,
-		error,
-		userCount,
-		fetchUsers,
-	};
-}
-
-// Using the composable in a component
-import { useUsers } from '@/composables/useUsers';
-
-const { users, loading, error, userCount } = useUsers();
-```
-
-### Global State Management
-
-#### Pinia (Recommended)
-
-The modern Vue state management library:
-
-```js
-// stores/counter.js
-import { defineStore } from 'pinia';
-
-export const useCounterStore = defineStore('counter', {
-	// State
-	state: () => ({
-		count: 0,
-		loading: false,
-	}),
-
-	// Getters (computed values)
-	getters: {
-		doubleCount: (state) => state.count * 2,
-	},
-
-	// Actions (methods)
-	actions: {
-		increment() {
-			this.count++;
-		},
-		async fetchCount() {
-			this.loading = true;
-			try {
-				const response = await fetch('/api/count');
-				const data = await response.json();
-				this.count = data.count;
-			} finally {
-				this.loading = false;
-			}
-		},
-	},
-});
-
-// Using the store in a component
-import { useCounterStore } from '@/stores/counter';
-
-const counterStore = useCounterStore();
-
-// Access state and getters
-console.log(counterStore.count);
-console.log(counterStore.doubleCount);
-
-// Call actions
-counterStore.increment();
-await counterStore.fetchCount();
-```
-
-#### Vuex (Legacy)
-
-For older Vue 2 applications:
-
-```js
-// store/index.js
-import Vue from 'vue';
-import Vuex from 'vuex';
-
-Vue.use(Vuex);
-
-export default new Vuex.Store({
-	state: {
-		count: 0,
-	},
-	mutations: {
-		INCREMENT(state) {
-			state.count++;
-		},
-		SET_COUNT(state, value) {
-			state.count = value;
-		},
-	},
-	actions: {
-		increment({ commit }) {
-			commit('INCREMENT');
-		},
-		async fetchCount({ commit }) {
-			const response = await fetch('/api/count');
-			const data = await response.json();
-			commit('SET_COUNT', data.count);
-		},
-	},
-	getters: {
-		doubleCount: (state) => state.count * 2,
-	},
-});
-```
+-   **Component Local State**: Using `ref()` or `reactive()` for state confined to a single component or a small component subtree (passed via props).
+-   **Composition API for Cross-Component State (`provide`/`inject`)**: Suitable for sharing state within a component subtree without prop drilling.
+-   **Global State Management (Pinia)**: The officially recommended library for centralized state management in Vue 3. Provides stores, state, getters, actions, and excellent TypeScript support.
+-   **Vuex (Legacy)**: The state management solution for Vue 2, still usable in Vue 3 but Pinia is preferred for new projects.
 
 ## Project Organization
 
-### Feature-Based Structure
+(Covered in detail in `naming-conventions.md` for file names, and here for structure.)
 
-Organize by feature rather than by file type:
-
-```
-src/
-├── assets/                 # Static assets
-├── components/
-│   ├── ui/                 # Base UI components
-│   └── common/             # Shared composite components
-├── features/
-│   ├── auth/
-│   │   ├── components/     # Auth-specific components
-│   │   ├── composables/    # Auth-specific composables
-│   │   ├── stores/         # Auth-specific stores
-│   │   └── views/          # Auth-related pages
-│   └── products/
-│       ├── components/
-│       ├── composables/
-│       ├── stores/
-│       └── views/
-├── layouts/                # Layout components
-├── composables/            # Shared composables
-├── stores/                 # Pinia stores
-├── router/                 # Vue Router configuration
-├── utils/                  # Utility functions
-├── App.vue                 # Root component
-└── main.js                 # Entry point
-```
-
-### Module-Based Structure
-
-For larger applications, a modular approach with explicit boundaries:
+A common structure for Vue projects (especially with Vite):
 
 ```
-src/
-├── modules/
-│   ├── auth/
-│   │   ├── api.js          # Auth-specific API calls
-│   │   ├── components/     # Internal components
-│   │   ├── composables/    # Internal composables
-│   │   ├── store.js        # Module store
-│   │   ├── routes.js       # Module routes
-│   │   └── index.js        # Public API of this module
-│   └── products/
-│       ├── api.js
-│       ├── components/
-│       ├── composables/
-│       ├── store.js
-│       ├── routes.js
-│       └── index.js
-├── core/                   # Core application functionality
-│   ├── components/
-│   ├── composables/
-│   ├── router/
-│   └── store/
-└── main.js                 # Entry point
+{projectPath}/
+├── public/                 # Static assets that are copied directly to the build root
+├── src/
+│   ├── assets/             # Static assets processed by Vite (e.g., images, fonts)
+│   ├── components/         # Reusable global/UI components
+│   │   ├── base/           # Base UI components (BaseButton.vue)
+│   │   └── common/         # More complex shared components (UserAvatar.vue)
+│   ├── views/              # Route-level components (pages) (e.g., HomeView.vue, AboutView.vue)
+│   │   └── HomeView.vue
+│   ├── layouts/            # Layout components (e.g., AppLayout.vue, AuthLayout.vue)
+│   ├── router/             # Vue Router configuration (index.ts)
+│   ├── stores/             # Pinia stores (e.g., userStore.ts)
+│   ├── composables/        # Reusable Composition API functions (e.g., useCounter.ts)
+│   ├── services/           # API service clients, other external services
+│   │   └── apiService.ts
+│   ├── styles/             # Global styles, variables, mixins (e.g., main.scss)
+│   ├── App.vue             # Root Vue component
+│   └── main.ts             # Application entry point (initializes Vue app, router, Pinia)
+├── index.html              # Main HTML file
+├── vite.config.ts          # Vite configuration
+├── vue.config.js           # Vue CLI configuration (if using Vue CLI)
+├── tsconfig.json           # TypeScript configuration
+└── package.json
 ```
+Organizing by feature (e.g., `src/features/auth/components/`, `src/features/auth/stores/`) is also a popular and scalable approach, especially for larger applications.
 
 ## Routing Architecture
 
-Vue Router enables navigation between views:
-
-```js
-// router/index.js
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '@/views/HomeView.vue';
-
-const routes = [
-	{
-		path: '/',
-		name: 'home',
-		component: HomeView,
-	},
-	{
-		path: '/about',
-		name: 'about',
-		// Lazy-loaded route
-		component: () => import('@/views/AboutView.vue'),
-	},
-	{
-		path: '/users/:id',
-		name: 'user-profile',
-		component: () => import('@/views/UserProfile.vue'),
-		// Route metadata
-		meta: { requiresAuth: true },
-	},
-];
-
-const router = createRouter({
-	history: createWebHistory(),
-	routes,
-});
-
-// Navigation guards for global logic (e.g., authentication)
-router.beforeEach((to, from) => {
-	if (to.meta.requiresAuth && !isAuthenticated()) {
-		return { name: 'login', query: { redirect: to.fullPath } };
-	}
-});
-
-export default router;
-```
+(Covered by Vue Router, typically configured in `src/router/index.ts` or a similar file.)
+-   **Vue Router**: The official library for client-side routing in Vue applications.
+-   **Routes Definition**: Define paths, corresponding components, nested routes, and dynamic segments.
+-   **Navigation Guards**: Implement global, per-route, or in-component guards for controlling access to routes (e.g., for authentication).
+-   **Lazy Loading**: Import route components dynamically (`component: () => import('@/views/AboutView.vue')`) to split code into smaller chunks and improve initial load time.
 
 ## API Integration Patterns
 
-### API Module Pattern
+-   **Dedicated API Service Modules**: Centralize API calls in dedicated files (e.g., `src/services/userService.ts`). These modules can use `axios`, `fetch`, or other HTTP clients.
+-   **Composables for API Calls**: Wrap API calls and related state (loading, error, data) within composable functions for easy reuse in components.
+    ```typescript
+    // src/composables/useFetchData.ts
+    import { ref } from 'vue';
 
-Centralize API calls in dedicated modules:
+    export function useFetchData<T>(url: string) {
+      const data = ref<T | null>(null);
+      const error = ref<Error | null>(null);
+      const isLoading = ref(false);
 
-```js
-// api/users.js
-import axios from 'axios';
+      const fetchData = async () => {
+        isLoading.value = true;
+        error.value = null;
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          data.value = await response.json();
+        } catch (e: any) {
+          error.value = e;
+        } finally {
+          isLoading.value = false;
+        }
+      };
+      return { data, error, isLoading, fetchData };
+    }
+    ```
 
-const api = axios.create({
-	baseURL: '/api',
-});
-
-export default {
-	async getUsers() {
-		const response = await api.get('/users');
-		return response.data;
-	},
-
-	async getUser(id) {
-		const response = await api.get(`/users/${id}`);
-		return response.data;
-	},
-
-	async createUser(userData) {
-		const response = await api.post('/users', userData);
-		return response.data;
-	},
-};
-```
-
-### API Composable Pattern
-
-Wrap API calls in composables for reactive state:
-
-```js
-// composables/useUserApi.js
-import { ref } from 'vue';
-import usersApi from '@/api/users';
-
-export function useUserApi() {
-	const users = ref([]);
-	const user = ref(null);
-	const loading = ref(false);
-	const error = ref(null);
-
-	const fetchUsers = async () => {
-		loading.value = true;
-		error.value = null;
-
-		try {
-			users.value = await usersApi.getUsers();
-		} catch (err) {
-			error.value = err;
-		} finally {
-			loading.value = false;
-		}
-	};
-
-	const fetchUser = async (id) => {
-		loading.value = true;
-		error.value = null;
-
-		try {
-			user.value = await usersApi.getUser(id);
-		} catch (err) {
-			error.value = err;
-		} finally {
-			loading.value = false;
-		}
-	};
-
-	return {
-		users,
-		user,
-		loading,
-		error,
-		fetchUsers,
-		fetchUser,
-	};
-}
-```
-
-## Typed Vue with TypeScript
-
-Vue 3 has excellent TypeScript support:
-
-```ts
-// User.vue
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-
-// Define typed props
-interface Props {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  isAdmin?: boolean;
-}
-
-const props = defineProps<Props>();
-
-// Define typed emits
-const emit = defineEmits<{
-  (e: 'update:user', user: Props['user']): void;
-  (e: 'delete', id: number): void;
-}>();
-
-// Typed ref
-const isEditing = ref<boolean>(false);
-
-// Type inference works automatically
-const userDisplayName = computed(() => {
-  return isEditing.value ? `Editing: ${props.user.name}` : props.user.name;
-});
-</script>
-```
-
-## Dependency Injection
-
-For passing data deeply without prop drilling:
-
-```js
-// Context provider component
-<script setup>
-import { provide } from 'vue';
-
-const theme = ref('light');
-
-const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light';
-};
-
-// Provide values to descendants
-provide('theme', theme);
-provide('toggleTheme', toggleTheme);
-</script>
-
-// Deep component that needs theme
-<script setup>
-import { inject } from 'vue';
-
-// Inject values from ancestors
-const theme = inject('theme');
-const toggleTheme = inject('toggleTheme');
-</script>
-```
-
-## Performance Optimization
-
-Key techniques for Vue performance:
-
-1. **Proper Key Usage**: Always use `:key` with unique values in `v-for` loops
-2. **Computed Properties**: Cache derived values with `computed`
-3. **Memoization**: Use `computed` or `v-memo` to avoid unnecessary re-renders
-4. **Lazy Loading**: Load components on demand with dynamic imports
-5. **Virtual Scrolling**: For long lists, consider libraries like `vue-virtual-scroller`
-6. **Component Splitting**: Break large components into smaller, focused ones
-
-## Architecture Decision Records
-
-Consider maintaining ADRs for key decisions:
-
-```
-docs/
-└── architecture/
-    ├── decisions/
-    │   ├── 0001-state-management-choice.md
-    │   ├── 0002-api-approach.md
-    │   └── 0003-component-organization.md
-    └── architecture-overview.md
+Understanding these architectural concepts will help in building well-structured, maintainable, and scalable Vue.js applications in {projectPath}.
 ```

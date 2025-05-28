@@ -1,8 +1,7 @@
 ---
-title: Astro Testing Best Practices
-description: Guidelines for testing Astro projects effectively
-tags: [Astro, Testing, Best Practices]
-always: true
+description: Guidelines for testing Astro projects effectively, covering unit testing (Vitest), component testing (Astro Testing Library), E2E testing (Playwright), testing content collections, and common pitfalls.
+globs: <root>/src/**/*.{test,spec}.{js,ts,jsx,tsx},<root>/tests/**/*.{js,ts,jsx,tsx,astro},<root>/vitest.config.{js,ts}
+alwaysApply: true
 ---
 
 # Astro Testing Best Practices

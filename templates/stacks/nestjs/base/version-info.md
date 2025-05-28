@@ -1,7 +1,7 @@
 ---
-description: NestJS version information and migration guidelines
-globs: <root>/**/*.ts
-alwaysApply: false
+description: NestJS version information, key features by version, migration guidelines, and compatibility notes.
+globs: <root>/package.json # For version detection
+alwaysApply: true
 ---
 
 # NestJS Version Information
@@ -108,23 +108,23 @@ Breaking changes:
 
     ```typescript
     // Before (NestJS 9)
-    export const User = createParamDecorator(
-    	(data: string, ctx: ExecutionContext) => {
-    		const request = ctx.switchToHttp().getRequest();
-    		const user = request.user;
-    		return data ? user?.[data] : user;
-    	}
-    );
+    // export const User = createParamDecorator(
+    // 	(data: string, ctx: ExecutionContext) => {
+    // 		const request = ctx.switchToHttp().getRequest();
+    // 		const user = request.user;
+    // 		return data ? user?.[data] : user;
+    // 	}
+    // );
 
     // After (NestJS 10)
-    export const User = createParamDecorator(
-    	(data: string, ctx: ExecutionContext) => {
-    		const request = ctx.switchToHttp().getRequest();
-    		const user = request.user;
-    		return data ? user?.[data] : user;
-    	}
-    );
-    // No change in syntax, but validation is more strict
+    // export const User = createParamDecorator(
+    // 	(data: string, ctx: ExecutionContext) => {
+    // 		const request = ctx.switchToHttp().getRequest();
+    // 		const user = request.user;
+    // 		return data ? user?.[data] : user;
+    // 	}
+    // );
+    // No change in syntax for typical usage, but internal validation or behavior might be stricter.
     ```
 
 5. **ESM Configuration**:
@@ -144,9 +144,9 @@ Breaking changes:
     ```json
     {
     	"compilerOptions": {
-    		"module": "ESNext",
-    		"moduleResolution": "NodeNext",
-    		"target": "ES2021",
+    		"module": "ESNext", // Or "NodeNext"
+    		"moduleResolution": "NodeNext", // Or "Bundler" if using Vite/ESBuild
+    		"target": "ES2021", // Or newer
     		"outDir": "./dist",
     		"esModuleInterop": true
     	}
@@ -166,198 +166,162 @@ Breaking changes:
     ```
 
 2. **Logger Format Changes**:
-   Update custom logger implementations to match the new timestamp format.
+   Update custom logger implementations to match the new timestamp format or configure the logger to use the old format if necessary.
 
     ```typescript
-    // Before (NestJS 8)
-    // Timestamp was ISO format: 2022-01-01T12:00:00.000Z
-
-    // After (NestJS 9)
-    // Timestamp defaults to: 12:00:00 PM
+    // Default timestamp format changed in v9.
+    // If you have custom loggers parsing timestamps, they might need adjustment.
     ```
 
 3. **Review and Update Interceptors**:
-   Check interceptors for compatibility with the new behavior, especially those handling responses.
+   Check interceptors for compatibility with the new behavior, especially those handling responses or exceptions.
 
 4. **Request Size Limits**:
-   Configure payload size limits if needed:
+   Configure payload size limits if needed using `bodyParser` middleware options:
 
     ```typescript
     // main.ts
-    app.use(json({ limit: '50mb' }));
-    app.use(urlencoded({ limit: '50mb', extended: true }));
+    // import { json, urlencoded } from 'express'; // For Express
+    // app.use(json({ limit: '50mb' }));
+    // app.use(urlencoded({ extended: true, limit: '50mb' }));
     ```
 
 5. **Apollo Federation Changes**:
-   If using Apollo Federation, update to Federation 2.0 compatible configuration.
+   If using Apollo Federation, update to Federation 2.0 compatible configuration in your GraphQL module setup.
 
 ## Best Practices for Version Management
 
 1. **Regularly Update Dependencies**:
-   Keep all NestJS packages at the same version to avoid compatibility issues.
+   Keep all NestJS packages (`@nestjs/*`) at the same major version to avoid compatibility issues.
 
     ```bash
     # Check outdated packages
     npm outdated
 
-    # Update all @nestjs packages at once
+    # Update all @nestjs packages to latest within the current major version
     npx npm-check-updates -u "/^@nestjs\/.*$/" && npm install
+    # For major version upgrades, do it carefully, package by package or using NestJS migration guides.
     ```
 
 2. **Use Peer Dependencies**:
-   When creating NestJS libraries, use peer dependencies for NestJS packages.
+   When creating NestJS libraries, correctly define `@nestjs/common`, `@nestjs/core`, etc., as peer dependencies in your library's `package.json`.
 
     ```json
     {
     	"peerDependencies": {
-    		"@nestjs/common": "^10.0.0",
-    		"@nestjs/core": "^10.0.0"
+    		"@nestjs/common": "^9.0.0 || ^10.0.0", // Example range
+    		"@nestjs/core": "^9.0.0 || ^10.0.0"
     	}
     }
     ```
 
 3. **Version Control Package Lock**:
-   Always commit your `package-lock.json` or `yarn.lock` to ensure consistent installations.
+   Always commit your `package-lock.json` (for npm), `yarn.lock` (for Yarn), or `pnpm-lock.yaml` (for PNPM) to ensure consistent installations across environments.
 
 4. **Use Tagged Releases**:
-   For production, use specific versions rather than ranges.
+   For production, use specific versions rather than ranges if maximum stability is required, though SemVer with `^` is generally safe for minor and patch updates.
 
     ```json
+    // package.json example
     {
     	"dependencies": {
-    		"@nestjs/common": "10.0.0",
-    		"@nestjs/core": "10.0.0"
+    		"@nestjs/common": "^10.0.0", // Allows patch and minor updates
+    		"@nestjs/core": "^10.0.0"
     	}
     }
     ```
 
 5. **Test Before Upgrading**:
-   Always test your application thoroughly before upgrading to a new major version.
+   Always test your application thoroughly (unit, integration, E2E tests) before and after upgrading to a new major or minor version.
 
     ```bash
-    # Install specific version for testing
-    npm install @nestjs/common@10.0.0-rc.0 @nestjs/core@10.0.0-rc.0 --save
+    # Example: If testing a release candidate
+    # npm install @nestjs/common@10.0.0-rc.0 @nestjs/core@10.0.0-rc.0 --save
 
     # Run your test suite
     npm run test
     npm run test:e2e
     ```
 
-## Version-Specific Features
+## Version-Specific Features Deep Dive
 
-### NestJS 10.x Features Deep Dive
+### NestJS 10.x Features
 
 #### Enhanced ESM Support
+NestJS 10 offers improved compatibility with ECMAScript Modules. This requires specific configurations in `package.json` (`"type": "module"`) and `tsconfig.json` (`"module": "NodeNext"` or `"ESNext"`). Imports within your project might need to include file extensions (e.g., `import { MyService } from './my.service.js';`).
 
+#### Improved Streaming API with `StreamableFile`
+The `StreamableFile` class simplifies sending file streams as responses, handling headers like `Content-Type` and `Content-Disposition` automatically.
 ```typescript
-// package.json
-{
-  "type": "module",
-  "imports": {
-    "#src/*": "./dist/*"
+import { Controller, Get, Res, StreamableFile } from '@nestjs/common';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import type { Response } from 'express';
+
+@Controller('file')
+export class FileController {
+  @Get('stream')
+  getFile(@Res({ passthrough: true }) res: Response): StreamableFile {
+    const file = createReadStream(join(process.cwd(), 'package.json'));
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition': 'attachment; filename="package.json"',
+    });
+    return new StreamableFile(file);
   }
 }
-
-// Using imports in code
-import { AppService } from '#src/app.service.js';
-
-// Note the `.js` extension is required in ESM
 ```
 
-#### Improved Streaming API
-
-```typescript
-@Controller('stream')
-export class StreamController {
-	@Get()
-	streamFile(@Res() res: Response) {
-		const file = createReadStream(join(process.cwd(), 'large-file.txt'));
-		file.pipe(res);
-	}
-
-	@Get('buffer')
-	buffer(@Res() res: Response) {
-		const buffer = Buffer.from('Hello World');
-		res.set({
-			'Content-Type': 'application/octet-stream',
-			'Content-Disposition': 'attachment; filename="data.bin"',
-		});
-		res.send(buffer);
-	}
-}
-```
-
-### NestJS 9.x Features Deep Dive
+### NestJS 9.x Features
 
 #### Standalone Applications
-
+The `NestFactory.createApplicationContext()` method allows creating a NestJS application instance without an HTTP listener, useful for CRON jobs, CLI tools, or queue workers.
 ```typescript
-// Create a standalone app
-const app = await NestFactory.createApplicationContext(AppModule);
-
-// Use it without HTTP server
-const service = app.get(AppService);
-await service.performTask();
-await app.close();
+// In a script or CRON job entry point
+async function runScript() {
+  const appCtx = await NestFactory.createApplicationContext(AppModule);
+  const myService = appCtx.get(MyService);
+  await myService.performTask();
+  await appCtx.close();
+}
+runScript();
 ```
 
-#### Enhanced GraphQL Federation
-
-```typescript
-// app.module.ts
-@Module({
-	imports: [
-		GraphQLModule.forRoot<ApolloGatewayDriverConfig>({
-			driver: ApolloGatewayDriver,
-			server: {
-				cors: true,
-			},
-			gateway: {
-				supergraphSdl: new IntrospectAndCompose({
-					subgraphs: [
-						{ name: 'users', url: 'http://user-service/graphql' },
-						{ name: 'posts', url: 'http://post-service/graphql' },
-					],
-				}),
-			},
-		}),
-	],
-})
-export class AppModule {}
-```
+#### Enhanced GraphQL Federation (Apollo Federation 2.0)
+NestJS 9 improved support for Apollo Federation v2, allowing for more complex federated GraphQL architectures. This involves using `@apollo/gateway` with `GraphQLModule.forRoot` configured for federation.
 
 ## Deprecated Features and Alternatives
 
 | Version | Deprecated Feature                        | Alternative                               |
 | ------- | ----------------------------------------- | ----------------------------------------- |
-| 10.x    | `HttpException.getResponse()` return type | Use type assertion or specific exceptions |
-| 9.x     | `FastifyAdapter` default arguments        | Explicitly provide options                |
-| 8.x     | `forwardRef()` without factory            | Use factory for lazy evaluation           |
-| 7.x     | `@Inject()` without token                 | Always provide a token                    |
+| 10.x    | Some internal `HttpException` constructor signatures | Use static factory methods or updated constructor. |
+| 9.x     | `FastifyAdapter` default arguments        | Explicitly provide options to `FastifyAdapter`. |
+| 8.x     | `forwardRef()` without factory function   | Always use a factory function: `forwardRef(() => MyModule)`. |
+| 7.x     | `@Inject()` without a token (for custom providers) | Always provide an explicit token for custom providers. |
 
 ## Compatibility with Popular Libraries
 
-| Library  | NestJS 10.x | NestJS 9.x | Notes                      |
-| -------- | ----------- | ---------- | -------------------------- |
-| TypeORM  | ✅ 0.3.x+   | ✅ 0.3.x+  | Issues with older versions |
-| Mongoose | ✅ 7.x+     | ✅ 6.x+    | Schema changes in v7       |
-| Passport | ✅ 0.6.x+   | ✅ 0.5.x+  | Strategy interface changes |
-| GraphQL  | ✅ 16.x+    | ✅ 15.x+   | Breaking changes in v16    |
-| Swagger  | ✅ 6.x+     | ✅ 5.x+    | API changes in v6          |
+(This table is illustrative; always check current compatibility with specific versions)
+| Library  | NestJS 10.x | NestJS 9.x | Notes (General Trends)             |
+| -------- | ----------- | ---------- | ---------------------------------- |
+| TypeORM  | ✅ 0.3.x+   | ✅ 0.3.x+  | Ensure NestJS TypeORM wrapper is compatible. |
+| Mongoose | ✅ 7.x+     | ✅ 6.x+    | Mongoose v7+ often requires newer Node.js. |
+| Passport | ✅ 0.6.x+   | ✅ 0.5.x+  | Generally stable API.              |
+| GraphQL  | ✅ (Mercurius/Apollo) | ✅ (Mercurius/Apollo) | Apollo Server v4+ has changes. |
+| Swagger  | ✅ 7.x+     | ✅ 6.x+    | `@nestjs/swagger` versions align with NestJS. |
 
 ## Experimental Features
 
-NestJS regularly introduces experimental features that may change in future releases:
-
--   **NestJS 10.x**: Enhanced modular reloading
--   **NestJS 9.x**: Resource tokens
--   **NestJS 8.x**: Hybrid application support
-
-Use experimental features with caution in production applications.
+NestJS sometimes introduces experimental features. Use these with caution in production as their APIs might change.
+-   Always check the official documentation for the current status of experimental features.
+-   Examples might include new decorators, module loading strategies, or integrations.
 
 ## Community Resources
 
 -   [Official NestJS Documentation](https://docs.nestjs.com/)
 -   [NestJS GitHub Repository](https://github.com/nestjs/nest)
 -   [NestJS Discord Community](https://discord.gg/nestjs)
--   [NestJS Blog](https://trilon.io/blog/)
+-   [Awesome NestJS](https://github.com/juliandavidmr/awesome-nestjs) - A curated list of NestJS resources.
+
+{projectPath} should aim to follow the guidelines pertinent to its detected NestJS version: **{detectedVersion}**.
+```

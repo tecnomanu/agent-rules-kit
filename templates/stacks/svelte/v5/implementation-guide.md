@@ -1,3 +1,9 @@
+---
+description: Guide to Svelte 5, focusing on Runes API and other new features.
+globs: <root>/src/**/*.{svelte,js,ts}
+alwaysApply: true # Applies if v5 is detected
+---
+
 # Svelte 5 Implementation Guide
 
 This document provides implementation details specific to Svelte 5, which introduces a complete rethinking of reactivity with the "runes" API.

@@ -1,3 +1,9 @@
+---
+description: Implementation details and key features specific to Svelte 3.
+globs: <root>/src/**/*.{svelte,js,ts}
+alwaysApply: true # Applies if v3 is detected
+---
+
 # Svelte 3 Implementation Guide
 
 This document provides implementation details specific to Svelte 3.
@@ -173,3 +179,4 @@ Key changes if upgrading from Svelte 2:
 3. New store implementation using `$` prefix
 4. Component methods replaced with exported functions
 5. Two-way binding with `bind:` directive
+```

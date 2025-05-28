@@ -1,3 +1,9 @@
+---
+description: Implementation details, key changes, and new features in Svelte 4.
+globs: <root>/src/**/*.{svelte,js,ts}
+alwaysApply: true # Applies if v4 is detected
+---
+
 # Svelte 4 Implementation Guide
 
 This document provides implementation details specific to Svelte 4.
@@ -165,3 +171,4 @@ You can now provide default values even for required props:
 -   Svelte 4 integrates with Vite for faster development
 -   The official VS Code extension provides better syntax highlighting and intellisense
 -   SvelteKit is the recommended meta-framework for building full applications with Svelte 4
+```

@@ -1,9 +1,7 @@
 ---
-title: Astro Framework Integration Guide
-description: Best practices for integrating other frameworks with Astro
-tags: [Astro, Integration, Frameworks, React, Vue, Svelte]
-globs: ./**/*
-always: true
+description: Best practices for integrating UI frameworks (React, Vue, Svelte, etc.) with Astro, covering selective hydration (client directives), state management (Nano Stores), cross-framework communication, and performance optimization.
+globs: <root>/src/**/*.{astro,js,jsx,ts,tsx,vue,svelte},<root>/astro.config.mjs
+alwaysApply: true
 ---
 
 # Astro Framework Integration Guide

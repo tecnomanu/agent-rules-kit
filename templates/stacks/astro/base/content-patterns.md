@@ -1,9 +1,7 @@
 ---
-title: Astro Content Patterns
-description: Advanced patterns for managing static and dynamic content in Astro
-tags: [Astro, Content, SSG, SSR, Patterns]
-globs: ./**/*
-always: true
+description: Advanced patterns for managing static and dynamic content in Astro, including Content Collections architecture, static generation, asset management (Image component), SSR, hybrid rendering, data management (API integration, caching), performance optimization (partial hydration, preloading), and testing content.
+globs: <root>/src/**/*.{astro,md,mdx,ts,js},<root>/src/content/config.ts,<root>/astro.config.mjs
+alwaysApply: true
 ---
 
 # Astro Content Patterns

@@ -1,502 +1,389 @@
 ---
-description: Testing guidelines for NestJS applications
-globs: <root>/**/*.spec.ts
-alwaysApply: false
+description: Comprehensive testing strategies, types (Unit, Integration, E2E), tools (Jest, Supertest), and best practices for NestJS applications.
+globs: <root>/src/**/*.spec.ts,<root>/test/**/*.e2e-spec.ts
+alwaysApply: true
 ---
 
-# Testing in NestJS
+# Prácticas de Testing en NestJS
 
-This document covers the core testing concepts and best practices for NestJS applications.
+## Principios Generales
 
-## Types of Tests
+-   **Test Driven Development (TDD)**: Desarrollar tests antes que el código cuando sea posible.
+-   **Tests Automatizados**: Cada funcionalidad debe estar cubierta por tests automatizados.
+-   **Cobertura**: Aspirar a una cobertura de código del 80% o superior.
+-   **Aislamiento**: Los tests deben poder ejecutarse de manera independiente.
+-   **Determinismo**: Los tests deben producir resultados consistentes en cada ejecución.
 
-NestJS supports three main categories of tests:
+## Tipos de Tests en NestJS
 
-1. **Unit Tests** - Test individual components in isolation
-2. **Integration Tests** - Test how components work together
-3. **End-to-End (E2E) Tests** - Test the entire application flow
+### Tests Unitarios
 
-## Testing Setup
-
-NestJS comes with Jest as the default testing framework. The testing configuration is automatically set up in new projects with:
-
--   `jest.config.js` - Main Jest configuration
--   `.spec.ts` files for unit/integration tests
--   `.e2e-spec.ts` files for end-to-end tests
-
-## Unit Testing
-
-Unit tests focus on testing individual components (services, pipes, etc.) in isolation.
-
-### Testing Services
+-   Ubicación: archivos `*.spec.ts` junto a los archivos que prueban
+-   Probar funciones y métodos de forma aislada
+-   Usar `jest.mock()` para dependencias
+-   No deben acceder a recursos externos (DB, API, etc.)
 
 ```typescript
-// cats.service.ts
-@Injectable()
-export class CatsService {
-	private cats: Cat[] = [];
+// user.service.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserService } from './user.service';
+import { UserRepository } from './user.repository'; // Assuming this is a custom repository interface/class
 
-	create(cat: Cat) {
-		this.cats.push(cat);
-		return cat;
-	}
-
-	findAll() {
-		return this.cats;
-	}
-}
-
-// cats.service.spec.ts
-describe('CatsService', () => {
-	let service: CatsService;
+describe('UserService', () => {
+	let service: UserService;
+	let repository: UserRepository;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [CatsService],
+			providers: [
+				UserService,
+				{
+					provide: UserRepository, // Or getRepositoryToken(UserEntity) if using TypeORM
+					useValue: { // Provide mock methods
+						findById: jest.fn(),
+						create: jest.fn(),
+						// Add other methods used by UserService here
+					},
+				},
+			],
 		}).compile();
 
-		service = module.get<CatsService>(CatsService);
+		service = module.get<UserService>(UserService);
+		repository = module.get<UserRepository>(UserRepository); // Or getRepositoryToken(UserEntity)
 	});
 
 	it('should be defined', () => {
 		expect(service).toBeDefined();
 	});
 
-	it('should create a cat', () => {
-		const cat = { name: 'Test Cat', age: 3, breed: 'Test Breed' };
-		expect(service.create(cat)).toEqual(cat);
-		expect(service.findAll()).toContain(cat);
+	describe('findById', () => { // Corrected method name to match example
+		it('should return a user by id', async () => {
+			const userId = '1';
+			const expectedUser = { id: userId, name: 'Test User', email: 'test@example.com' }; // Example user
+			// Ensure the spy is on the correct method name as defined in your repository
+			jest.spyOn(repository, 'findById').mockResolvedValue(expectedUser as any); 
+
+			const result = await service.findById(userId);
+
+			expect(result).toEqual(expectedUser);
+			expect(repository.findById).toHaveBeenCalledWith(userId);
+		});
+
+		// Add test for user not found
+		it('should throw an error if user not found', async () => {
+			const userId = 'nonexistent';
+			jest.spyOn(repository, 'findById').mockResolvedValue(null);
+			// Or mockRejectedValue(new NotFoundException()) if your service handles it that way
+
+			await expect(service.findById(userId)).rejects.toThrow(); // Or specific NestJS NotFoundException
+		});
 	});
+
+	// Add more describe blocks for other service methods like 'create', 'update', etc.
 });
 ```
 
-### Testing with Mocks
+### Tests de Integración
 
-Using the `@nestjs/testing` module's `Test.createTestingModule()` with mocks:
+-   Ubicación: archivo `*.spec.ts` junto a los archivos que prueban (controllers, modules)
+-   Probar la interacción entre múltiples componentes (e.g., Controller -> Service -> Repository)
+-   Usar el `Test.createTestingModule()` de NestJS para instanciar un subconjunto de la aplicación.
+-   Mocks pueden ser usados para capas externas (e.g. base de datos, APIs externas) o para servicios no directamente bajo prueba.
 
 ```typescript
-describe('CatsService', () => {
-	let service: CatsService;
-	let repositoryMock: MockType<Repository<Cat>>;
+// users.controller.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity'; // Assuming an entity
+
+describe('UsersController', () => {
+	let controller: UsersController;
+	let service: UsersService;
+
+	const mockUser: User = {
+		id: '1',
+		name: 'Test User',
+		email: 'test@example.com',
+		password: 'hashedPassword', // Usually password is not returned
+		// Add other properties as in your User entity
+	};
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				CatsService,
-				{
-					provide: getRepositoryToken(Cat),
-					useFactory: repositoryMockFactory,
-				},
-			],
-		}).compile();
-
-		service = module.get<CatsService>(CatsService);
-		repositoryMock = module.get(getRepositoryToken(Cat));
-	});
-
-	it('should find all cats', async () => {
-		const cats = [{ name: 'Test Cat' }];
-		repositoryMock.find.mockReturnValue(cats);
-
-		expect(await service.findAll()).toEqual(cats);
-		expect(repositoryMock.find).toHaveBeenCalled();
-	});
-});
-
-// Mock factory
-export type MockType<T> = {
-	[P in keyof T]: jest.Mock<{}>;
-};
-
-export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
-	() => ({
-		find: jest.fn(),
-		findOne: jest.fn(),
-		save: jest.fn(),
-		// ...other methods
-	})
-);
-```
-
-### Testing Controllers
-
-```typescript
-describe('CatsController', () => {
-	let controller: CatsController;
-	let service: CatsService;
-
-	beforeEach(async () => {
-		const module: TestingModule = await Test.createTestingModule({
-			controllers: [CatsController],
+			controllers: [UsersController],
 			providers: [
 				{
-					provide: CatsService,
-					useValue: {
-						findAll: jest.fn().mockReturnValue([]),
-						create: jest
-							.fn()
-							.mockImplementation((cat) =>
-								Promise.resolve({ id: 1, ...cat })
-							),
+					provide: UsersService,
+					useValue: { // Mock implementation of UsersService
+						create: jest.fn().mockResolvedValue(mockUser),
+						findAll: jest.fn().mockResolvedValue([mockUser]),
+						findOne: jest.fn().mockResolvedValue(mockUser),
+						// Add other methods used by UsersController
 					},
 				},
 			],
 		}).compile();
 
-		controller = module.get<CatsController>(CatsController);
-		service = module.get<CatsService>(CatsService);
-	});
-
-	it('should get all cats', async () => {
-		const result = [{ name: 'Test Cat' }];
-		jest.spyOn(service, 'findAll').mockImplementation(() => result);
-
-		expect(await controller.findAll()).toBe(result);
-	});
-});
-```
-
-### Testing Pipes
-
-```typescript
-describe('ValidationPipe', () => {
-	let pipe: ValidationPipe;
-
-	beforeEach(() => {
-		pipe = new ValidationPipe();
+		controller = module.get<UsersController>(UsersController);
+		service = module.get<UsersService>(UsersService);
 	});
 
 	it('should be defined', () => {
-		expect(pipe).toBeDefined();
+		expect(controller).toBeDefined();
 	});
 
-	it('should validate and pass valid data', () => {
-		const validData = { name: 'Test Cat', age: 5 };
-		const metadata: ArgumentMetadata = {
-			type: 'body',
-			metatype: CreateCatDto,
-			data: '',
-		};
+	describe('create', () => {
+		it('should create a new user', async () => {
+			const createUserDto: CreateUserDto = {
+				name: 'Test User',
+				email: 'test@example.com',
+				password: 'password',
+			};
+			
+			// Service's create method is already mocked to return mockUser
+			const result = await controller.create(createUserDto);
 
-		expect(pipe.transform(validData, metadata)).resolves.toEqual(validData);
+			expect(result).toEqual(mockUser);
+			expect(service.create).toHaveBeenCalledWith(createUserDto);
+		});
 	});
 
-	it('should throw an exception for invalid data', () => {
-		const invalidData = { age: 'not a number' };
-		const metadata: ArgumentMetadata = {
-			type: 'body',
-			metatype: CreateCatDto,
-			data: '',
-		};
+	describe('findOne', () => {
+		it('should return a single user', async () => {
+			const userId = '1';
+			// Service's findOne method is already mocked
+			const result = await controller.findOne(userId);
 
-		expect(pipe.transform(invalidData, metadata)).rejects.toThrow(
-			BadRequestException
-		);
+			expect(result).toEqual(mockUser);
+			expect(service.findOne).toHaveBeenCalledWith(userId);
+		});
 	});
+	
+	// Add tests for other controller methods (findAll, update, remove)
 });
 ```
 
-### Testing Guards
+### Tests E2E (End-to-End)
+
+-   Ubicación: directorio `test/` en la raíz del proyecto.
+-   Archivos: `*.e2e-spec.ts`.
+-   Prueban la aplicación completa, simulando peticiones HTTP reales.
+-   Se usa `supertest` para realizar las peticiones HTTP.
 
 ```typescript
-describe('AuthGuard', () => {
-	let guard: AuthGuard;
-	let jwtService: JwtService;
+// users.e2e-spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module'; // Main application module
 
-	beforeEach(async () => {
-		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				AuthGuard,
-				{
-					provide: JwtService,
-					useValue: {
-						verify: jest.fn(),
-					},
-				},
-			],
-		}).compile();
-
-		guard = module.get<AuthGuard>(AuthGuard);
-		jwtService = module.get<JwtService>(JwtService);
-	});
-
-	it('should be defined', () => {
-		expect(guard).toBeDefined();
-	});
-
-	it('should return true for valid token', () => {
-		const context = createMock<ExecutionContext>();
-		const request = {
-			headers: {
-				authorization: 'Bearer valid-token',
-			},
-		};
-
-		context.switchToHttp().getRequest.mockReturnValue(request);
-		jest.spyOn(jwtService, 'verify').mockReturnValue({ userId: 1 });
-
-		expect(guard.canActivate(context)).toBe(true);
-		expect(request).toHaveProperty('user');
-	});
-});
-```
-
-## Integration Testing
-
-Integration tests verify how components work together.
-
-```typescript
-describe('Cats Integration', () => {
+describe('UsersController (e2e)', () => {
 	let app: INestApplication;
-	let catsService: CatsService;
 
-	beforeEach(async () => {
+	beforeAll(async () => { // Use beforeAll for app setup if it's costly
 		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [CatsModule, DatabaseModule],
+			imports: [AppModule], // Import your main app module
 		}).compile();
 
 		app = moduleFixture.createNestApplication();
-		app.useGlobalPipes(new ValidationPipe());
+		// Apply global pipes, interceptors, etc., as in your main.ts
+		app.useGlobalPipes(new ValidationPipe()); 
 		await app.init();
-
-		catsService = moduleFixture.get<CatsService>(CatsService);
-	});
-
-	afterEach(async () => {
-		await app.close();
-	});
-
-	it('should create a cat', async () => {
-		const createSpy = jest.spyOn(catsService, 'create');
-		const cat = { name: 'Integration Test Cat', age: 3, breed: 'Test' };
-
-		await request(app.getHttpServer()).post('/cats').send(cat).expect(201);
-
-		expect(createSpy).toHaveBeenCalledWith(expect.objectContaining(cat));
-	});
-});
-```
-
-## End-to-End (E2E) Testing
-
-E2E tests verify the application from end to end, including HTTP requests, database operations, etc.
-
-```typescript
-// test/app.e2e-spec.ts
-describe('Cats E2E', () => {
-	let app: INestApplication;
-
-	beforeEach(async () => {
-		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [AppModule],
-		}).compile();
-
-		app = moduleFixture.createNestApplication();
-		app.useGlobalPipes(new ValidationPipe());
-		await app.init();
-
-		// Set up test database
-		const connection = app.get(Connection);
-		await connection.synchronize(true); // Reset database for tests
-	});
-
-	afterEach(async () => {
-		await app.close();
-	});
-
-	it('/GET cats', () => {
-		return request(app.getHttpServer())
-			.get('/cats')
-			.expect(200)
-			.expect('Content-Type', /json/);
-	});
-
-	it('/POST cats - creates a new cat', () => {
-		return request(app.getHttpServer())
-			.post('/cats')
-			.send({ name: 'E2E Test Cat', age: 5, breed: 'E2E Test' })
-			.expect(201)
-			.expect((res) => {
-				expect(res.body).toHaveProperty('id');
-				expect(res.body.name).toEqual('E2E Test Cat');
-			});
-	});
-
-	it('/POST cats - validation fails with invalid input', () => {
-		return request(app.getHttpServer())
-			.post('/cats')
-			.send({ age: 'not a number' })
-			.expect(400);
-	});
-});
-```
-
-## Testing Asynchronous Code
-
-NestJS applications often involve asynchronous operations. Jest provides multiple ways to test asynchronous code:
-
-### Using Async/Await
-
-```typescript
-it('should find a cat by id', async () => {
-	const result = { id: 1, name: 'Test Cat' };
-	jest.spyOn(repository, 'findOne').mockResolvedValue(result);
-
-	expect(await service.findOne(1)).toEqual(result);
-});
-```
-
-### Using Promises
-
-```typescript
-it('should find a cat by id', () => {
-	const result = { id: 1, name: 'Test Cat' };
-	jest.spyOn(repository, 'findOne').mockResolvedValue(result);
-
-	return service.findOne(1).then((cat) => {
-		expect(cat).toEqual(result);
-	});
-});
-```
-
-## Test Coverage
-
-NestJS's Jest configuration includes coverage reports. Run:
-
-```bash
-npm test -- --coverage
-```
-
-This generates a coverage report in the `coverage` directory.
-
-## Test Organization
-
-A well-organized test suite improves maintainability:
-
-```typescript
-describe('CatsService', () => {
-	let service: CatsService;
-	let repository: Repository<Cat>;
-
-	beforeAll(async () => {
-		// One-time setup (database connection, etc.)
-	});
-
-	beforeEach(async () => {
-		// Setup for each test
-	});
-
-	afterEach(() => {
-		// Cleanup after each test
-		jest.clearAllMocks();
 	});
 
 	afterAll(async () => {
-		// One-time cleanup
+		await app.close();
 	});
 
-	// Group related tests
-	describe('create', () => {
-		it('should create a cat', async () => {
-			// Test implementation
-		});
-
-		it('should throw an error if cat exists', async () => {
-			// Test implementation
-		});
+	it('/users (POST) - should create a user', () => {
+		return request(app.getHttpServer())
+			.post('/users')
+			.send({
+				name: 'Test User E2E',
+				email: 'teste2e@example.com',
+				password: 'password123',
+			})
+			.expect(201) // Check HTTP status code
+			.then(response => { // Use .then() for more detailed assertions on the response
+				expect(response.body).toHaveProperty('id');
+				expect(response.body.name).toEqual('Test User E2E');
+				expect(response.body.email).toEqual('teste2e@example.com');
+				expect(response.body).not.toHaveProperty('password'); // Ensure password is not returned
+			});
 	});
 
-	describe('findAll', () => {
-		it('should return all cats', async () => {
-			// Test implementation
-		});
-
-		it('should return an empty array if no cats', async () => {
-			// Test implementation
-		});
+	it('/users (GET) - should get all users', async () => {
+		// Assuming a user was created by the POST test or in a setup step
+		const response = await request(app.getHttpServer())
+			.get('/users')
+			.expect(200);
+		
+		expect(Array.isArray(response.body)).toBe(true);
+		// Add more assertions if needed, e.g., checking for the previously created user
 	});
+	
+	// Add more E2E tests for other endpoints (GET /users/:id, PATCH /users/:id, DELETE /users/:id)
+	// Ensure proper database seeding/cleanup strategies if tests interact with a DB
 });
 ```
 
-## Testing with Databases
+## Ejecución de Tests
 
-For tests involving databases:
+### Comandos Básicos
 
-1. **Use In-Memory Databases**: For faster tests
-2. **Separate Test Database**: Don't use your development database
-3. **Reset Between Tests**: Clear data between tests for isolation
+```bash
+# Ejecutar todos los tests (unitarios e integración por defecto)
+npm run test
 
+# Ejecutar tests en modo watch (re-ejecuta al guardar cambios)
+npm run test:watch
+
+# Ejecutar tests y generar reporte de cobertura
+npm run test:cov
+
+# Ejecutar tests e2e
+npm run test:e2e
+```
+
+### Con cada cambio
+
+-   Ejecutar tests específicos por archivo o descripción: `npm run test -- user.service` o `npm run test -t "should return a user"`.
+-   Antes de commit/push, ejecutar la suite completa: `npm run test && npm run test:e2e`.
+-   Para mayor velocidad durante el desarrollo: `npm run test:watch`.
+
+## Buenas Prácticas
+
+### Organización de Tests
+
+1.  **Estructura AAA**: Arrange (Preparar los datos y mocks), Act (Ejecutar la función/método), Assert (Verificar los resultados).
+2.  **Descripción clara**: Usar descripciones claras y concisas en bloques `describe` (para agrupar tests) e `it` (para tests individuales).
+3.  **Tests independientes**: Evitar dependencias entre tests. Cada test debe poder ejecutarse de forma aislada y en cualquier orden. Usar `beforeEach` para reseteo.
+
+### Mock de Dependencias
+
+-   **Servicios y Repositorios**:
+    ```typescript
+    // Mockear un servicio completo
+    const mockUsersService = {
+      findAll: jest.fn(),
+      findOne: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+
+    // Mockear un repositorio TypeORM (common pattern)
+    // const mockUserRepository = {
+    //   find: jest.fn(),
+    //   findOne: jest.fn(),
+    //   save: jest.fn(),
+    //   create: jest.fn(), // TypeORM's create is for entity instance, not DB op
+    //   delete: jest.fn(),
+    // };
+    // En el provider: { provide: getRepositoryToken(User), useValue: mockUserRepository }
+    ```
+-   **Módulos Externos**: Usar `jest.mock('module-name')` para mockear módulos completos.
+
+### Testing de Excepciones
+
+NestJS usa su sistema de excepciones (`HttpException` y derivadas).
 ```typescript
-// typeorm-testing.module.ts
-@Module({
-	imports: [
-		TypeOrmModule.forRoot({
-			type: 'sqlite',
-			database: ':memory:',
-			entities: [Cat],
-			synchronize: true,
-		}),
-		TypeOrmModule.forFeature([Cat]),
-	],
-	exports: [TypeOrmModule],
-})
-export class TypeOrmTestingModule {}
+it('should throw NotFoundException when user not found', async () => {
+  jest.spyOn(repository, 'findById').mockResolvedValue(null); // Assuming findById returns null if not found
 
-// Use in tests
-beforeEach(async () => {
-	const module: TestingModule = await Test.createTestingModule({
-		imports: [TypeOrmTestingModule],
-		providers: [CatsService],
-	}).compile();
-
-	// ...
+  // Test that the service method throws the expected NestJS exception
+  await expect(service.findById('nonExistentId')).rejects.toThrow(NotFoundException);
 });
 ```
 
-## Test Doubles
+## CI/CD con GitHub Actions (Ejemplo)
 
-Different types of test doubles for different scenarios:
+```yaml
+name: NestJS CI/CD Tests
 
-1. **Spy**: Watches function calls without changing behavior
-2. **Stub**: Provides pre-defined responses
-3. **Mock**: Pre-programmed with expectations
-4. **Fake**: Simplified implementation of a component
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
 
-```typescript
-// Spy example
-const findAllSpy = jest.spyOn(service, 'findAll');
-await service.findAll();
-expect(findAllSpy).toHaveBeenCalled();
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x] # Test on relevant Node versions
 
-// Stub example
-jest.spyOn(repository, 'find').mockReturnValue([{ name: 'Test Cat' }]);
-
-// Mock example
-const mockRepository = {
-	find: jest.fn().mockReturnValue([{ name: 'Test Cat' }]),
-	findOne: jest.fn().mockReturnValue({ name: 'Test Cat' }),
-	save: jest
-		.fn()
-		.mockImplementation((cat) => Promise.resolve({ id: 1, ...cat })),
-};
-
-// Fake example
-class FakeAuthService {
-	async validateUser(username: string, password: string) {
-		if (username === 'test' && password === 'test') {
-			return { id: 1, username: 'test' };
-		}
-		return null;
-	}
-}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit and integration tests
+        run: npm run test
+      - name: Run E2E tests
+        run: npm run test:e2e # Ensure your E2E environment (DB, etc.) is available or mocked
+      # Optional: Run coverage check if you have thresholds
+      # - name: Check coverage
+      #   run: npm run test:cov 
 ```
 
-## Best Practices
+## Testing con Bases de Datos
 
-1. **Test in Isolation**: Avoid dependencies between tests
-2. **Mock External Services**: Don't rely on external APIs in tests
-3. **Keep Tests Fast**: Slow tests slow down development
-4. **Test Behavior, Not Implementation**: Focus on what, not how
-5. **Clear Setup/Teardown**: Each test should start with a clean environment
-6. **Avoid Test-Private Methods**: Only test public interfaces
-7. **Descriptive Test Names**: Tests should document functionality
+### Uso de Base de Datos en Memoria (SQLite para TypeORM)
+
+Para tests de integración que necesitan una base de datos, SQLite en memoria es una opción rápida.
+```typescript
+// En un archivo de configuración de TypeORM para tests, e.g., ormconfig.test.ts
+// O directamente en el createTestingModule
+// TypeOrmModule.forRoot({
+//   type: 'sqlite',
+//   database: ':memory:',
+//   entities: [__dirname + '/../**/*.entity{.ts,.js}'], // Adjust path
+//   synchronize: true, // Auto-creates schema, ONLY for testing
+//   dropSchema: true, // Drops schema before each test run if needed (via beforeEach)
+// }),
+```
+
+### Mock de Repositorios TypeORM (getRepositoryToken)
+
+Es la forma más común de testear servicios que dependen de repositorios TypeORM sin golpear una base de datos real.
+```typescript
+// user.service.spec.ts
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './entities/user.entity'; // Your TypeORM entity
+
+// ...
+const module: TestingModule = await Test.createTestingModule({
+  providers: [
+    UserService,
+    {
+      provide: getRepositoryToken(User), // Use this to get the token for User repository
+      useValue: { // Provide mock methods for your repository
+        findOne: jest.fn(),
+        save: jest.fn(),
+        find: jest.fn(),
+        // ...otros métodos que tu servicio utilice
+      },
+    },
+  ],
+}).compile();
+
+// repository = module.get<Repository<User>>(getRepositoryToken(User)); // Para obtener la instancia mockeada
+```
+
+## Mantenimiento y Mejora Continua
+
+1.  Revisar la cobertura de código regularmente y enfocarse en áreas críticas o complejas.
+2.  Refactorizar tests cuando el código fuente cambia para mantenerlos relevantes y legibles.
+3.  Educar al equipo sobre buenas prácticas de testing y herramientas disponibles.
+4.  Integrar tests en el flujo de trabajo diario y en pipelines de CI/CD.
+
+> Nota: Estas son las prácticas base para testing en NestJS. Adapta estas reglas según las necesidades específicas de tu proyecto en {projectPath}.
+```

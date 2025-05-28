@@ -1,3 +1,9 @@
+---
+description: Recommended component organization for standard Svelte applications.
+globs: <root>/src/**/*.{svelte,js,ts}
+alwaysApply: false # As it's an architectural choice
+---
+
 # Component Organization in Svelte
 
 This document outlines the recommended organization for components in a standard Svelte application.

@@ -1,7 +1,7 @@
 ---
 description: Naming conventions for Go code
 globs: <root>/**/*.go
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Go Naming Conventions

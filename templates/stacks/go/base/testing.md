@@ -1,7 +1,7 @@
 ---
-description: Testing best practices for Go applications
+description: Testing best practices and strategies for Go applications.
 globs: <root>/**/*_test.go
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Go Testing Best Practices

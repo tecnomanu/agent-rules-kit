@@ -1,423 +1,285 @@
 ---
-description: Core architectural concepts for NestJS applications
-globs: <root>/**/*.ts
-alwaysApply: false
+description: Core architectural concepts of NestJS, including modules, controllers, providers (services, repositories), dependency injection, pipes, guards, interceptors, and middleware.
+globs: <root>/src/**/*.ts,<root>/src/main.ts
+alwaysApply: true
 ---
 
 # NestJS Architecture Concepts
 
-NestJS is a progressive Node.js framework for building efficient, scalable, and enterprise-grade server-side applications. This document outlines the core architectural concepts of NestJS.
+NestJS is a progressive Node.js framework for building efficient, scalable, and enterprise-grade server-side applications. It leverages modern JavaScript, is built with TypeScript, and combines elements of Object-Oriented Programming (OOP), Functional Programming (FP), and Functional Reactive Programming (FRP). This document outlines the core architectural concepts of NestJS for {projectPath}.
 
 ## Fundamental Principles
 
-NestJS is built on the following core principles:
+NestJS is built on several core principles, heavily inspired by Angular:
 
-1. **Modularity** - Applications are divided into modules that encapsulate related functionality
-2. **Dependency Injection** - Automatic management of dependencies between application components
-3. **Decorators** - TypeScript decorators are used to define application metadata
-4. **AOP (Aspect-Oriented Programming)** - Cross-cutting concerns handled through interceptors, guards, and middleware
-5. **TypeScript First** - Leveraging the full power of TypeScript's static typing system
-6. **OOP (Object-Oriented Programming)** - Using classes, interfaces, and inheritance for clean code organization
+1.  **Modularity**: Applications are organized into modules that encapsulate related functionality.
+2.  **Dependency Injection (DI)**: A powerful system for managing dependencies between application components, promoting loose coupling and testability.
+3.  **Decorators**: TypeScript decorators are used extensively to define metadata for classes, methods, and properties, configuring how they integrate into the NestJS ecosystem.
+4.  **Platform Agnostic**: While commonly used for building REST APIs and GraphQL applications with Express.js or Fastify, NestJS is platform-agnostic and can be used for microservices, WebSockets, CLI applications, etc.
+5.  **TypeScript First**: Fully embraces TypeScript, providing strong typing and enabling better tooling and developer experience.
 
 ## Core Building Blocks
 
-### Modules
+### 1. Modules (`@Module()`)
 
-Modules are the primary organizational unit in NestJS applications:
+Modules are the fundamental organizational unit in NestJS. They are TypeScript classes adorned with the `@Module()` decorator. A module encapsulates a closely related set of capabilities (components, services, controllers, etc.).
+
+-   **`imports`**: An array of other modules that this module needs. Exported providers from imported modules become available.
+-   **`controllers`**: An array of controllers that must be instantiated within this module.
+-   **`providers`**: An array of providers (services, repositories, factories, helpers) that will be instantiated by the NestJS injector and may be shared at least across this module.
+-   **`exports`**: A subset of providers from this module that should be available in other modules that import this module.
 
 ```typescript
-// cats.module.ts
-@Module({
-	controllers: [CatsController],
-	providers: [CatsService],
-	exports: [CatsService],
-})
-export class CatsModule {}
+// src/users/users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+// import { TypeOrmModule } from '@nestjs/typeorm'; // Example if using TypeORM
+// import { User } from './entities/user.entity'; // Example entity
 
-// app.module.ts
 @Module({
-	imports: [CatsModule],
-	controllers: [AppController],
-	providers: [AppService],
+  // imports: [TypeOrmModule.forFeature([User])], // Example: importing TypeORM features for User entity
+  controllers: [UsersController],
+  providers: [UsersService], // UserService is now available for injection within UsersModule
+  exports: [UsersService]   // UserService can be imported by other modules
+})
+export class UsersModule {}
+
+// src/app.module.ts (Root Module)
+import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+// ... other imports
+
+@Module({
+  imports: [UsersModule, /* other modules */],
+  // ... controllers and providers for AppModule
 })
 export class AppModule {}
 ```
+The root module (`AppModule`) is the entry point of the application structure.
 
-Each module:
+### 2. Controllers (`@Controller()`)
 
--   Encapsulates related functionality (controllers, services, etc.)
--   Can import other modules to use their exported providers
--   Can export providers for use by other modules
+Controllers are responsible for handling incoming requests and returning responses to the client. They are classes decorated with `@Controller()` and define various routes.
 
-### Controllers
-
-Controllers handle incoming HTTP requests and return responses:
+-   **Route Path**: The `@Controller('users')` decorator specifies a route path prefix for all routes defined within this controller.
+-   **HTTP Method Decorators**: `@Get()`, `@Post()`, `@Put()`, `@Delete()`, `@Patch()`, `@Options()`, `@Head()`, `@All()` map HTTP requests to specific handler methods.
+-   **Parameter Decorators**: Extract data from the request (e.g., `@Param()`, `@Query()`, `@Body()`, `@Headers()`, `@Req()`, `@Res()`).
 
 ```typescript
-@Controller('cats')
-export class CatsController {
-	constructor(private catsService: CatsService) {}
+// src/users/users.controller.ts
+import { Controller, Get, Post, Body, Param, NotFoundException, UseGuards } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+// import { AuthGuard } from '../auth/auth.guard'; // Example guard
 
-	@Get()
-	findAll(): Cat[] {
-		return this.catsService.findAll();
-	}
+@Controller('users') // Route prefix for all methods in this controller
+// @UseGuards(AuthGuard) // Example: Apply a guard to all routes in this controller
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
 
-	@Post()
-	@UseGuards(AuthGuard)
-	create(@Body() createCatDto: CreateCatDto): Cat {
-		return this.catsService.create(createCatDto);
-	}
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
 }
 ```
 
-Key controller concepts:
+### 3. Providers (`@Injectable()`)
 
--   Route path prefix defined at controller level
--   HTTP method decorators map to specific endpoints
--   Parameter decorators extract data from requests
--   Guards, interceptors, and pipes applied at controller or method level
+Providers are a fundamental concept in NestJS. Many NestJS classes may be treated as a provider – services, repositories, factories, helpers, etc. The main idea of a provider is that it can be **injected** as a dependency.
 
-### Providers
-
-Providers are classes annotated with the `@Injectable()` decorator:
+-   **Services**: Typically encapsulate business logic.
+-   **Repositories**: Abstract data access (e.g., interacting with a database).
+-   **Factories**: Create instances of other classes.
+-   Providers are plain JavaScript classes that are decorated with `@Injectable()`.
+-   They are managed by NestJS's Inversion of Control (IoC) container.
 
 ```typescript
+// src/users/users.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from './entities/user.entity'; // Assuming an entity definition
+import { CreateUserDto } from './dto/create-user.dto';
+// import { UserRepository } from './user.repository'; // Example custom repository
+
 @Injectable()
-export class CatsService {
-	private readonly cats: Cat[] = [];
+export class UsersService {
+  // Example with an in-memory array, typically you'd inject a repository
+  private readonly users: User[] = []; 
+  // constructor(private readonly userRepository: UserRepository) {} // Example with repository
 
-	create(cat: Cat): Cat {
-		this.cats.push(cat);
-		return cat;
-	}
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const newUser: User = { id: Date.now().toString(), ...createUserDto };
+    this.users.push(newUser);
+    return newUser;
+    // return this.userRepository.create(createUserDto); // Using repository
+  }
 
-	findAll(): Cat[] {
-		return this.cats;
-	}
+  async findOne(id: string): Promise<User | undefined> {
+    const user = this.users.find(user => user.id === id);
+    if (!user) {
+      // throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+    // return this.userRepository.findById(id); // Using repository
+  }
 }
 ```
 
-Providers:
+### 4. Dependency Injection (DI)
 
--   Are injected through class constructors
--   Can depend on other providers
--   Are managed by NestJS's IoC (Inversion of Control) container
--   Include services, repositories, factories, and helpers
+NestJS has a powerful DI system. Dependencies are resolved by type and injected into class constructors.
+```typescript
+// constructor(private readonly usersService: UsersService) {}
+```
+Providers must be registered within a module (in the `providers` array or imported from other modules) to be injectable.
 
-### Middleware
+### 5. Pipes (`PipeTransform`, `@UsePipes()`)
 
-Middleware functions execute before route handlers:
+Pipes are classes decorated with `@Injectable()` that implement the `PipeTransform` interface. They operate on the arguments being processed by a route handler.
+-   **Transformation**: Transform input data to the desired format (e.g., string to integer).
+-   **Validation**: Validate input data and throw an exception if validation fails. NestJS often uses `class-validator` and `class-transformer` with a `ValidationPipe`.
 
 ```typescript
+// src/common/pipes/parse-int.pipe.ts
+import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+
 @Injectable()
-export class LoggerMiddleware implements NestMiddleware {
-	use(req: Request, res: Response, next: NextFunction) {
-		console.log(`Request: ${req.method} ${req.url}`);
-		next();
-	}
-}
-
-@Module({
-	imports: [CatsModule],
-})
-export class AppModule implements NestModule {
-	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(LoggerMiddleware).forRoutes('cats');
-	}
-}
-```
-
-Middleware functions:
-
--   Have access to request and response objects
--   Can modify request/response objects
--   Can end the request-response cycle
--   Can call the next middleware function in the stack
-
-### Interceptors
-
-Interceptors provide a way to:
-
-```typescript
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-		const request = context.switchToHttp().getRequest();
-		const method = request.method;
-		const url = request.url;
-
-		console.log(`[${method}] ${url} - Processing...`);
-
-		const now = Date.now();
-		return next
-			.handle()
-			.pipe(
-				tap(() =>
-					console.log(
-						`[${method}] ${url} - Completed in ${
-							Date.now() - now
-						}ms`
-					)
-				)
-			);
-	}
-}
-```
-
-Interceptors can:
-
--   Bind extra logic before/after method execution
--   Transform the result returned from a function
--   Transform exceptions thrown from a function
--   Extend basic function behavior
-
-### Guards
-
-Guards determine whether a request should be handled by the route handler:
-
-```typescript
-@Injectable()
-export class AuthGuard implements CanActivate {
-	constructor(private readonly jwtService: JwtService) {}
-
-	canActivate(
-		context: ExecutionContext
-	): boolean | Promise<boolean> | Observable<boolean> {
-		const request = context.switchToHttp().getRequest();
-		const token = request.headers.authorization?.split(' ')[1];
-
-		if (!token) {
-			return false;
-		}
-
-		try {
-			const payload = this.jwtService.verify(token);
-			request.user = payload;
-			return true;
-		} catch (e) {
-			return false;
-		}
-	}
-}
-```
-
-Guards:
-
--   Execute before middleware, pipes, interceptors, and route handlers
--   Are ideal for authorization logic
--   Return boolean values indicating whether the request is allowed
--   Can throw exceptions to reject the request with specific error messages
-
-### Pipes
-
-Pipes transform input data or validate it before reaching the route handler:
-
-```typescript
-@Injectable()
-export class ValidationPipe implements PipeTransform {
-	transform(value: any, metadata: ArgumentMetadata) {
-		// Validate the value
-		if (!this.isValid(value)) {
-			throw new BadRequestException('Validation failed');
-		}
-		return value;
-	}
-
-	private isValid(value: any): boolean {
-		// Custom validation logic
-		return true;
-	}
-}
-```
-
-Pipes:
-
--   Transform input data to desired format
--   Validate input data and throw exceptions if validation fails
--   Can be applied globally, controller-wide, or to specific route handlers
-
-### Exception Filters
-
-Exception filters handle exceptions thrown by application code:
-
-```typescript
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-	catch(exception: HttpException, host: ArgumentsHost) {
-		const ctx = host.switchToHttp();
-		const response = ctx.getResponse<Response>();
-		const request = ctx.getRequest<Request>();
-		const status = exception.getStatus();
-
-		response.status(status).json({
-			statusCode: status,
-			timestamp: new Date().toISOString(),
-			path: request.url,
-			message: exception.message,
-		});
-	}
-}
-```
-
-Exception filters:
-
--   Catch exceptions thrown in controllers, services, and other components
--   Transform exceptions into custom response formats
--   Handle specific error types differently
-
-## Architectural Layers
-
-A typical NestJS application has the following layers:
-
-1. **Presentation Layer** (Controllers)
-
-    - Handles HTTP requests and responses
-    - Applies data transformation and validation
-    - Routes requests to appropriate services
-
-2. **Business Logic Layer** (Services)
-
-    - Implements core business logic
-    - Coordinates between multiple repositories if needed
-    - Maintains service boundaries and encapsulation
-
-3. **Data Access Layer** (Repositories)
-
-    - Handles database operations
-    - Abstracts away data storage details
-    - Provides domain entity mapping
-
-4. **Domain Layer** (Entities, DTOs, Interfaces)
-    - Defines the core domain models
-    - Contains Data Transfer Objects (DTOs) for API contracts
-    - Defines domain interfaces and types
-
-## Communication Patterns
-
-NestJS supports several communication patterns:
-
-### Request-Response Pattern
-
-The standard HTTP request-response pattern is implemented using controllers and decorators:
-
-```typescript
-@Controller('items')
-export class ItemsController {
-	@Get(':id')
-	findOne(@Param('id') id: string): Promise<Item> {
-		// Implementation
-	}
-}
-```
-
-### Event-Driven Architecture
-
-Using the `@nestjs/event-emitter` package:
-
-```typescript
-// Emitting events
-@Injectable()
-export class ItemsService {
-	constructor(private eventEmitter: EventEmitter2) {}
-
-	createItem(item: Item): Item {
-		// Create item
-		this.eventEmitter.emit('item.created', item);
-		return item;
-	}
-}
-
-// Listening to events
-@Injectable()
-export class ItemEventsListener {
-	@OnEvent('item.created')
-	handleItemCreatedEvent(item: Item) {
-		// Handle event
-	}
-}
-```
-
-### Microservices
-
-NestJS supports multiple microservice transport mechanisms:
-
-```typescript
-// Microservice (TCP)
-const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-  transport: Transport.TCP,
-  options: {
-    host: '127.0.0.1',
-    port: 8888,
-  },
-});
-
-// HTTP client requesting microservice
-@Injectable()
-export class ItemsService {
-  constructor(@Inject('ITEMS_SERVICE') private client: ClientProxy) {}
-
-  getItems(): Observable<Item[]> {
-    return this.client.send<Item[]>({ cmd: 'get_items' }, {});
+export class ParseIntPipe implements PipeTransform<string, number> {
+  transform(value: string, metadata: ArgumentMetadata): number {
+    const val = parseInt(value, 10);
+    if (isNaN(val)) {
+      throw new BadRequestException(`Validation failed: "${value}" is not an integer.`);
+    }
+    return val;
   }
 }
 
-// Microservice handler
-@MessagePattern({ cmd: 'get_items' })
-getItems(): Item[] {
-  return this.itemsService.findAll();
-}
+// Usage in a controller:
+// @Get(':id')
+// findOne(@Param('id', ParseIntPipe) id: number) { /* ... */ }
+// Or globally: app.useGlobalPipes(new ValidationPipe());
 ```
 
-## CQRS (Command Query Responsibility Segregation)
+### 6. Guards (`CanActivate`, `@UseGuards()`)
 
-NestJS provides a `@nestjs/cqrs` module:
+Guards are classes decorated with `@Injectable()` that implement the `CanActivate` interface. They determine whether a given request will be handled by the route handler or not, typically based on authentication/authorization.
+-   Return `true` to allow access, `false` or throw an exception (e.g., `ForbiddenException`) to deny.
 
 ```typescript
-// Command
-export class CreateItemCommand {
-	constructor(public readonly item: Item) {}
+// src/auth/guards/roles.guard.ts
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+    if (!requiredRoles) {
+      return true; // No roles specified, access granted
+    }
+    const { user } = context.switchToHttp().getRequest();
+    return requiredRoles.some((role) => user?.roles?.includes(role));
+  }
 }
 
-// Command Handler
-@CommandHandler(CreateItemCommand)
-export class CreateItemHandler implements ICommandHandler<CreateItemCommand> {
-	constructor(private repository: ItemRepository) {}
-
-	async execute(command: CreateItemCommand): Promise<void> {
-		const { item } = command;
-		await this.repository.save(item);
-	}
-}
-
-// Query
-export class GetItemsQuery {}
-
-// Query Handler
-@QueryHandler(GetItemsQuery)
-export class GetItemsHandler implements IQueryHandler<GetItemsQuery> {
-	constructor(private repository: ItemRepository) {}
-
-	async execute(query: GetItemsQuery): Promise<Item[]> {
-		return this.repository.findAll();
-	}
-}
+// Usage:
+// @SetMetadata('roles', ['admin'])
+// @UseGuards(RolesGuard)
+// @Get('admin-route')
+// getAdminData() { /* ... */ }
 ```
 
-CQRS benefits:
+### 7. Interceptors (`NestInterceptor`, `@UseInterceptors()`)
 
--   Separation of read and write operations
--   Better scalability for different workloads
--   Clearer domain boundaries and responsibility separation
+Interceptors are classes decorated with `@Injectable()` that implement the `NestInterceptor` interface. They provide aspect-oriented programming (AOP) capabilities:
+-   Bind extra logic before/after method execution.
+-   Transform the result returned from a function.
+-   Transform exceptions thrown from a function.
+-   Extend basic function behavior.
+-   Override a function completely.
+They have access to `ExecutionContext` (like Guards) and `CallHandler` (which allows access to the response stream via RxJS `Observable`).
 
-## Summary
+```typescript
+// src/common/interceptors/logging.interceptor.ts
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
-NestJS provides a robust architectural foundation for building scalable applications:
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const now = Date.now();
+    const request = context.switchToHttp().getRequest();
+    const method = request.method;
+    const url = request.url;
 
--   **Modular design** enables code organization and reusability
--   **Dependency injection** encourages loose coupling between components
--   **Decorators and middleware** provide powerful hooks for cross-cutting concerns
--   **Support for multiple architectural patterns** (MVC, CQRS, Event-Driven, Microservices)
--   **TypeScript integration** enables strong typing and better developer experience
+    return next
+      .handle()
+      .pipe(
+        tap(() => console.log(`${method} ${url} ${Date.now() - now}ms`)),
+      );
+  }
+}
 
-These architectural concepts form the foundation for building maintainable, testable, and scalable NestJS applications.
+// Usage: @UseInterceptors(LoggingInterceptor)
+```
+
+### 8. Middleware (`NestMiddleware`)
+
+Middleware functions are executed sequentially before a route handler is called. They are typically used for request logging, CORS, security headers, etc.
+-   Middleware can be a function or a class implementing `NestMiddleware`.
+-   They have access to the request and response objects (`req`, `res`), and the `next` function in the request-response cycle.
+-   Configured in a module's `configure` method (by implementing `NestModule`).
+
+```typescript
+// src/common/middleware/logger.middleware.ts
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express'; // Or from 'fastify'
+
+@Injectable()
+export class LoggerMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`Request: ${req.method} ${req.originalUrl}`);
+    next();
+  }
+}
+
+// In a module:
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer
+//       .apply(LoggerMiddleware)
+//       .forRoutes('*'); // Apply to all routes or specific ones
+//   }
+// }
+```
+
+## Request Lifecycle
+
+A typical request in a NestJS application flows through these components in roughly this order:
+
+1.  **Client sends HTTP Request**.
+2.  **Middleware**: Global middleware, then module-specific middleware.
+3.  **Guards**: Global guards, then controller guards, then route guards. If any guard returns `false` or throws, the request is denied.
+4.  **Interceptors (pre-controller)**: Global interceptors, then controller interceptors, then route interceptors (the `intercept` method's part before `next.handle()`).
+5.  **Pipes**: Global pipes, then controller pipes, then route pipes, then route parameter pipes (transform/validate request data).
+6.  **Controller Handler**: The method in the controller decorated with the HTTP method (e.g., `@Get()`) is executed.
+7.  **Service(s)**: Controller typically calls one or more services to handle business logic.
+8.  **Interceptors (post-request / response)**: The part of the interceptor after `next.handle()` (e.g., `tap()`, `map()` operators on the Observable) processes the response.
+9.  **Exception Filters**: If any unhandled exception occurs during the process (from controller, service, pipe, guard), global filters, then controller filters, then route filters are executed to format the error response.
+10. **Server sends HTTP Response** to the client.
+
+This architecture, with its clear separation of concerns and robust DI system, forms the foundation for building maintainable, testable, and scalable server-side applications with NestJS in {projectPath}.
+```

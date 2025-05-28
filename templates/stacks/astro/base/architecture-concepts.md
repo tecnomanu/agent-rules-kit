@@ -1,7 +1,7 @@
 ---
-description: Core architectural concepts for Astro projects
-globs: ./**/*
-always: true
+description: Core architectural concepts for Astro projects, including Islands Architecture, Multi-Framework Support, Content Collections, and Rendering Modes.
+globs: <root>/src/**/*.{astro,md,mdx,ts,js},<root>/astro.config.mjs
+alwaysApply: true
 ---
 
 # Astro Architecture Concepts

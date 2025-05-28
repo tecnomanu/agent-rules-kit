@@ -1,3 +1,9 @@
+---
+description: Detailed guide on SvelteKit's file-based routing system and layout mechanisms.
+globs: <root>/src/routes/**/*.{svelte,js,ts}
+alwaysApply: false # As it's an architectural choice/explanation
+---
+
 # Routing and Layouts in SvelteKit
 
 This document explains the routing system and layout structure in SvelteKit.

@@ -1,28 +1,34 @@
-# Convenciones de Nomenclatura en NestJS
+---
+description: Standard naming conventions for NestJS projects, covering modules, controllers, services, entities, DTOs, and more, following TypeScript and NestJS best practices.
+globs: <root>/src/**/*.ts
+alwaysApply: true
+---
 
-Este documento define las convenciones de nomenclatura estándar para proyectos NestJS, siguiendo las prácticas recomendadas por la comunidad y el ecosistema TypeScript/NestJS.
+# NestJS Naming Conventions
 
-## Principios Generales
+This document defines standard naming conventions for NestJS projects, following best practices from the community and the TypeScript/NestJS ecosystem.
 
--   **Consistencia**: Mantén el mismo estilo en todo el proyecto.
--   **Claridad**: Los nombres deben ser descriptivos y revelar la intención.
--   **Concisión**: Evita nombres innecesariamente largos cuando sea posible.
--   **Estándares**: Seguir convenciones oficiales de NestJS y TypeScript.
+## General Principles
 
-## Estilos de Nomenclatura
+-   **Consistency**: Maintain the same style throughout the project.
+-   **Clarity**: Names should be descriptive and reveal intent.
+-   **Conciseness**: Avoid unnecessarily long names when possible.
+-   **Standards**: Follow official NestJS and TypeScript conventions.
 
-| Estilo         | Descripción                                                            | Ejemplo          |
+## Naming Styles
+
+| Style         | Description                                                            | Example          |
 | -------------- | ---------------------------------------------------------------------- | ---------------- |
-| **PascalCase** | Primera letra de cada palabra en mayúscula                             | `UserController` |
-| **camelCase**  | Primera letra minúscula, resto de palabras con primera letra mayúscula | `findUserById`   |
-| **kebab-case** | Palabras en minúscula separadas por guiones                            | `user-service`   |
+| **PascalCase** | First letter of each word capitalized                                  | `UserController` |
+| **camelCase**  | First letter lowercase, subsequent words with first letter capitalized | `findUserById`   |
+| **kebab-case** | Lowercase words separated by hyphens                                   | `user-service`   |
 
-## Aplicación por Tipo de Elemento
+## Application by Element Type
 
-### Módulos
+### Modules
 
--   **Nombres**: `PascalCase` con sufijo `Module`
--   **Archivos**: `kebab-case` con sufijo `.module.ts`
+-   **Names**: `PascalCase` with `Module` suffix
+-   **Files**: `kebab-case` with `.module.ts` suffix
 
 ```typescript
 // users.module.ts
@@ -35,94 +41,96 @@ Este documento define las convenciones de nomenclatura estándar para proyectos 
 export class UsersModule {}
 ```
 
-### Controladores
+### Controllers
 
--   **Nombres**: `PascalCase` con sufijo `Controller`
--   **Archivos**: `kebab-case` con sufijo `.controller.ts`
--   **Rutas**: `kebab-case`
+-   **Names**: `PascalCase` with `Controller` suffix
+-   **Files**: `kebab-case` with `.controller.ts` suffix
+-   **Routes**: `kebab-case` (for URL paths)
 
 ```typescript
 // users.controller.ts
-@Controller('users')
+@Controller('users') // Path is typically kebab-case or plural noun
 export class UsersController {
 	@Get(':id')
 	findOne(@Param('id') id: string) {
-		return this.usersService.findOne(id);
+		// return this.usersService.findOne(id); // Assuming usersService is injected
 	}
 }
 ```
 
-### Servicios
+### Services
 
--   **Nombres**: `PascalCase` con sufijo `Service`
--   **Archivos**: `kebab-case` con sufijo `.service.ts`
+-   **Names**: `PascalCase` with `Service` suffix
+-   **Files**: `kebab-case` with `.service.ts` suffix
 
 ```typescript
 // users.service.ts
 @Injectable()
 export class UsersService {
 	findAll() {
-		return this.usersRepository.find();
+		// return this.usersRepository.find(); // Assuming usersRepository is injected
 	}
 }
 ```
 
-### Entidades
+### Entities (e.g., TypeORM, Prisma)
 
--   **Nombres**: `PascalCase` singular
--   **Archivos**: `kebab-case` con sufijo `.entity.ts`
--   **Propiedades**: `camelCase`
+-   **Names**: `PascalCase` singular (representing the object)
+-   **Files**: `kebab-case` with `.entity.ts` suffix (or `.model.ts` for Prisma)
+-   **Properties**: `camelCase`
 
 ```typescript
 // user.entity.ts
-@Entity()
+// @Entity() // Example for TypeORM
 export class User {
-	@PrimaryGeneratedColumn()
+	// @PrimaryGeneratedColumn() // Example for TypeORM
 	id: number;
 
-	@Column()
+	// @Column() // Example for TypeORM
 	firstName: string;
 
-	@Column()
+	// @Column() // Example for TypeORM
 	lastName: string;
 
-	@Column({ unique: true })
+	// @Column({ unique: true }) // Example for TypeORM
 	email: string;
 }
 ```
 
 ### DTOs (Data Transfer Objects)
 
--   **Nombres**: `PascalCase` con sufijo descriptivo (`Dto`)
--   **Archivos**: `kebab-case` con sufijo descriptivo (`.dto.ts`)
+-   **Names**: `PascalCase` with a descriptive suffix, commonly `Dto`.
+-   **Files**: `kebab-case` with a descriptive suffix like `.dto.ts`.
 
 ```typescript
 // create-user.dto.ts
+// import { IsString, MinLength, IsEmail } from 'class-validator'; // Example imports
 export class CreateUserDto {
-	@IsString()
-	@MinLength(2)
+	// @IsString()
+	// @MinLength(2)
 	firstName: string;
 
-	@IsString()
-	@MinLength(2)
+	// @IsString()
+	// @MinLength(2)
 	lastName: string;
 
-	@IsEmail()
+	// @IsEmail()
 	email: string;
 }
 
 // update-user.dto.ts
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+// import { PartialType } from '@nestjs/mapped-types'; // Or @nestjs/swagger
+// export class UpdateUserDto extends PartialType(CreateUserDto) {}
 ```
 
 ### Interfaces
 
--   **Nombres**: `PascalCase`, puede llevar prefijo `I` (opcional)
--   **Archivos**: `kebab-case` con sufijo `.interface.ts`
+-   **Names**: `PascalCase`. Prefixing with `I` (e.g., `IUser`) is a common convention but optional; many prefer to omit it if the context is clear.
+-   **Files**: `kebab-case` with `.interface.ts` suffix.
 
 ```typescript
 // user.interface.ts
-export interface IUser {
+export interface User { // Or IUser
 	id: number;
 	firstName: string;
 	lastName: string;
@@ -133,8 +141,9 @@ export interface IUser {
 
 ### Enums
 
--   **Nombres**: `PascalCase`
--   **Archivos**: `kebab-case` con sufijo `.enum.ts`
+-   **Names**: `PascalCase` singular (e.g., `UserRole`, `OrderStatus`).
+-   **Files**: `kebab-case` with `.enum.ts` suffix.
+-   **Members**: `UPPER_SNAKE_CASE` or `PascalCase`. `UPPER_SNAKE_CASE` is common for string enums.
 
 ```typescript
 // user-role.enum.ts
@@ -143,114 +152,127 @@ export enum UserRole {
 	EDITOR = 'editor',
 	USER = 'user',
 }
+
+// Alternatively, with PascalCase members (less common for string enums in some styles)
+// export enum UserRole { Admin = 'admin', Editor = 'editor', User = 'user' }
 ```
 
 ### Guards, Interceptors, Pipes, Filters
 
--   **Nombres**: `PascalCase` con sufijo según el tipo (`Guard`, `Interceptor`, etc.)
--   **Archivos**: `kebab-case` con sufijo según el tipo (`.guard.ts`, `.interceptor.ts`, etc.)
+-   **Names**: `PascalCase` with a suffix indicating the type (`Guard`, `Interceptor`, `Pipe`, `Filter`).
+-   **Files**: `kebab-case` with the corresponding suffix (`.guard.ts`, `.interceptor.ts`, etc.).
 
 ```typescript
 // auth.guard.ts
-@Injectable()
-export class AuthGuard implements CanActivate {
-	canActivate(context: ExecutionContext): boolean {
-		// Lógica aquí
+// import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'; // Example imports
+// @Injectable()
+export class AuthGuard /*implements CanActivate*/ {
+	canActivate(context: /*ExecutionContext*/ any): boolean {
+		// Logic here
 		return true;
 	}
 }
 
 // transform.interceptor.ts
-@Injectable()
-export class TransformInterceptor implements NestInterceptor {
-	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-		// Lógica aquí
+// import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common'; // Example imports
+// import { Observable } from 'rxjs'; // Example import
+// @Injectable()
+export class TransformInterceptor /*implements NestInterceptor*/ {
+	intercept(context: /*ExecutionContext*/ any, next: /*CallHandler*/ any): /*Observable<any>*/ any {
+		// Logic here
 		return next.handle();
 	}
 }
 ```
 
-### Métodos y Funciones
+### Methods and Functions
 
--   Usar `camelCase`
--   Verbos que describan la acción
--   Para métodos HTTP, seguir convenciones REST:
+-   Use `camelCase`.
+-   Verbs that describe the action.
+-   For HTTP methods in controllers, follow REST conventions (often implied by decorators like `@Get`, `@Post`).
 
 ```typescript
-// En controladores
-@Get()
+// In controllers
+// @Get()
 findAll() {}
 
-@Get(':id')
-findOne(@Param('id') id: string) {}
+// @Get(':id')
+findOne(/*@Param('id')*/ id: string) {}
 
-@Post()
-create(@Body() createUserDto: CreateUserDto) {}
+// @Post()
+create(/*@Body()*/ createUserDto: /*CreateUserDto*/ any) {}
 
-@Patch(':id')
-update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {}
+// @Patch(':id')
+update(/*@Param('id')*/ id: string, /*@Body()*/ updateUserDto: /*UpdateUserDto*/ any) {}
 
-@Delete(':id')
-remove(@Param('id') id: string) {}
+// @Delete(':id')
+remove(/*@Param('id')*/ id: string) {}
 ```
 
-### Variables y Propiedades
+### Variables and Properties
 
--   Usar `camelCase`
--   Nombres descriptivos
+-   Use `camelCase`.
+-   Descriptive names.
+-   Private properties in classes are often prefixed with an underscore `_` by convention, though TypeScript's `private` keyword is the formal way to enforce privacy.
 
 ```typescript
 const userCount = 42;
 const isActive = true;
 
-// En clases
-private readonly usersRepository: Repository<User>;
-private readonly configService: ConfigService;
+// In classes
+// private readonly userRepository: Repository<User>; // TypeORM example
+// private readonly _configService: ConfigService; // Underscore for private
 ```
 
-### Constantes
+### Constants
 
--   Para constantes globales: `UPPER_SNAKE_CASE`
--   Para constantes en clases: `camelCase`
+-   For exported, top-level constants or widely used immutable values: `UPPER_SNAKE_CASE`.
+-   For local constants within a class or function, `camelCase` (if `readonly`) or `PascalCase` (if `static readonly` and treated like a type-level constant) can be acceptable, but `UPPER_SNAKE_CASE` is also common for any immutable primitive.
 
 ```typescript
-// Constantes globales
-const API_VERSION = 'v1';
-const MAX_LOGIN_ATTEMPTS = 5;
+// Global or exported constants
+export const API_VERSION = 'v1';
+export const MAX_LOGIN_ATTEMPTS = 5;
 
-// En clases
-private readonly maxRetries = 3;
+// Inside classes
+class MyService {
+  private static readonly DEFAULT_TIMEOUT_MS = 30000; // PascalCase for static readonly
+  private readonly maxRetries = 3; // camelCase for instance readonly
+}
 ```
 
-## Estructura de Directorios
+## Directory Structure (Example for a feature module)
 
 ```
 src/
 ├── app.module.ts
 ├── main.ts
-├── users/
-│   ├── dto/
+├── users/                     # Feature module directory (kebab-case)
+│   ├── dto/                   # DTOs for this feature
 │   │   ├── create-user.dto.ts
 │   │   └── update-user.dto.ts
+│   ├── entities/              # Entities for this feature (if using TypeORM)
 │   │   └── user.entity.ts
-│   │   └── users.controller.ts
-│   │   └── users.module.ts
-│   │   └── users.service.ts
-│   │   └── users.service.spec.ts
-│   └── auth/
-│       ├── auth.controller.ts
-│       ├── auth.module.ts
-│       ├── auth.service.ts
-│       └── guards/
-│           └── jwt-auth.guard.ts
-└── users/
+│   ├── users.controller.ts
+│   ├── users.module.ts
+│   ├── users.service.ts
+│   ├── users.service.spec.ts  # Unit test for the service
+│   └── users.controller.spec.ts # Unit/Integration test for controller
+├── auth/                      # Another feature module
+│   ├── auth.controller.ts
+│   ├── auth.module.ts
+│   ├── auth.service.ts
+│   └── guards/
+│       └── jwt-auth.guard.ts
+└── shared/                    # Shared module for common utilities, etc.
+    └── shared.module.ts
 ```
 
-## Convenciones de Tests
+## Test File Conventions
 
--   **Archivos de Test**: Mismo nombre que el archivo probado, con sufijo `.spec.ts`
--   **E2E Tests**: sufijo `.e2e-spec.ts` en directorio `test/`
--   **Nombres de Tests**: Descriptivos sobre lo que está probando
+-   **Test Files**: Same name as the file being tested, with `.spec.ts` suffix (for unit/integration tests).
+-   **E2E Test Files**: Descriptive name with `.e2e-spec.ts` suffix, typically in a top-level `test/` directory.
+-   **Test Descriptions**: Use descriptive strings in `describe()` and `it()` blocks.
 
 ```typescript
 // users.service.spec.ts
@@ -265,66 +287,56 @@ describe('UsersService', () => {
 });
 ```
 
-## Decoradores
+## Decorators
 
--   Los decoradores deben estar solos en una línea
--   Seguir orden de decoradores recomendado por NestJS
+-   Decorators should be placed on their own line immediately above the decorated code.
+-   Follow the order of decorators recommended by NestJS if multiple are used (e.g., `@ApiProperty()` before validation decorators).
 
 ```typescript
-@Module({
-	imports: [DatabaseModule],
-	controllers: [UsersController],
-})
+// @Module({ // Example imports
+// 	imports: [DatabaseModule],
+// 	controllers: [UsersController],
+// })
 export class UsersModule {}
 
-@Controller('users')
-@UseGuards(AuthGuard)
+// @Controller('users') // Example imports
+// @UseGuards(AuthGuard) // Example guard
 export class UsersController {
-	@Get(':id')
-	@UseInterceptors(LoggingInterceptor)
-	findOne(@Param('id') id: string) {
-		return this.usersService.findOne(id);
+	// @Get(':id')
+	// @UseInterceptors(LoggingInterceptor) // Example interceptor
+	findOne(/*@Param('id')*/ id: string) {
+		// return this.usersService.findOne(id);
 	}
 }
 ```
 
-## Herramientas de Linting
+## Linting Tools
 
-Configurar ESLint con reglas estrictas:
+Configure ESLint with strict rules to enforce naming conventions and other coding standards.
+The NestJS starter project usually comes with a good ESLint setup. You can customize `@typescript-eslint/naming-convention` rules in your `.eslintrc.js` file.
 
+Example `.eslintrc.js` rule snippet (adjust to your team's preference):
 ```javascript
-// .eslintrc.js
+// .eslintrc.js excerpt
 module.exports = {
-	parser: '@typescript-eslint/parser',
-	parserOptions: {
-		project: 'tsconfig.json',
-		sourceType: 'module',
-	},
-	plugins: ['@typescript-eslint/eslint-plugin'],
-	extends: ['plugin:@typescript-eslint/recommended', 'prettier'],
-	root: true,
-	env: {
-		node: true,
-		jest: true,
-	},
-	rules: {
-		'@typescript-eslint/naming-convention': [
-			'error',
-			{
-				selector: 'default',
-				format: ['camelCase'],
-			},
-			{
-				selector: 'variable',
-				format: ['camelCase', 'UPPER_CASE'],
-			},
-			{
-				selector: 'typeLike',
-				format: ['PascalCase'],
-			},
-		],
-	},
+  // ... other ESLint config ...
+  rules: {
+    '@typescript-eslint/naming-convention': [
+      'warn', // Use 'error' to enforce strictly
+      { selector: 'default', format: ['camelCase'] },
+      { selector: 'variable', format: ['camelCase', 'UPPER_CASE', 'PascalCase'], leadingUnderscore: 'allow' }, // Allow PascalCase for e.g. injected constants
+      { selector: 'parameter', format: ['camelCase'], leadingUnderscore: 'allow' },
+      { selector: 'property', format: ['camelCase', 'UPPER_CASE'], leadingUnderscore: 'allow' }, // Allow UPPER_CASE for e.g. static readonly
+      { selector: 'method', format: ['camelCase'] },
+      { selector: 'enumMember', format: ['UPPER_SNAKE_CASE'] }, // Or PascalCase
+      { selector: 'typeLike', format: ['PascalCase'] }, // Classes, Interfaces, Types, Enums
+      // Optionally allow 'I' prefix for interfaces, but don't enforce it if not preferred:
+      // { selector: 'interface', format: ['PascalCase'], custom: { regex: '^I[A-Z]', match: false } }, 
+    ],
+    // ... other rules ...
+  },
 };
 ```
 
-> Nota: Estas convenciones son recomendaciones basadas en las mejores prácticas de NestJS. Adapta según las necesidades específicas de tu proyecto mantiendo consistencia en todo el código.
+> Note: These conventions are recommendations based on NestJS best practices. Adapt them as needed for {projectPath}'s specific requirements while maintaining consistency throughout the codebase.
+```

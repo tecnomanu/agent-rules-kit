@@ -1,6 +1,6 @@
 ---
-description: Microservices architecture patterns for NestJS applications
-globs: <root>/**/*.ts
+description: Designing and implementing microservices architecture with NestJS, covering communication patterns (TCP, Redis, RabbitMQ, Kafka, gRPC), API Gateway, data management, and service discovery.
+globs: <root>/**/*.ts # Broad, as microservices can touch many parts
 alwaysApply: false
 ---
 

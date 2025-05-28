@@ -1,9 +1,7 @@
 ---
-title: Astro Performance and Architecture Guide
-description: Advanced architecture patterns and performance optimization for Astro projects
-tags: [Astro, Performance, Architecture, Optimization]
-globs: ./**/*
-always: true
+description: Advanced architecture patterns and performance optimization for Astro projects, covering component design, data flow, asset strategy (Image component), code splitting, resource loading, caching, and performance monitoring (Web Vitals, Lighthouse).
+globs: <root>/src/**/*.{astro,ts,js},<root>/astro.config.mjs,<root>/public/**/*
+alwaysApply: true
 ---
 
 # Astro Performance and Architecture Guide
