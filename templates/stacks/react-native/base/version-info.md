@@ -1,5 +1,5 @@
 ---
-globs: []
+globs: <root>/package.json # To detect React Native version
 alwaysApply: true
 description: "Provides information about the detected React Native version and project path. This file is automatically populated."
 ---

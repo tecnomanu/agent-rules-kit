@@ -1,7 +1,7 @@
 ---
-description: Testing best practices for Next.js applications
-globs: <root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/api/**/*.ts,<root>/tests/**/*.{ts,tsx}
-alwaysApply: false
+description: Testing concepts and best practices for Next.js applications
+globs: <root>/{app,src,pages,components}/**/__tests__/**/*.{ts,tsx,js,jsx},<root>/{app,src,pages,components}/**/*.{spec,test}.{ts,tsx,js,jsx}
+alwaysApply: true
 ---
 
 # Next.js Testing Guide

@@ -1,7 +1,7 @@
 ---
 description: Core architectural concepts for React applications
 globs: <root>/src/**/*.{ts,tsx,js,jsx}
-alwaysApply: false
+alwaysApply: true
 ---
 
 # React Architecture Concepts

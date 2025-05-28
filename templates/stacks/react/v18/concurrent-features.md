@@ -1,3 +1,9 @@
+---
+description: Guide to React 18 Concurrent Features
+globs: <root>/src/**/*.{ts,tsx,js,jsx}
+alwaysApply: true # As these are core v18 features
+---
+
 # React 18: Concurrent Features Guide
 
 ## Overview
@@ -22,8 +28,29 @@ This leads to improved performance, smoother user experiences, and new capabilit
     -   "Syntax: `const deferredValue = useDeferredValue(value);`"
 -   **Automatic Batching:**
     -   "React 18 automatically batches multiple state updates (even those inside promises, setTimeout, or native event handlers) into a single re-render for better performance. Previously, batching was mostly limited to React event handlers."
+
+### Automatic Batching Explained
+
+In React 18, state updates are automatically batched, even if they are outside of React event handlers (e.g., inside `setTimeout`, promises, or native event handlers). This means multiple `setState` calls will result in only one re-render, improving performance.
+
+**Conceptual Example:**
+
+```javascript
+// React 17 (potentially two re-renders)
+setTimeout(() => {
+  setCount(c => c + 1); // Re-render 1
+  setLoading(false);    // Re-render 2
+}, 1000);
+
+// React 18 (only one re-render)
+setTimeout(() => {
+  setCount(c => c + 1); // Batched
+  setLoading(false);    // Batched - single re-render
+}, 1000);
+```
 -   **Suspense for Data Fetching (General Concept):**
     -   "While full Suspense for data fetching is still evolving in libraries, React 18 improves its core capabilities, enabling patterns where components can 'suspend' while data is being fetched, showing a fallback UI."
+    -   **Note on Data Fetching Libraries:** While React provides the primitives for Suspense, integrating it for data fetching is often handled by libraries like React Query, SWR, or Relay. Consult the documentation of your chosen data fetching library for specific patterns on how to use Suspense for declarative loading states.
 
 ## `startTransition` Example
 

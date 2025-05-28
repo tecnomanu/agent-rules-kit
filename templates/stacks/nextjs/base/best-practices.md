@@ -1,7 +1,7 @@
 ---
 description: Core best practices for Next.js applications
 globs: <root>/app/**/*.{ts,tsx},<root>/components/**/*.{ts,tsx},<root>/pages/**/*.{ts,tsx}
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Next.js Best Practices

@@ -1,3 +1,9 @@
+---
+description: Understanding and using React Server Components (RSC) in Next.js 14 with the App Router.
+globs: <root>/app/**/*.{js,jsx,ts,tsx}
+alwaysApply: true
+---
+
 # Next.js 14: Understanding Server Components
 
 ## Overview
