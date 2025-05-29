@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.10.0...v1.11.0) (2025-05-29)
+
+
+### Features
+
+* ✨ improve CLI UX and fix global rules installation ([5f157f8](https://github.com/tecnomanu/agent-rules-kit/commit/5f157f898c6c47719f298bd63232667816f18d50))
+
 # [1.10.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.9.0...v1.10.0) (2025-05-29)
 
 
