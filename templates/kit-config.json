@@ -313,13 +313,5 @@
 				"globs": ["<root>/**/*.go"]
 			}
 		}
-	},
-	"generic": {
-		"default_architecture": "standard",
-		"architectures": {
-			"standard": {
-				"name": "Generic Architecture"
-			}
-		}
 	}
 }

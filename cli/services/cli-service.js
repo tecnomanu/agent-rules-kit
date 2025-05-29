@@ -148,7 +148,10 @@ export class CliService extends BaseService {
                 type: 'list',
                 name: 'stack',
                 message: `${this.emoji.stack} Select the stack for your rules:`,
-                choices: availableStacks,
+                choices: [
+                    ...availableStacks,
+                    { name: '← Continue without specific stack', value: null }
+                ],
             }
         ]);
         return stack;
@@ -332,17 +335,17 @@ export class CliService extends BaseService {
      * Shows welcome message and introduction
      */
     showWelcome() {
-        console.log(chalk.bold.cyan('\n✨ Welcome to Agent Rules Kit! ✨\n'));
+        console.log(chalk.bold.cyan('✨ Welcome to Agent Rules Kit! ✨\n'));
         console.log(chalk.white('This tool will help you install best practice rules'));
         console.log(chalk.white('for your project with artificial intelligence.\n'));
 
         console.log(chalk.green('📝 What we will do:'));
         console.log(chalk.white('  • Configure specific rules for your development stack'));
         console.log(chalk.white('  • Include global industry best practices'));
-        console.log(chalk.white('  • Preserve your existing rules (backups will be created if needed)\n'));
+        console.log(chalk.white('  • Preserve your existing rules and backups for existing `agent rules kit`\n'));
 
         console.log(chalk.yellow('⚡ Rules will be installed in:'));
-        console.log(chalk.white('  📁 .cursor/rules/rules-kit/\n'));
+        console.log(chalk.white('  📁 [your_specific_path]/.cursor/rules/rules-kit/\n'));
 
         console.log(chalk.magenta('🎯 We will ask you a few quick questions to customize the installation.'));
     }
@@ -355,7 +358,7 @@ export class CliService extends BaseService {
             {
                 type: 'input',
                 name: 'continue',
-                message: chalk.bold('👆 Press ENTER to continue...'),
+                message: chalk.bold('👉 Press ENTER to continue...'),
                 default: ''
             }
         ]);
