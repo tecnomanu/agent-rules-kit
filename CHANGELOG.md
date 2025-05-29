@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.9.0...v1.10.0) (2025-05-29)
+
+
+### Features
+
+* 🎉 implement improved CLI flow and reorganize project structure ([82eb358](https://github.com/tecnomanu/agent-rules-kit/commit/82eb35837ea23f6af6ee126e7a726d4b18724f4f))
+
 # [1.9.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.8.0...v1.9.0) (2025-05-29)
 
 
