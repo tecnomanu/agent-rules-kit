@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.13.0...v1.14.0) (2025-05-29)
+
+
+### Features
+
+* 🎉 complete MCP Tools documentation and upgrade to v2.0.0 - Add comprehensive MCP Tools Development section to CONTRIBUTING.md - Create detailed MCP Tools Integration Guide (docs/mcp-tools-guide.md) - Update services architecture documentation with McpService details - Update CLI development rules with MCP Tools workflow - Upgrade package.json to version 2.0.0 with new MCP keywords - Add multi-select MCP tools support documentation - Document new cli/services/stack/ and cli/services/mcp/ architecture - Include testing guidelines for MCP service development - All 144 tests passing with comprehensive MCP coverage BREAKING CHANGE: Major version 2.0.0 introduces comprehensive MCP Tools integration as a core feature, representing a significant expansion of Agent Rules Kit capabilities. The service architecture has been completely reorganized with new directory structure and dedicated MCP service. ([bfaaadd](https://github.com/tecnomanu/agent-rules-kit/commit/bfaaadd4bb84132fb22375d39d016f11c2be7686))
+
 # [1.13.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.12.0...v1.13.0) (2025-05-29)
 
 
