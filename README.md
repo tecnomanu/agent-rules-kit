@@ -12,6 +12,25 @@
   <img src="https://img.shields.io/github/actions/workflow/status/tecnomanu/agent-rules-kit/CI" alt="Build Status" />
 </p>
 
+<!-- Badges -->
+<p align="center">
+  <a href="#️-mcp">
+    <img alt="MCP badge"
+         src="https://img.shields.io/badge/Rules-MCP-6f42c1?style=for-the-badge&logo=sheriff"
+    />
+  </a>
+  <a href="#️-stacks">
+    <img alt="Stacks badge"
+         src="https://img.shields.io/badge/Rules-Stacks-ff004c?style=for-the-badge&logo=layers"
+    />
+  </a>
+  <a href="#️-globals">
+    <img alt="Globals badge"
+         src="https://img.shields.io/badge/Rules-Globals-0d6efd?style=for-the-badge&logo=files"
+    />
+  </a>
+</p>
+
 > Bootstrap **Cursor** rules (`.mdc`) for AI agent-guided projects. This tool helps you generate and maintain project-specific rules for multiple frameworks and architectures.
 
 ## What is Agent Rules Kit?

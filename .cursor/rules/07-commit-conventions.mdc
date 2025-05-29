@@ -5,7 +5,73 @@ alwaysApply: true
 ---
 # Commit Conventions
 
-This document outlines the commit conventions used in the Agent Rules Kit project. We use **semantic-release** for automated versioning and CHANGELOG generation.
+Follow **Conventional Commits** with emojis and semantic-release automation.
+
+## Basic Format
+
+```
+<type>: <emoji> <description>
+
+[optional body]
+
+[optional footer]
+```
+
+## Common Types
+
+| Type  | Emoji | Impact | Example |
+|-------|-------|--------|---------|
+| feat  | ✨    | MINOR  | `feat: ✨ add user authentication` |
+| fix   | 🐛    | PATCH  | `fix: 🐛 handle timeout error` |
+| docs  | 📝    | None   | `docs: 📝 update README` |
+| chore | 🔧    | None   | `chore: 🔧 bump dependencies` |
+
+## Breaking Changes (MAJOR version)
+
+For major version bumps, use **BREAKING CHANGE** footer:
+
+### ✅ Correct:
+```bash
+feat: 🎉 redesign authentication system
+
+BREAKING CHANGE: Token format changed, requires client updates
+```
+
+### ❌ Wrong:
+```bash
+# Don't use exclamation mark
+feat!: ✨ breaking change
+
+# Don't make super long single-line messages
+feat: 🎉 very long message with breaking change info all in one line BREAKING CHANGE: xyz
+```
+
+## Author Identity (MANDATORY)
+
+**ALWAYS use `--author` for AI commits:**
+
+### AI Assistant Commits:
+```bash
+# For Claude/Sonnet
+git commit --author="Claude AI <claude.ai@assistant.local>" -m "feat: ✨ add feature"
+
+# For Cursor AI
+git commit --author="Cursor AI <cursor.ai@assistant.local>" -m "fix: 🐛 resolve issue"
+```
+
+### Human Developer Commits:
+```bash
+# Use normal identity (no --author needed)
+git commit -m "feat: ✨ implement feature"
+```
+
+## Key Rules
+
+1. **Keep commits short**: Title under 72 characters
+2. **Use blank lines**: Separate title from body/footer
+3. **Always use --author**: For AI-generated commits
+4. **BREAKING CHANGE footer**: For major version bumps
+5. **English only**: All commit messages in English
 
 ## Language
 
