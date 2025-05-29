@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.12.0...v1.13.0) (2025-05-29)
+
+
+### Features
+
+* 🎉 refactor services architecture and enhance MCP tools support - Reorganize services into logical directories (stack/, mcp/) - Create dedicated McpService for better separation of concerns - Move all stack-specific services to cli/services/stack/ directory - Move MCP functionality to cli/services/mcp/ directory - Update all import paths to reflect new structure - Add comprehensive tests for McpService (15 test cases) - Update README with enhanced MCP tools documentation - Add multi-select capability for MCP tools installation - Improve CLI workflow with better organization - All 144 tests passing with new architecture BREAKING CHANGE: Service architecture has been completely reorganized. Stack services moved to cli/services/stack/ and MCP functionality extracted to cli/services/mcp/. Import paths for services have changed, requiring updates for any external integrations. ([31c70d3](https://github.com/tecnomanu/agent-rules-kit/commit/31c70d3752124ff80a9119122ae400a3897a238a))
+
 # [1.12.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.11.1...v1.12.0) (2025-05-29)
 
 
