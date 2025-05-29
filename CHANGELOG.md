@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.14.0...v1.15.0) (2025-05-29)
+
+
+### Features
+
+* :rocket: Change to version 2.0 with MCP rules now ([3d63abc](https://github.com/tecnomanu/agent-rules-kit/commit/3d63abc505f96d37bebd065972a3936c38027144))
+
 # [1.14.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.13.0...v1.14.0) (2025-05-29)
 
 
