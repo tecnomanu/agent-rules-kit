@@ -135,6 +135,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 
 | Stack                                                                                                                                         | Status                                | Features                                                                                                                       |
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                  | ![100%](https://progress-bar.dev/100) | Complete SDK coverage (Python, TypeScript, Java, Kotlin, C#, Swift), server/client patterns, architecture concepts             |
 | <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>           | ![100%](https://progress-bar.dev/100) | Multiple architectures, version detection, casting rules                                                                       |
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>                 | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs                                                              |
 | <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>            | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs                                                            |
@@ -164,3 +165,38 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating in ou
 ## License
 
 This project is licensed under the ISC License. See the [LICENSE](LICENSE) file for details.
+
+## 🎯 Available Stacks
+
+Choose from a wide range of technology stacks:
+
+| Stack                               | SDKs/Versions                               | Architectures                         |
+| ----------------------------------- | ------------------------------------------- | ------------------------------------- |
+| **Laravel**                         | 8, 9, 10, 11                                | Standard, DDD, Hexagonal              |
+| **Next.js**                         | 12, 13, 14, 15                              | App Router, Pages Router              |
+| **Angular**                         | 12, 13, 14, 15, 16, 17, 18                  | Standard, Standalone, Micro-frontends |
+| **React**                           | 16, 17, 18, 19                              | Standard, Hooks, Concurrent           |
+| **Vue.js**                          | 2, 3                                        | Options API, Composition API, Nuxt    |
+| **Astro**                           | 3, 4                                        | Static, SSR, Hybrid                   |
+| **React Native**                    | 0.70, 0.71, 0.72, 0.73, 0.74                | Standard, Expo                        |
+| **NestJS**                          | 8, 9, 10                                    | Standard, Microservices, GraphQL      |
+| **Go**                              | 1.20, 1.21, 1.22                            | Standard, DDD, Hexagonal              |
+| **Django**                          | 4, 5                                        | MVT, API, Full-Stack                  |
+| **FastAPI**                         | 0.100+                                      | Standard, Async, Microservices        |
+| **Express.js**                      | 4                                           | Standard, REST, GraphQL               |
+| **Spring Boot**                     | 2, 3                                        | Standard, Reactive, Microservices     |
+| **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
+
+### 🔥 Featured: Model Context Protocol (MCP)
+
+MCP is an open standard that enables AI applications to securely connect to data sources. Our rules kit includes comprehensive implementation guides for all major SDKs:
+
+-   **📖 Architecture Concepts**: Core MCP patterns and best practices
+-   **🐍 Python SDK**: Async/await patterns with Pydantic validation
+-   **🟦 TypeScript SDK**: Type-safe implementations with modern JS
+-   **☕ Java SDK**: Enterprise-grade patterns with Spring Boot integration
+-   **🎯 Kotlin SDK**: Coroutines and concise syntax
+-   **🔷 C# SDK**: .NET integration with dependency injection
+-   **🍎 Swift SDK**: Modern Swift with actors and memory safety
+
+Choose your SDK as a "version" when setting up MCP rules!

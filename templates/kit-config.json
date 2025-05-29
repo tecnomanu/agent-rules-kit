@@ -86,7 +86,6 @@
 				"range_name": "v9-10"
 			}
 		},
-		"globs": ["<root>/src/**/*.ts", "<root>/test/**/*.ts"],
 		"architectures": {
 			"standard": {
 				"name": "Standard Architecture",
@@ -312,6 +311,67 @@
 				"name": "Hexagonal Architecture",
 				"globs": ["<root>/**/*.go"]
 			}
+		}
+	},
+	"mcp": {
+		"default_architecture": "server",
+		"version_ranges": {
+			"typescript": {
+				"name": "TypeScript SDK",
+				"range_name": "typescript"
+			},
+			"python": {
+				"name": "Python SDK",
+				"range_name": "python"
+			},
+			"java": {
+				"name": "Java SDK",
+				"range_name": "java"
+			},
+			"kotlin": {
+				"name": "Kotlin SDK",
+				"range_name": "kotlin"
+			},
+			"csharp": {
+				"name": "C# SDK",
+				"range_name": "csharp"
+			},
+			"swift": {
+				"name": "Swift SDK",
+				"range_name": "swift"
+			}
+		},
+		"globs": [
+			"<root>/**/*.py",
+			"<root>/**/*.ts",
+			"<root>/**/*.js",
+			"<root>/**/*.java",
+			"<root>/**/*.kt",
+			"<root>/**/*.cs",
+			"<root>/**/*.swift"
+		],
+		"architectures": {
+			"server": {
+				"name": "MCP Server Implementation",
+				"globs": ["<root>/**/*.{py,ts,js,java,kt,cs,swift}"]
+			},
+			"client": {
+				"name": "MCP Client Implementation",
+				"globs": ["<root>/**/*.{py,ts,js,java,kt,cs,swift}"]
+			},
+			"toolkit": {
+				"name": "MCP Toolkit Development",
+				"globs": ["<root>/**/*.{py,ts,js,java,kt,cs,swift}"]
+			}
+		},
+		"pattern_rules": {
+			"version_detection": [
+				"package.json",
+				"pyproject.toml",
+				"pom.xml",
+				"build.gradle",
+				"Package.swift"
+			]
 		}
 	}
 }
