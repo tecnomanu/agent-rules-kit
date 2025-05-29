@@ -361,8 +361,41 @@ async function main() {
 
     includeGlobalRules = wantGlobalRules;
 
-    // If no stack and no global rules, exit
-    if (!selectedStack && !includeGlobalRules) {
+    // Third question: Do you want MCP tools rules?
+    let selectedMcpTools = [];
+    const { wantMcpTools } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'wantMcpTools',
+            message: `${cliService.emoji.tools} Do you want to install MCP (Model Context Protocol) tools rules?`,
+            default: false
+        }
+    ]);
+
+    if (wantMcpTools) {
+        const availableMcpTools = configService.getAvailableMcpTools();
+
+        if (availableMcpTools.length > 0) {
+            const { mcpTools } = await inquirer.prompt([
+                {
+                    type: 'checkbox',
+                    name: 'mcpTools',
+                    message: 'Select MCP tools to install rules for:',
+                    choices: availableMcpTools.map(tool => ({
+                        name: `${tool.name} - ${tool.description}`,
+                        value: tool.key,
+                        checked: tool.key === 'pampa' // Pre-select PAMPA by default
+                    }))
+                }
+            ]);
+            selectedMcpTools = mcpTools;
+        } else {
+            cliService.info('No MCP tools available in configuration');
+        }
+    }
+
+    // If no stack, no global rules, and no MCP tools, exit
+    if (!selectedStack && !includeGlobalRules && selectedMcpTools.length === 0) {
         cliService.info('💭 No rules selected for installation. See you later!');
         process.exit(0);
     }
@@ -388,7 +421,7 @@ async function main() {
     await baseService.ensureDirectoryExistsAsync(rulesDir);
 
     // Show installation summary
-    cliService.showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions);
+    cliService.showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools);
 
     // Get the start time for measuring performance
     const startGeneration = Date.now();
@@ -421,6 +454,12 @@ async function main() {
 
             const globalCount = await stackService.copyGlobalRules(rulesDir, globalMeta, config);
             totalFiles += globalCount;
+        }
+
+        // If MCP tools are selected, copy them
+        if (selectedMcpTools.length > 0) {
+            const mcpCount = await stackService.copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config);
+            totalFiles += mcpCount;
         }
 
         // If stack is selected, generate stack-specific rules

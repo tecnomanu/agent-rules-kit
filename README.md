@@ -198,15 +198,30 @@ MCP is an open standard that enables AI applications to securely connect to data
 
 -   **📖 Architecture Concepts**: Core MCP patterns and best practices
 -   **🐍 Python SDK**: Async/await patterns with Pydantic validation
--   **🟦 TypeScript SDK**: Type-safe implementations with modern JS
--   **☕ Java SDK**: Enterprise-grade patterns with Spring Boot integration
--   **🎯 Kotlin SDK**: Coroutines and concise syntax
--   **🔷 C# SDK**: .NET integration with dependency injection
--   **🍎 Swift SDK**: Modern Swift with actors and memory safety
+-   **🟦 TypeScript SDK**: Type-safe implementations with modern JS patterns
+-   **☕ Java SDK**: Enterprise patterns with Spring Boot integration
+-   **🎯 Kotlin SDK**: Coroutines and advanced async features
+-   **🔷 C# SDK**: .NET patterns with dependency injection
+-   **🍎 Swift SDK**: Actors and async/await with Vapor integration
 
-Choose your SDK as a "version" when setting up MCP rules!
+### 🔧 MCP Tools Integration
 
-### 🎯 Featured: Pampa Semantic Code Search
+Agent Rules Kit now includes specialized rules for popular MCP tools to help AI agents use them effectively:
+
+-   **🔍 PAMPA**: Semantic code search and project memory system
+-   **🐙 GitHub**: Repository management and file operations
+-   **🧠 Memory**: Persistent knowledge storage across sessions
+-   **📁 Filesystem**: Secure file operations with access controls
+-   **📝 Git**: Repository operations and version control
+
+These tools provide AI agents with practical, workflow-focused rules for using MCP servers effectively. Each tool includes:
+
+-   **Basic Instructions**: When and how to use each MCP function
+-   **Available Tools**: Complete function reference with parameters
+-   **Strategy Guidelines**: Best practices for agent workflows
+-   **Error Handling**: Common issues and solutions
+
+## 🎯 Featured: Pampa Semantic Code Search
 
 Pampa is our own AI-powered semantic code search tool designed specifically for AI agents:
 

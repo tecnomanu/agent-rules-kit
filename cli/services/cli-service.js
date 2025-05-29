@@ -28,7 +28,8 @@ export class CliService extends BaseService {
             file: '📄',
             global: '🌐',
             progress: '🔨',
-            folder: '📁'
+            folder: '📁',
+            tools: '🔧'
         };
         this.progressBar = null;
     }
@@ -370,8 +371,9 @@ export class CliService extends BaseService {
      * @param {string} selectedStack - Selected stack
      * @param {boolean} includeGlobalRules - Whether to include global rules
      * @param {object} additionalOptions - Additional configuration options
+     * @param {Array<string>} selectedMcpTools - Selected MCP tools
      */
-    showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions) {
+    showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools = []) {
         console.log(chalk.bold.cyan('\n📋 Installation Summary:\n'));
 
         if (includeGlobalRules) {
@@ -400,6 +402,15 @@ export class CliService extends BaseService {
             }
         } else {
             console.log(chalk.gray('❌ Specific stack: No'));
+        }
+
+        if (selectedMcpTools.length > 0) {
+            console.log(chalk.green(`✅ MCP tools: ${selectedMcpTools.length} selected`));
+            selectedMcpTools.forEach(tool => {
+                console.log(chalk.white(`   🔧 ${tool.toUpperCase()}`));
+            });
+        } else {
+            console.log(chalk.gray('❌ MCP tools: No'));
         }
 
         console.log(); // Add spacing

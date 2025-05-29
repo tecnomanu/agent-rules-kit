@@ -10,6 +10,28 @@
 			"quality-assurance.md"
 		]
 	},
+	"mcp_tools": {
+		"pampa": {
+			"name": "PAMPA - Semantic Code Search",
+			"description": "AI-powered semantic code search and project memory system"
+		},
+		"github": {
+			"name": "GitHub - Repository Management",
+			"description": "Secure access to GitHub repositories for file operations and API integration"
+		},
+		"memory": {
+			"name": "Memory - Persistent Knowledge",
+			"description": "Persistent knowledge storage and retrieval across sessions"
+		},
+		"filesystem": {
+			"name": "Filesystem - File Operations",
+			"description": "Secure file operations with configurable access controls"
+		},
+		"git": {
+			"name": "Git - Version Control",
+			"description": "Repository operations, commit history analysis, and version control"
+		}
+	},
 	"laravel": {
 		"default_architecture": "standard",
 		"version_ranges": {

@@ -1133,6 +1133,62 @@ export class StackService extends BaseService {
     }
 
     /**
+     * Copy MCP tools rules to the specified directory
+     * @param {string} rulesDir - Target rules directory
+     * @param {Array<string>} selectedMcpTools - Array of selected MCP tool keys
+     * @param {object} meta - Metadata for processing
+     * @param {object} config - Configuration object
+     * @returns {Promise<number>} - Number of MCP tool files copied
+     */
+    async copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config) {
+        // Get a reference to the file service
+        const fileService = this.fileService || (this.configService?.fileService);
+        if (!fileService) {
+            throw new Error('File service is required but not available');
+        }
+
+        let totalFilesCopied = 0;
+
+        // Create MCP tools directory
+        const mcpToolsDir = path.join(rulesDir, 'mcp-tools');
+        await this.ensureDirectoryExistsAsync(mcpToolsDir);
+
+        // Process each selected MCP tool
+        for (const mcpTool of selectedMcpTools) {
+            const mcpToolTemplatesDir = path.join(this.templatesDir, 'mcp-tools', mcpTool);
+
+            if (await this.pathExistsAsync(mcpToolTemplatesDir)) {
+                // Create directory for this specific MCP tool
+                const toolDir = path.join(mcpToolsDir, mcpTool);
+                await this.ensureDirectoryExistsAsync(toolDir);
+
+                // Get all .md files from the MCP tool directory
+                const toolFiles = await fs.promises.readdir(mcpToolTemplatesDir);
+                const mdFiles = toolFiles.filter(file => file.endsWith('.md'));
+
+                // Process files in batches for better memory usage
+                const batchSize = 10;
+                for (let i = 0; i < mdFiles.length; i += batchSize) {
+                    const batch = mdFiles.slice(i, i + batchSize);
+
+                    await Promise.all(batch.map(async (file) => {
+                        const sourceFile = path.join(mcpToolTemplatesDir, file);
+                        const destFile = path.join(toolDir, file.replace(/\.md$/, '.mdc'));
+
+                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+                        this.debugLog(`Copied MCP tool rule: ${mcpTool}/${file}`);
+                        totalFilesCopied++;
+                    }));
+                }
+            } else {
+                this.debugLog(`MCP tool templates directory not found: ${mcpTool}`);
+            }
+        }
+
+        return totalFilesCopied;
+    }
+
+    /**
      * Count stack-specific rules only (excluding global rules)
      * @param {object} meta - Metadata containing stack, version, architecture info
      * @returns {Promise<number>} - Number of stack-specific rule files
