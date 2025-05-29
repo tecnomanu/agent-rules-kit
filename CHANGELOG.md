@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.15.0...v2.0.0) (2025-05-29)
+
+
+### Features
+
+* :zap: Release new version 2.0 with MCP rules! ([fc89584](https://github.com/tecnomanu/agent-rules-kit/commit/fc89584337d060517b6b2763e7175d94f3293555))
+
+
+### BREAKING CHANGES
+
+* Add new options to use rules of mcp tools
+
 # [1.15.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.14.0...v1.15.0) (2025-05-29)
 
 
