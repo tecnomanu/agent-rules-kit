@@ -145,31 +145,11 @@ async function main() {
         return;
     }
 
-    // Get available stacks from the service
-    const availableStacks = stackService.getAvailableStacks().map(stack => ({
-        name: stack.charAt(0).toUpperCase() + stack.slice(1), // Capitalize first letter
-        value: stack
-    }));
-
-    if (availableStacks.length === 0) {
-        cliService.error('No stacks found in the kit-config.json or stacks directory');
-        process.exit(1);
-    }
-
-    // Ask for the stack to use
-    const stack = await cliService.askStack(availableStacks);
-
-    // Ask for the relative path to the project
+    // Ask for the relative path to the project first
     const projectPath = await cliService.askProjectPath();
 
     // Ask for the application directory within the project
     const appDirectory = await cliService.askAppDirectory();
-
-    // Try to detect the stack version
-    const detectedVersion = stackService.detectStackVersion(stack, appDirectory !== './' ? appDirectory : projectPath);
-    if (detectedVersion) {
-        cliService.info(`Detected ${stack} version: ${detectedVersion}`);
-    }
 
     // Format the rules directory path - always in .cursor/rules/rules-kit
     const rulesDir = stackService.formatRulesPath(projectPath);
@@ -191,11 +171,60 @@ async function main() {
         }
     }
 
-    // Ask if global rules should be included
-    const includeGlobalRules = await cliService.askIncludeGlobalRules();
-
     // Ensure the rules directory exists
     await baseService.ensureDirectoryExistsAsync(rulesDir);
+
+    // First ask if global rules should be included
+    const includeGlobalRules = await cliService.askIncludeGlobalRules();
+
+    // If global rules are requested, copy them
+    if (includeGlobalRules) {
+        const globalMeta = {
+            projectPath: appDirectory,
+            cursorPath: projectPath,
+            debug: debugMode
+        };
+
+        const config = configService.getConfig();
+        await stackService.copyGlobalRules(rulesDir, globalMeta, config);
+        cliService.success('Global rules copied successfully!');
+    }
+
+    // Ask if user wants to add a specific stack
+    const { wantStack } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'wantStack',
+            message: `${cliService.emoji.stack} Do you want to add rules for a specific stack?`,
+            default: false
+        }
+    ]);
+
+    // If no stack is wanted, we're done
+    if (!wantStack) {
+        cliService.success('Rules setup completed!');
+        return;
+    }
+
+    // Get available stacks from the service
+    const availableStacks = stackService.getAvailableStacks().map(stack => ({
+        name: stack.charAt(0).toUpperCase() + stack.slice(1), // Capitalize first letter
+        value: stack
+    }));
+
+    if (availableStacks.length === 0) {
+        cliService.error('No stacks found in the kit-config.json or stacks directory');
+        process.exit(1);
+    }
+
+    // Ask for the stack to use
+    const stack = await cliService.askStack(availableStacks);
+
+    // Try to detect the stack version
+    const detectedVersion = stackService.detectStackVersion(stack, appDirectory !== './' ? appDirectory : projectPath);
+    if (detectedVersion) {
+        cliService.info(`Detected ${stack} version: ${detectedVersion}`);
+    }
 
     // Load the appropriate stack service dynamically
     const stackSpecificService = await loadStackService(stack);
@@ -358,60 +387,17 @@ async function main() {
         let totalFiles = 0;
         let processedFiles = 0;
 
-        // Count the total number of files to be generated
-        totalFiles = await stackService.countTotalRules(meta);
+        // Count the total number of files to be generated (stack-specific only)
+        totalFiles = await stackService.countStackRules(meta);
 
-        // Generate rules with different methods depending on stack
-        switch (stack) {
-            case 'laravel':
-                // Set up progress tracking
-                const updateLaravelProgress = () => {
-                    processedFiles++;
-                    cliService.updateProgress((processedFiles / totalFiles) * 100);
-                };
+        // Set up progress tracking
+        const updateProgress = () => {
+            processedFiles++;
+            cliService.updateProgress((processedFiles / totalFiles) * 100);
+        };
 
-                await stackService.generateRulesAsync(rulesDir, meta, config, updateLaravelProgress, includeGlobalRules);
-                break;
-
-            case 'nextjs':
-                // Set up progress tracking
-                const updateNextjsProgress = () => {
-                    processedFiles++;
-                    cliService.updateProgress((processedFiles / totalFiles) * 100);
-                };
-
-                await stackService.generateRulesAsync(rulesDir, meta, config, updateNextjsProgress, includeGlobalRules);
-                break;
-
-            case 'react':
-                // Set up progress tracking
-                const updateReactProgress = () => {
-                    processedFiles++;
-                    cliService.updateProgress((processedFiles / totalFiles) * 100);
-                };
-
-                await stackService.generateRulesAsync(rulesDir, meta, config, updateReactProgress, includeGlobalRules);
-                break;
-
-            case 'angular':
-                // Set up progress tracking
-                const updateAngularProgress = () => {
-                    processedFiles++;
-                    cliService.updateProgress((processedFiles / totalFiles) * 100);
-                };
-
-                await stackService.generateRulesAsync(rulesDir, meta, config, updateAngularProgress, includeGlobalRules);
-                break;
-
-            default:
-                // Set up progress tracking
-                const updateGenericProgress = () => {
-                    processedFiles++;
-                    cliService.updateProgress((processedFiles / totalFiles) * 100);
-                };
-
-                await stackService.generateRulesAsync(rulesDir, meta, config, updateGenericProgress, includeGlobalRules);
-        }
+        // Generate stack-specific rules only (global rules already copied)
+        await stackService.generateRulesAsync(rulesDir, meta, config, updateProgress, false);
 
         // End progress tracking
         cliService.completeProgress();
@@ -422,8 +408,8 @@ async function main() {
         const durationFormatted = (durationMs / 1000).toFixed(2);
 
         // Create the summary and show it
-        cliService.success(`Rules generated successfully in ${durationFormatted}s!`);
-        cliService.info(`Generated ${totalFiles} rule files at ${chalk.bold(rulesDir)}`);
+        cliService.success(`Stack rules generated successfully in ${durationFormatted}s!`);
+        cliService.info(`Generated ${totalFiles} stack rule files at ${chalk.bold(rulesDir)}`);
 
         // Show additional information about the architecture if available
         if (additionalOptions.architecture) {

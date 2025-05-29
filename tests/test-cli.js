@@ -13,7 +13,7 @@
  *   --architecture=<arch>      Architecture to use (standard, ddd, etc.)
  *   --version=<version>        Version of the stack (e.g., 3, 14, 12)
  *   --project-path=<path>      Path to the project (default: './')
- *   --root=<path>              Path where rules will be generated (default: 'testing')
+ *   --root=<path>              Path where rules will be generated (default: 'test')
  *   --cursor-path=<path>       Path to cursor (default: '.')
  *   --no-global                Skip global rules
  *   --debug                    Enable debug output
@@ -34,9 +34,9 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { ConfigService } from './services/config-service.js';
-import { FileService } from './services/file-service.js';
-import { StackService } from './services/stack-service.js';
+import { ConfigService } from '../cli/services/config-service.js';
+import { FileService } from '../cli/services/file-service.js';
+import { StackService } from '../cli/services/stack-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.join(__dirname, '..', 'templates');
@@ -48,7 +48,7 @@ function parseArgs() {
     const options = {
         stack: 'laravel',
         global: true,
-        root: 'testing',
+        root: 'test',
         cursorPath: '.',
         projectPath: './',
         mirrorDocs: false,
@@ -155,7 +155,7 @@ ${chalk.yellow('Options:')}
   --architecture=<arch>      Architecture to use (standard, ddd, etc.)
   --version=<version>        Version of the stack (e.g., 3, 14, 12)
   --project-path=<path>      Path to the project (default: './')
-  --root=<path>              Path where rules will be generated (default: 'testing')
+  --root=<path>              Path where rules will be generated (default: 'test')
   --cursor-path=<path>       Path to cursor (default: '.')
   --no-global                Skip global rules
   --debug                    Enable debug output

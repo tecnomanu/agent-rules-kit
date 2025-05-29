@@ -1077,4 +1077,115 @@ export class StackService extends BaseService {
             return false;
         }
     }
+
+    /**
+     * Copy global rules to the specified directory
+     * @param {string} rulesDir - Target rules directory
+     * @param {object} meta - Metadata for processing
+     * @param {object} config - Configuration object
+     */
+    async copyGlobalRules(rulesDir, meta, config) {
+        // Get a reference to the file service
+        const fileService = this.fileService || (this.configService?.fileService);
+        if (!fileService) {
+            throw new Error('File service is required but not available');
+        }
+
+        // Use always rules instead of rules as that's the naming in config
+        const globalRules = config.global?.always || [];
+
+        // If no explicit rules defined, copy all .md files from global folder
+        const globalTemplatesDir = path.join(this.templatesDir, 'global');
+        let filesToCopy = [];
+
+        if (globalRules.length > 0) {
+            filesToCopy = globalRules;
+        } else if (await this.pathExistsAsync(globalTemplatesDir)) {
+            // Get all .md files if no explicit rules
+            const allFiles = await fs.promises.readdir(globalTemplatesDir);
+            filesToCopy = allFiles.filter(file => file.endsWith('.md'));
+        }
+
+        if (filesToCopy.length > 0) {
+            const globalDir = path.join(rulesDir, 'global');
+            await this.ensureDirectoryExistsAsync(globalDir);
+
+            // Process in batches for better memory usage
+            const batchSize = 10;
+            for (let i = 0; i < filesToCopy.length; i += batchSize) {
+                const batch = filesToCopy.slice(i, i + batchSize);
+
+                await Promise.all(batch.map(async (rule) => {
+                    const sourceFile = path.join(globalTemplatesDir, rule);
+                    const destFile = path.join(globalDir, rule.replace(/\.md$/, '.mdc'));
+
+                    if (await this.pathExistsAsync(sourceFile)) {
+                        await fileService.wrapMdToMdcAsync(sourceFile, destFile, meta, config);
+                        this.debugLog(`Copied global rule: ${rule}`);
+                    } else {
+                        this.debugLog(`Global rule not found: ${rule}`);
+                    }
+                }));
+            }
+        }
+
+        return filesToCopy.length;
+    }
+
+    /**
+     * Count stack-specific rules only (excluding global rules)
+     * @param {object} meta - Metadata containing stack, version, architecture info
+     * @returns {Promise<number>} - Number of stack-specific rule files
+     */
+    async countStackRules(meta) {
+        const { stack, versionRange, architecture } = meta;
+        let count = 0;
+
+        // Collect unique files from all sources
+        const trackedFiles = new Set();
+
+        // Count base rules
+        const baseDir = path.join(this.templatesDir, 'stacks', stack, 'base');
+        if (await this.pathExistsAsync(baseDir)) {
+            const baseFiles = await fs.promises.readdir(baseDir);
+            baseFiles.filter(file => file.endsWith('.md')).forEach(file => {
+                trackedFiles.add(file);
+            });
+        }
+
+        // Count version overlay rules
+        if (versionRange) {
+            const versionDir = path.join(this.templatesDir, 'stacks', stack, versionRange);
+            if (await this.pathExistsAsync(versionDir)) {
+                const versionFiles = await fs.promises.readdir(versionDir);
+                versionFiles.filter(file => file.endsWith('.md')).forEach(file => {
+                    trackedFiles.add(file);
+                });
+            }
+        }
+
+        // Count architecture-specific rules
+        if (architecture) {
+            const archDir = path.join(this.templatesDir, 'stacks', stack, 'architectures', architecture);
+            if (await this.pathExistsAsync(archDir)) {
+                const archFiles = await fs.promises.readdir(archDir);
+                archFiles.filter(file => file.endsWith('.md')).forEach(file => {
+                    trackedFiles.add(file);
+                });
+            }
+        }
+
+        // Count state management rules for React
+        if (stack === 'react' && meta.stateManagement) {
+            const stateDir = path.join(this.templatesDir, 'stacks', stack, 'state-management', meta.stateManagement);
+            if (await this.pathExistsAsync(stateDir)) {
+                const stateFiles = await fs.promises.readdir(stateDir);
+                stateFiles.filter(file => file.endsWith('.md')).forEach(file => {
+                    trackedFiles.add(file);
+                });
+            }
+        }
+
+        return trackedFiles.size;
+    }
 } 

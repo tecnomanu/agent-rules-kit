@@ -9,6 +9,10 @@
 	"scripts": {
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
+		"test:cli": "node tests/test-cli.js",
+		"test:cli:laravel": "node tests/test-cli.js --stack=laravel --version=11 --debug",
+		"test:cli:angular": "node tests/test-cli.js --stack=angular --version=14 --debug",
+		"test:cli:nextjs": "node tests/test-cli.js --stack=nextjs --version=14 --debug",
 		"start": "node cli/index.js",
 		"dev": "node cli/index.js",
 		"lint": "eslint \"**/*.js\"",

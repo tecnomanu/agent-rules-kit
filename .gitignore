@@ -1,5 +1,5 @@
 node_modules
-testing/**/*
+test/**/*
 .DS_Store
 docs/agent-process-log/**/*
 *.zip
@@ -7,3 +7,4 @@ docs/agent-process-log/**/*
 *.tar.*
 *.7z
 .history
+.trae/
