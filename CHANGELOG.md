@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/tecnomanu/agent-rules-kit/compare/v1.11.0...v1.11.1) (2025-05-29)
+
+
+### Bug Fixes
+
+* 🐛 improve service loading system and stack selection ([e10156f](https://github.com/tecnomanu/agent-rules-kit/commit/e10156fe2d44710ca5de77bbd6855de059ec3401))
+
 # [1.11.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.10.0...v1.11.0) (2025-05-29)
 
 
