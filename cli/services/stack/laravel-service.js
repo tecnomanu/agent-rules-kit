@@ -3,6 +3,7 @@
  * Handles operations specific to the Laravel stack
  */
 import chalk from 'chalk';
+import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '../base-service.js';
 
@@ -15,6 +16,46 @@ export class LaravelService extends BaseService {
         this.fileService = options.fileService;
         this.configService = options.configService;
         this.templatesDir = options.templatesDir;
+    }
+
+    /**
+     * Detect version of Laravel from composer.json
+     * @param {string} projectPath - Path to the project root
+     * @returns {string|null} - Detected version or null if not found
+     */
+    detectLaravelVersion(projectPath) {
+        try {
+            const composerPath = path.join(projectPath, 'composer.json');
+            this.debugLog(`Looking for composer.json at: ${composerPath}`);
+
+            if (!fs.existsSync(composerPath)) {
+                this.debugLog('composer.json not found');
+                return null;
+            }
+
+            const composerContent = fs.readFileSync(composerPath, 'utf8');
+            const composer = JSON.parse(composerContent);
+            this.debugLog(`Found composer.json with content length: ${composerContent.length}`);
+
+            if (!composer.require || !composer.require['laravel/framework']) {
+                this.debugLog('Laravel framework not found in composer.json');
+                return null;
+            }
+
+            const versionStr = composer.require['laravel/framework'];
+            this.debugLog(`Found Laravel version: ${versionStr}`);
+
+            // Extract major version number
+            const match = versionStr.match(/\d+/);
+            if (match) {
+                const version = parseInt(match[0], 10);
+                this.debugLog(`Detected Laravel version: ${version}`);
+                return version.toString();
+            }
+        } catch (error) {
+            this.debugLog(`Error detecting Laravel version: ${error.message}`);
+        }
+        return null;
     }
 
     /**

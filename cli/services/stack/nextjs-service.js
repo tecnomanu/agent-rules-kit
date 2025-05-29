@@ -3,6 +3,7 @@
  * Manages Next.js specific rules and configurations
  */
 import chalk from 'chalk';
+import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '../base-service.js';
 
@@ -15,6 +16,46 @@ export class NextjsService extends BaseService {
         this.fileService = options.fileService;
         this.configService = options.configService;
         this.templatesDir = options.templatesDir;
+    }
+
+    /**
+     * Detect version of Next.js from package.json
+     * @param {string} projectPath - Path to the project root
+     * @returns {string|null} - Detected version or null if not found
+     */
+    detectNextjsVersion(projectPath) {
+        try {
+            const packagePath = path.join(projectPath, 'package.json');
+            this.debugLog(`Looking for package.json at: ${packagePath}`);
+
+            if (!fs.existsSync(packagePath)) {
+                this.debugLog('package.json not found');
+                return null;
+            }
+
+            const packageContent = fs.readFileSync(packagePath, 'utf8');
+            const pkg = JSON.parse(packageContent);
+            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
+
+            if (!pkg.dependencies || !pkg.dependencies.next) {
+                this.debugLog('Next.js not found in package.json dependencies');
+                return null;
+            }
+
+            const versionStr = pkg.dependencies.next;
+            this.debugLog(`Found Next.js version: ${versionStr}`);
+
+            // Extract major version number
+            const match = versionStr.match(/\d+/);
+            if (match) {
+                const version = parseInt(match[0], 10);
+                this.debugLog(`Detected Next.js version: ${version}`);
+                return version.toString();
+            }
+        } catch (error) {
+            this.debugLog(`Error detecting Next.js version: ${error.message}`);
+        }
+        return null;
     }
 
     /**

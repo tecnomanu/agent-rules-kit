@@ -17,7 +17,7 @@ import { CliService } from './services/cli-service.js';
 import { ConfigService } from './services/config-service.js';
 import { FileService } from './services/file-service.js';
 import { McpService } from './services/mcp/mcp-service.js';
-import { StackService } from './services/stack/stack-service.js';
+import { StackService } from './services/stack-service.js';
 
 // Path configuration
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

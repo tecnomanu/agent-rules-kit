@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfigService } from '../../cli/services/config-service.js';
 import { FileService } from '../../cli/services/file-service.js';
-import { StackService } from '../../cli/services/stack/stack-service.js';
+import { StackService } from '../../cli/services/stack-service.js';
 
 // Mock dependencies first
 vi.mock('fs-extra', () => {
@@ -119,28 +119,52 @@ describe('Stack Service', () => {
     });
 
     describe('detectStackVersion', () => {
-        it('should detect Laravel version', () => {
-            // Uso de path.resolve para manejar rutas relativas
-            stackService.detectLaravelVersion = vi.fn((projectPath) => '10');
+        it('should detect Laravel version', async () => {
+            // Mock the service initialization and Laravel service
+            const mockLaravelService = {
+                detectLaravelVersion: vi.fn().mockReturnValue('10')
+            };
+
+            stackService.stackServices = {
+                laravel: mockLaravelService
+            };
+
+            stackService.getStackService = vi.fn().mockReturnValue(mockLaravelService);
 
             const result = stackService.detectStackVersion('laravel', './project');
 
             expect(result).toBe('10');
-            // Test simplificado para evitar problemas con rutas
-            expect(stackService.detectLaravelVersion).toHaveBeenCalled();
+            expect(mockLaravelService.detectLaravelVersion).toHaveBeenCalled();
+            // Check that it was called with a resolved path
+            const calledWith = mockLaravelService.detectLaravelVersion.mock.calls[0][0];
+            expect(calledWith).toContain('project');
         });
 
-        it('should detect Next.js version', () => {
-            stackService.detectNextjsVersion = vi.fn((projectPath) => '13');
+        it('should detect Next.js version', async () => {
+            // Mock the service initialization and Next.js service
+            const mockNextjsService = {
+                detectNextjsVersion: vi.fn().mockReturnValue('13')
+            };
+
+            stackService.stackServices = {
+                nextjs: mockNextjsService
+            };
+
+            stackService.getStackService = vi.fn().mockReturnValue(mockNextjsService);
 
             const result = stackService.detectStackVersion('nextjs', './project');
 
             expect(result).toBe('13');
-            // Test simplificado para evitar problemas con rutas
-            expect(stackService.detectNextjsVersion).toHaveBeenCalled();
+            expect(mockNextjsService.detectNextjsVersion).toHaveBeenCalled();
+            // Check that it was called with a resolved path
+            const calledWith = mockNextjsService.detectNextjsVersion.mock.calls[0][0];
+            expect(calledWith).toContain('project');
         });
 
         it('should return null for unknown stacks', () => {
+            stackService.getStackService = vi.fn().mockReturnValue(null);
+            stackService.detectStackVersionGeneric = vi.fn().mockReturnValue(null);
+
             const result = stackService.detectStackVersion('unknown', './project');
 
             expect(result).toBeNull();

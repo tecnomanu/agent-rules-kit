@@ -4,7 +4,7 @@
  */
 import fs from 'fs-extra';
 import path from 'path';
-import { BaseService } from '../base-service.js';
+import { BaseService } from './base-service.js';
 
 /**
  * Service for handling stack operations
@@ -15,6 +15,34 @@ export class StackService extends BaseService {
         this.configService = options.configService;
         this.fileService = options.fileService;
         this.templatesDir = options.templatesDir;
+
+        // Initialize stack services map
+        this.stackServices = {};
+        this.initializeStackServices(options);
+    }
+
+    /**
+     * Initialize stack-specific services
+     * @param {Object} options - Options for service initialization
+     */
+    async initializeStackServices(options) {
+        const serviceMap = {
+            laravel: () => import('./stack/laravel-service.js').then(m => m.LaravelService),
+            nextjs: () => import('./stack/nextjs-service.js').then(m => m.NextjsService),
+            react: () => import('./stack/react-service.js').then(m => m.ReactService),
+            angular: () => import('./stack/angular-service.js').then(m => m.AngularService),
+            astro: () => import('./stack/astro-service.js').then(m => m.AstroService)
+        };
+
+        for (const [stack, importFn] of Object.entries(serviceMap)) {
+            try {
+                const ServiceClass = await importFn();
+                this.stackServices[stack] = new ServiceClass(options);
+                this.debugLog(`Initialized ${stack} service`);
+            } catch (error) {
+                this.debugLog(`Failed to load ${stack} service: ${error.message}`);
+            }
+        }
     }
 
     /**
@@ -247,11 +275,176 @@ export class StackService extends BaseService {
     }
 
     /**
-     * Detect version of Laravel from composer.json
+     * Generic function to detect version from package.json
      * @param {string} projectPath - Path to the project root
+     * @param {string} packageName - Name of the package to look for
+     * @param {Array<string>} possibleLocations - Possible locations (dependencies, devDependencies, etc.)
      * @returns {string|null} - Detected version or null if not found
      */
-    detectLaravelVersion(projectPath) {
+    detectPackageVersion(projectPath, packageName, possibleLocations = ['dependencies', 'devDependencies']) {
+        try {
+            const packagePath = path.join(projectPath, 'package.json');
+            this.debugLog(`Looking for package.json at: ${packagePath}`);
+
+            if (!fs.existsSync(packagePath)) {
+                this.debugLog('package.json not found');
+                return null;
+            }
+
+            const packageContent = fs.readFileSync(packagePath, 'utf8');
+            const pkg = JSON.parse(packageContent);
+            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
+
+            // Check all possible locations for the package
+            for (const location of possibleLocations) {
+                if (pkg[location] && pkg[location][packageName]) {
+                    const versionStr = pkg[location][packageName];
+                    this.debugLog(`Found ${packageName} version in ${location}: ${versionStr}`);
+
+                    // Extract major version number
+                    const match = versionStr.match(/\d+/);
+                    if (match) {
+                        const version = parseInt(match[0], 10);
+                        this.debugLog(`Detected ${packageName} version: ${version}`);
+                        return version.toString();
+                    }
+                }
+            }
+
+            this.debugLog(`${packageName} not found in package.json`);
+            return null;
+        } catch (error) {
+            this.debugLog(`Error detecting ${packageName} version: ${error.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * Get the specific service for a stack
+     * @param {string} stack - Stack name
+     * @returns {Object|null} - Stack service instance or null if not found
+     */
+    getStackService(stack) {
+        const stackKey = stack?.toLowerCase();
+        if (this.stackServices[stackKey]) {
+            return this.stackServices[stackKey];
+        }
+
+        // If service not found, return null to fallback to generic detection
+        this.debugLog(`No specific service found for ${stack}, using generic detection`);
+        return null;
+    }
+
+    /**
+     * Detect stack version using service-specific method or generic fallback
+     * @param {string} stack - The stack to detect version for
+     * @param {string} projectPath - Path to the project root
+     * @returns {string|null} - Detected version or null if not detected
+     */
+    detectStackVersion(stack, projectPath) {
+        this.debugLog(`Attempting to detect ${stack} version in ${projectPath}`);
+
+        // Resolve absolute path for project
+        const resolvedPath = path.resolve(projectPath);
+        this.debugLog(`Resolved project path: ${resolvedPath}`);
+
+        // Try to get a specific service for this stack
+        const stackService = this.getStackService(stack);
+        const detectMethodName = `detect${stack.charAt(0).toUpperCase() + stack.slice(1).toLowerCase()}Version`;
+
+        // If stack service has a specific detect method, use it
+        if (stackService && typeof stackService[detectMethodName] === 'function') {
+            this.debugLog(`Using specific ${detectMethodName} method`);
+            return stackService[detectMethodName](resolvedPath);
+        }
+
+        // Fall back to generic detection based on common patterns
+        this.debugLog(`Using generic detection for ${stack}`);
+        return this.detectStackVersionGeneric(stack, resolvedPath);
+    }
+
+    /**
+     * Generic version detection fallback
+     * @param {string} stack - Stack name
+     * @param {string} projectPath - Project path
+     * @returns {string|null} - Detected version or null
+     */
+    detectStackVersionGeneric(stack, projectPath) {
+        // Define common package patterns for different stacks
+        const stackPatterns = {
+            laravel: {
+                files: ['composer.json'],
+                packages: ['laravel/framework'],
+                locations: ['require']
+            },
+            nextjs: {
+                files: ['package.json'],
+                packages: ['next'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            react: {
+                files: ['package.json'],
+                packages: ['react'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            angular: {
+                files: ['package.json'],
+                packages: ['@angular/core'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            vue: {
+                files: ['package.json'],
+                packages: ['vue'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            astro: {
+                files: ['package.json'],
+                packages: ['astro'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            nuxt: {
+                files: ['package.json'],
+                packages: ['nuxt'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            svelte: {
+                files: ['package.json'],
+                packages: ['svelte'],
+                locations: ['dependencies', 'devDependencies']
+            },
+            sveltekit: {
+                files: ['package.json'],
+                packages: ['@sveltejs/kit'],
+                locations: ['dependencies', 'devDependencies']
+            }
+        };
+
+        const pattern = stackPatterns[stack?.toLowerCase()];
+        if (!pattern) {
+            this.debugLog(`No generic pattern available for ${stack}`);
+            return null;
+        }
+
+        // For composer.json files (PHP projects)
+        if (pattern.files.includes('composer.json')) {
+            return this.detectComposerVersion(projectPath, pattern.packages[0]);
+        }
+
+        // For package.json files (Node.js projects)
+        if (pattern.files.includes('package.json')) {
+            return this.detectPackageVersion(projectPath, pattern.packages[0], pattern.locations);
+        }
+
+        return null;
+    }
+
+    /**
+     * Detect version from composer.json
+     * @param {string} projectPath - Project path
+     * @param {string} packageName - Package name to look for
+     * @returns {string|null} - Detected version or null
+     */
+    detectComposerVersion(projectPath, packageName) {
         try {
             const composerPath = path.join(projectPath, 'composer.json');
             this.debugLog(`Looking for composer.json at: ${composerPath}`);
@@ -265,258 +458,25 @@ export class StackService extends BaseService {
             const composer = JSON.parse(composerContent);
             this.debugLog(`Found composer.json with content length: ${composerContent.length}`);
 
-            if (!composer.require || !composer.require['laravel/framework']) {
-                this.debugLog('Laravel framework not found in composer.json');
+            if (!composer.require || !composer.require[packageName]) {
+                this.debugLog(`${packageName} not found in composer.json require section`);
                 return null;
             }
 
-            const versionStr = composer.require['laravel/framework'];
-            this.debugLog(`Found Laravel version: ${versionStr}`);
+            const versionStr = composer.require[packageName];
+            this.debugLog(`Found ${packageName} version: ${versionStr}`);
 
             // Extract major version number
             const match = versionStr.match(/\d+/);
             if (match) {
                 const version = parseInt(match[0], 10);
-                this.debugLog(`Detected Laravel version: ${version}`);
+                this.debugLog(`Detected ${packageName} version: ${version}`);
                 return version.toString();
             }
         } catch (error) {
-            this.debugLog(`Error detecting Laravel version: ${error.message}`);
+            this.debugLog(`Error detecting ${packageName} version: ${error.message}`);
         }
         return null;
-    }
-
-    /**
-     * Detect version of Next.js from package.json
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not found
-     */
-    detectNextjsVersion(projectPath) {
-        try {
-            const packagePath = path.join(projectPath, 'package.json');
-            this.debugLog(`Looking for package.json at: ${packagePath}`);
-
-            if (!fs.existsSync(packagePath)) {
-                this.debugLog('package.json not found');
-                return null;
-            }
-
-            const packageContent = fs.readFileSync(packagePath, 'utf8');
-            const pkg = JSON.parse(packageContent);
-            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
-
-            if (!pkg.dependencies || !pkg.dependencies.next) {
-                this.debugLog('Next.js not found in package.json dependencies');
-                return null;
-            }
-
-            const versionStr = pkg.dependencies.next;
-            this.debugLog(`Found Next.js version: ${versionStr}`);
-
-            // Extract major version number
-            const match = versionStr.match(/\d+/);
-            if (match) {
-                const version = parseInt(match[0], 10);
-                this.debugLog(`Detected Next.js version: ${version}`);
-                return version.toString();
-            }
-        } catch (error) {
-            this.debugLog(`Error detecting Next.js version: ${error.message}`);
-        }
-        return null;
-    }
-
-    /**
-     * Detect version of React from package.json
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not found
-     */
-    detectReactVersion(projectPath) {
-        try {
-            const packagePath = path.join(projectPath, 'package.json');
-            this.debugLog(`Looking for package.json at: ${packagePath}`);
-
-            if (!fs.existsSync(packagePath)) {
-                this.debugLog('package.json not found');
-                return null;
-            }
-
-            const packageContent = fs.readFileSync(packagePath, 'utf8');
-            const pkg = JSON.parse(packageContent);
-            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
-
-            if (!pkg.dependencies || !pkg.dependencies.react) {
-                this.debugLog('React not found in package.json dependencies');
-                return null;
-            }
-
-            const versionStr = pkg.dependencies.react;
-            this.debugLog(`Found React version: ${versionStr}`);
-
-            // Extract major version number
-            const match = versionStr.match(/\d+/);
-            if (match) {
-                const version = parseInt(match[0], 10);
-                this.debugLog(`Detected React version: ${version}`);
-                return version.toString();
-            }
-        } catch (error) {
-            this.debugLog(`Error detecting React version: ${error.message}`);
-        }
-        return null;
-    }
-
-    /**
-     * Detect version of Angular from package.json
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not found
-     */
-    detectAngularVersion(projectPath) {
-        try {
-            const packagePath = path.join(projectPath, 'package.json');
-            this.debugLog(`Looking for package.json at: ${packagePath}`);
-
-            if (!fs.existsSync(packagePath)) {
-                this.debugLog('package.json not found');
-                return null;
-            }
-
-            const packageContent = fs.readFileSync(packagePath, 'utf8');
-            const pkg = JSON.parse(packageContent);
-            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
-
-            if (!pkg.dependencies || !pkg.dependencies['@angular/core']) {
-                this.debugLog('Angular not found in package.json dependencies');
-                return null;
-            }
-
-            const versionStr = pkg.dependencies['@angular/core'];
-            this.debugLog(`Found Angular version: ${versionStr}`);
-
-            // Extract major version number
-            const match = versionStr.match(/\d+/);
-            if (match) {
-                const version = parseInt(match[0], 10);
-                this.debugLog(`Detected Angular version: ${version}`);
-                return version.toString();
-            }
-        } catch (error) {
-            this.debugLog(`Error detecting Angular version: ${error.message}`);
-        }
-        return null;
-    }
-
-    /**
-     * Detect version of Vue from package.json
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not found
-     */
-    detectVueVersion(projectPath) {
-        try {
-            const packagePath = path.join(projectPath, 'package.json');
-            this.debugLog(`Looking for package.json at: ${packagePath}`);
-
-            if (!fs.existsSync(packagePath)) {
-                this.debugLog('package.json not found');
-                return null;
-            }
-
-            const packageContent = fs.readFileSync(packagePath, 'utf8');
-            const pkg = JSON.parse(packageContent);
-            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
-
-            if (!pkg.dependencies || !pkg.dependencies.vue) {
-                this.debugLog('Vue not found in package.json dependencies');
-                return null;
-            }
-
-            const versionStr = pkg.dependencies.vue;
-            this.debugLog(`Found Vue version: ${versionStr}`);
-
-            // Extract major version number
-            const match = versionStr.match(/\d+/);
-            if (match) {
-                const version = parseInt(match[0], 10);
-                this.debugLog(`Detected Vue version: ${version}`);
-                return version.toString();
-            }
-        } catch (error) {
-            this.debugLog(`Error detecting Vue version: ${error.message}`);
-        }
-        return null;
-    }
-
-    /**
-     * Detect version of Astro from package.json
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not found
-     */
-    detectAstroVersion(projectPath) {
-        try {
-            const packagePath = path.join(projectPath, 'package.json');
-            this.debugLog(`Looking for package.json at: ${packagePath}`);
-
-            if (!fs.existsSync(packagePath)) {
-                this.debugLog('package.json not found');
-                return null;
-            }
-
-            const packageContent = fs.readFileSync(packagePath, 'utf8');
-            const pkg = JSON.parse(packageContent);
-            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
-
-            if (!pkg.dependencies || !pkg.dependencies.astro) {
-                this.debugLog('Astro not found in package.json dependencies');
-                return null;
-            }
-
-            const versionStr = pkg.dependencies.astro;
-            this.debugLog(`Found Astro version: ${versionStr}`);
-
-            // Extract major version number
-            const match = versionStr.match(/\d+/);
-            if (match) {
-                const version = parseInt(match[0], 10);
-                this.debugLog(`Detected Astro version: ${version}`);
-                return version.toString();
-            }
-        } catch (error) {
-            this.debugLog(`Error detecting Astro version: ${error.message}`);
-        }
-        return null;
-    }
-
-    /**
-     * Detect stack version based on project files
-     * @param {string} stack - The stack to detect version for
-     * @param {string} projectPath - Path to the project root
-     * @returns {string|null} - Detected version or null if not detected
-     */
-    detectStackVersion(stack, projectPath) {
-        this.debugLog(`Attempting to detect ${stack} version in ${projectPath}`);
-
-        // Resolve absolute path for project
-        const resolvedPath = path.resolve(projectPath);
-        this.debugLog(`Resolved project path: ${resolvedPath}`);
-
-        // Use the appropriate detector based on stack
-        switch (stack.toLowerCase()) {
-            case 'laravel':
-                return this.detectLaravelVersion(resolvedPath);
-            case 'nextjs':
-                return this.detectNextjsVersion(resolvedPath);
-            case 'react':
-                return this.detectReactVersion(resolvedPath);
-            case 'angular':
-                return this.detectAngularVersion(resolvedPath);
-            case 'vue':
-                return this.detectVueVersion(resolvedPath);
-            case 'astro':
-                return this.detectAstroVersion(resolvedPath);
-            default:
-                this.debugLog(`No version detector available for ${stack}`);
-                return null;
-        }
     }
 
     /**

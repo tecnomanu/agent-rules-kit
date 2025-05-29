@@ -244,19 +244,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   ✨ **Astro v4 and v5 Support**: Extended Astro templates to support the latest framework versions
+
     -   **Astro v4 Features**: Astro DB, Actions, enhanced i18n, development toolbar enhancements, request rewriting, CSRF protection
     -   **Astro v5 Features**: Content Layer API, Server Islands, astro:env, Sessions (experimental), responsive images, Container API
     -   Comprehensive guides with practical examples for all new features
     -   Updated kit-config.json to include v4 and v5 version ranges
-    -   Support for modern Astro development patterns and full-stack capabilities
+    -   Support for modern Astro development patterns and best practices
+
+-   ✨ **Refactored Service Architecture**: Improved modularity and maintainability
+    -   **Stack-specific Services**: Each stack now has its own service with specialized version detection
+    -   **Generic Fallback**: Automatic fallback to generic detection patterns when specific services aren't available
+    -   **Dynamic Service Loading**: Services are loaded on-demand for better performance
+    -   **Centralized Stack Service**: Moved stack-service.js to services/ directory for better organization
+    -   **Removed Generic Service**: Eliminated unused generic-service.js and related functionality
 
 ### Fixed
 
--   🐛 **Version Info Templates**: Fixed missing content in version-info.md template files
-    -   Added comprehensive content to example version-info.md template with proper structure and template variables documentation
-    -   Created missing version-info.md file for Astro stack following the same pattern as other frameworks
-    -   Added detectAstroVersion method to StackService for proper Astro version detection from package.json
-    -   Updated detectStackVersion method to include Astro version detection support
+-   🐛 **Version Info Templates**: Completed missing version-info.md files
+    -   Added comprehensive version-info.md template for examples
+    -   Created Astro-specific version-info.md with proper metadata
+    -   Enhanced version detection for all supported stacks
+    -   Improved template variable substitution and formatting
 
 ## [0.2.1] - 2023-10-25
 

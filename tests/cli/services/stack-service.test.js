@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { StackService } from '../../../cli/services/stack/stack-service.js';
+import { StackService } from '../../../cli/services/stack-service.js';
 
 // Mock fs-extra
 vi.mock('fs-extra', () => {
