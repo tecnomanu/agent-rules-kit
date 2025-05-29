@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.0.0...v2.1.0) (2025-05-29)
+
+
+### Features
+
+* :fire: add rules for angular ([fb37727](https://github.com/tecnomanu/agent-rules-kit/commit/fb377275af20468f6e0d24c9872f5ee6153fd266))
+
 # [2.0.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.15.0...v2.0.0) (2025-05-29)
 
 
