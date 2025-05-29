@@ -1,4 +1,4 @@
-# Agent Rules Kit v2
+# Agent Rules Kit v2.0
 
 <p align="center">
   <img src="assets/banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
@@ -38,10 +38,11 @@ https://github.com/user-attachments/assets/8e91d651-c15f-4892-a250-684ab60d8594
 2. [New Architecture](#-new-architecture)
 3. [New Features](#-new-features)
 4. [Supported Stacks](#supported-stacks)
-5. [Implementation Status](#implementation-status)
-6. [Contributing](#contributing)
-7. [Code of Conduct](#code-of-conduct)
-8. [License](#license)
+5. [MCP Tools Integration](#-mcp-tools-integration)
+6. [Implementation Status](#implementation-status)
+7. [Contributing](#contributing)
+8. [Code of Conduct](#code-of-conduct)
+9. [License](#license)
 
 ## 🚀 Quick Start
 
@@ -88,6 +89,82 @@ We've completely redesigned the internal architecture to provide a more maintain
 -   🧩 Modular system for easy expansion to new frameworks
 -   💾 Automatic backups of existing rules
 -   🔄 Version-specific rule overlays
+-   🔧 **Multi-select MCP Tools integration** (New in v2.0)
+
+## 🔧 MCP Tools Integration
+
+**New in v2.0**: Agent Rules Kit now includes comprehensive support for Model Context Protocol (MCP) tools! This powerful feature allows AI agents to work more effectively with external tools and services.
+
+### What are MCP Tools?
+
+Model Context Protocol (MCP) tools are standardized interfaces that allow AI assistants to securely connect to external data sources and services. These tools enable AI agents to:
+
+-   🔍 **Search codebases semantically** with understanding of code meaning
+-   🐙 **Manage repositories** with secure GitHub integration
+-   🧠 **Maintain persistent memory** across conversation sessions
+-   📁 **Access file systems** with configurable security controls
+-   🔀 **Perform version control** operations with Git integration
+
+### Available MCP Tools
+
+Choose from 5 popular MCP tools during installation:
+
+| Tool              | Name                  | Description                                       | Best For                                                      |
+| ----------------- | --------------------- | ------------------------------------------------- | ------------------------------------------------------------- |
+| 🔍 **PAMPA**      | Semantic Code Search  | AI-powered code search with project memory        | Understanding large codebases, finding relevant code patterns |
+| 🐙 **GitHub**     | Repository Management | Secure GitHub API integration for file operations | Repository management, collaborative development              |
+| 🧠 **Memory**     | Persistent Knowledge  | Long-term memory storage across sessions          | Maintaining context, learning from previous interactions      |
+| 📁 **Filesystem** | File Operations       | Secure file system access with controls           | File management, project organization                         |
+| 🔀 **Git**        | Version Control       | Repository operations and history analysis        | Version control, commit management, branch operations         |
+
+### Multi-Select Installation
+
+The new multi-select interface allows you to install rules for multiple MCP tools simultaneously:
+
+```bash
+? Select MCP tools to install rules for: (Use space to select, enter to confirm)
+❯◉ PAMPA - Semantic Code Search - AI-powered semantic code search and project memory system
+ ◉ GitHub - Repository Management - Secure access to GitHub repositories for file operations
+ ◯ Memory - Persistent Knowledge - Persistent knowledge storage and retrieval across sessions
+ ◉ Filesystem - File Operations - Secure file operations with configurable access controls
+ ◯ Git - Version Control - Repository operations, commit history analysis, and version control
+```
+
+### Generated Rule Structure
+
+Each selected MCP tool generates organized rules in your project:
+
+```
+.cursor/rules/rules-kit/mcp-tools/
+├── pampa/
+│   ├── pampa-mcp-usage.mdc       # Core usage patterns
+│   └── pampa-best-practices.mdc  # Best practices and tips
+├── github/
+│   ├── github-mcp-usage.mdc      # GitHub API integration rules
+│   └── github-workflow.mdc       # Workflow patterns
+└── memory/
+    ├── memory-mcp-usage.mdc      # Memory management rules
+    └── memory-patterns.mdc       # Common memory patterns
+```
+
+### Benefits for AI Agents
+
+MCP Tools rules help AI agents:
+
+1. **🎯 Use tools effectively**: Clear guidelines on when and how to use each tool
+2. **🛡️ Follow security best practices**: Built-in security patterns and access controls
+3. **⚡ Optimize performance**: Efficient usage patterns to avoid rate limits and errors
+4. **🔄 Handle errors gracefully**: Common error scenarios and recovery strategies
+5. **📖 Learn workflows**: Step-by-step patterns for complex operations
+
+### Integration with Stack Rules
+
+MCP tools rules work alongside your stack-specific rules:
+
+-   **🔀 Independent Generation**: MCP rules are separate from stack rules
+-   **🧩 Flexible Combinations**: Any stack + any combination of MCP tools
+-   **🎯 Focused Guidance**: Tool-specific rules don't interfere with framework patterns
+-   **📋 Complete Coverage**: Both development patterns AND tool usage covered
 
 ## Supported Stacks
 
@@ -110,6 +187,7 @@ We've completely redesigned the internal architecture to provide a more maintain
 
 | Stack                                                                                                                                            | Status                                | Features                                                                                                                       |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="https://img.shields.io/badge/MCP%20Tools-FF6600?style=for-the-badge&logo=tools&logoColor=white" alt="MCP Tools" width="100"/>          | ![100%](https://progress-bar.dev/100) | **NEW v2.0**: Multi-select MCP tools (PAMPA, GitHub, Memory, Filesystem, Git), usage patterns, security guidelines, workflows  |
 | <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                     | ![100%](https://progress-bar.dev/100) | Complete SDK coverage (Python, TypeScript, Java, Kotlin, C#, Swift), server/client patterns, architecture concepts             |
 | <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>              | ![100%](https://progress-bar.dev/100) | Multiple architectures, version detection, casting rules                                                                       |
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>                    | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs                                                              |
@@ -126,8 +204,6 @@ We've completely redesigned the internal architecture to provide a more maintain
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>                 | ![75%](https://progress-bar.dev/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                         |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                       | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                                                                                      |
 | <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" width="100"/> | ![100%](https://progress-bar.dev/100) | Standard, Reactive, Microservices                                                                                              |
-| <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                     | ![100%](https://progress-bar.dev/100) | Python, TypeScript, Java, Kotlin, C#, Swift                                                                                    |
-| <img src="https://img.shields.io/badge/Pampa-FF2D20?style=for-the-badge&logo=pampa&logoColor=white" alt="Pampa" width="100"/>                    | ![100%](https://progress-bar.dev/100) | Latest                                                                                                                         |
 
 </p>
 
@@ -167,7 +243,7 @@ Choose from a wide range of technology stacks:
 | **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
 | **🆕 Pampa**                        | Latest                                      | Standard                              |
 
-### 🔥 Featured: Model Context Protocol (MCP)
+### 🔥 Featured: Model Context Protocol (MCP) SDKs
 
 MCP is an open standard that enables AI applications to securely connect to data sources. Our rules kit includes comprehensive implementation guides for all major SDKs:
 
@@ -179,19 +255,7 @@ MCP is an open standard that enables AI applications to securely connect to data
 -   **🔷 C# SDK**: .NET patterns with dependency injection
 -   **🍎 Swift SDK**: Actors and async/await with Vapor integration
 
-### 🔧 MCP Tools Integration
-
-Agent Rules Kit now includes specialized rules for popular MCP tools to help AI agents use them effectively:
-
--   **🔍 PAMPA**: Semantic code search and project memory system with usage patterns and best practices
--   **🐙 GitHub**: Repository management with secure file operations and API integration guidelines
--   **🧠 Memory**: Persistent knowledge storage and retrieval across sessions
--   **📁 Filesystem**: Secure file operations with configurable access controls
--   **🔀 Git**: Repository operations, commit history analysis, and version control workflows
-
-**New in v2.0**: You can now select multiple MCP tools during installation, allowing you to combine different tools based on your project needs. Each tool includes practical usage rules focused on agent workflows and best practices.
-
-## 🎯 Featured: Pampa Semantic Code Search
+### 🎯 Featured: Pampa Semantic Code Search
 
 Pampa is our own AI-powered semantic code search tool designed specifically for AI agents:
 
