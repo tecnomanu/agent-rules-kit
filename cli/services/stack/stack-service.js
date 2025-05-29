@@ -447,6 +447,46 @@ export class StackService extends BaseService {
     }
 
     /**
+     * Detect version of Astro from package.json
+     * @param {string} projectPath - Path to the project root
+     * @returns {string|null} - Detected version or null if not found
+     */
+    detectAstroVersion(projectPath) {
+        try {
+            const packagePath = path.join(projectPath, 'package.json');
+            this.debugLog(`Looking for package.json at: ${packagePath}`);
+
+            if (!fs.existsSync(packagePath)) {
+                this.debugLog('package.json not found');
+                return null;
+            }
+
+            const packageContent = fs.readFileSync(packagePath, 'utf8');
+            const pkg = JSON.parse(packageContent);
+            this.debugLog(`Found package.json with content length: ${packageContent.length}`);
+
+            if (!pkg.dependencies || !pkg.dependencies.astro) {
+                this.debugLog('Astro not found in package.json dependencies');
+                return null;
+            }
+
+            const versionStr = pkg.dependencies.astro;
+            this.debugLog(`Found Astro version: ${versionStr}`);
+
+            // Extract major version number
+            const match = versionStr.match(/\d+/);
+            if (match) {
+                const version = parseInt(match[0], 10);
+                this.debugLog(`Detected Astro version: ${version}`);
+                return version.toString();
+            }
+        } catch (error) {
+            this.debugLog(`Error detecting Astro version: ${error.message}`);
+        }
+        return null;
+    }
+
+    /**
      * Detect stack version based on project files
      * @param {string} stack - The stack to detect version for
      * @param {string} projectPath - Path to the project root
@@ -471,6 +511,8 @@ export class StackService extends BaseService {
                 return this.detectAngularVersion(resolvedPath);
             case 'vue':
                 return this.detectVueVersion(resolvedPath);
+            case 'astro':
+                return this.detectAstroVersion(resolvedPath);
             default:
                 this.debugLog(`No version detector available for ${stack}`);
                 return null;
