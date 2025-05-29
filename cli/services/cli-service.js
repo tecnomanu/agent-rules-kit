@@ -327,4 +327,114 @@ export class CliService extends BaseService {
         // If user enters empty or just '.', return './'
         return appDirectory.trim() === '' || appDirectory.trim() === '.' ? './' : appDirectory.trim();
     }
+
+    /**
+     * Shows welcome message and introduction
+     */
+    showWelcome() {
+        console.log(chalk.bold.cyan('\n✨ Welcome to Agent Rules Kit! ✨\n'));
+        console.log(chalk.white('This tool will help you install best practice rules'));
+        console.log(chalk.white('for your project with artificial intelligence.\n'));
+
+        console.log(chalk.green('📝 What we will do:'));
+        console.log(chalk.white('  • Configure specific rules for your development stack'));
+        console.log(chalk.white('  • Include global industry best practices'));
+        console.log(chalk.white('  • Preserve your existing rules (backups will be created if needed)\n'));
+
+        console.log(chalk.yellow('⚡ Rules will be installed in:'));
+        console.log(chalk.white('  📁 .cursor/rules/rules-kit/\n'));
+
+        console.log(chalk.magenta('🎯 We will ask you a few quick questions to customize the installation.'));
+    }
+
+    /**
+     * Asks user to press enter to continue
+     */
+    async askContinue() {
+        await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'continue',
+                message: chalk.bold('👆 Press ENTER to continue...'),
+                default: ''
+            }
+        ]);
+        console.log(); // Add spacing
+    }
+
+    /**
+     * Shows installation summary before proceeding
+     * @param {string} selectedStack - Selected stack
+     * @param {boolean} includeGlobalRules - Whether to include global rules
+     * @param {object} additionalOptions - Additional configuration options
+     */
+    showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions) {
+        console.log(chalk.bold.cyan('\n📋 Installation Summary:\n'));
+
+        if (includeGlobalRules) {
+            console.log(chalk.green('✅ Global rules: Yes (universal best practices)'));
+        } else {
+            console.log(chalk.gray('❌ Global rules: No'));
+        }
+
+        if (selectedStack) {
+            console.log(chalk.green(`✅ Specific stack: ${selectedStack.charAt(0).toUpperCase() + selectedStack.slice(1)}`));
+
+            if (additionalOptions.architecture) {
+                console.log(chalk.white(`   📐 Architecture: ${additionalOptions.architecture}`));
+            }
+
+            if (additionalOptions.formattedVersionName) {
+                console.log(chalk.white(`   🏷️  Version: ${additionalOptions.formattedVersionName}`));
+            }
+
+            if (additionalOptions.stateManagement) {
+                console.log(chalk.white(`   🔄 State Management: ${additionalOptions.stateManagement}`));
+            }
+
+            if (additionalOptions.includeSignals !== undefined) {
+                console.log(chalk.white(`   ⚡ Angular Signals: ${additionalOptions.includeSignals ? 'Yes' : 'No'}`));
+            }
+        } else {
+            console.log(chalk.gray('❌ Specific stack: No'));
+        }
+
+        console.log(); // Add spacing
+    }
+
+    /**
+     * Shows success message with complete installation details
+     * @param {number} totalFiles - Total files generated
+     * @param {string} rulesDir - Rules directory path
+     * @param {string} duration - Duration in seconds
+     * @param {string} selectedStack - Selected stack
+     * @param {object} additionalOptions - Additional configuration options
+     */
+    showSuccess(totalFiles, rulesDir, duration, selectedStack, additionalOptions) {
+        console.log(chalk.bold.green('\n🎉 Installation completed successfully!\n'));
+
+        console.log(chalk.white(`📊 Files generated: ${chalk.bold(totalFiles)}`));
+        console.log(chalk.white(`📁 Location: ${chalk.bold(rulesDir)}`));
+        console.log(chalk.white(`⏱️  Time: ${chalk.bold(duration)}s\n`));
+
+        if (selectedStack) {
+            console.log(chalk.cyan(`🚀 Stack configured: ${chalk.bold(selectedStack.charAt(0).toUpperCase() + selectedStack.slice(1))}`));
+
+            if (additionalOptions.architecture) {
+                console.log(chalk.white(`   📐 Architecture: ${additionalOptions.architecture}`));
+            }
+
+            if (additionalOptions.formattedVersionName) {
+                console.log(chalk.white(`   🏷️  Version: ${additionalOptions.formattedVersionName}`));
+            }
+        }
+
+        console.log(chalk.bold.yellow('\n📚 Next steps:'));
+        console.log(chalk.white('  1. Rules are now active in your project'));
+        console.log(chalk.white('  2. Cursor AI will use these rules automatically'));
+        console.log(chalk.white('  3. You can edit rules in .cursor/rules/rules-kit/'));
+        console.log(chalk.white('  4. To update, run: npx agent-rules-kit --update\n'));
+
+        console.log(chalk.bold.green('✨ Happy coding! ✨\n'));
+    }
 } 

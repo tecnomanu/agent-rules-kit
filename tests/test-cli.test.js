@@ -33,7 +33,7 @@ describe('Test CLI Integration', () => {
         const { stdout, stderr } = await execAsync(command);
 
         expect(stderr).toBe('');
-        expect(stdout).toContain('✅ Applied global rules');
+        expect(stdout).toContain('✅ Global rules copied successfully!');
         expect(stdout).toContain('✅ Test completed');
 
         // Verify global rules are generated
@@ -64,7 +64,7 @@ describe('Test CLI Integration', () => {
         const { stdout, stderr } = await execAsync(command);
 
         expect(stderr).toBe('');
-        expect(stdout).toContain('✅ Applied global rules');
+        expect(stdout).toContain('✅ Global rules copied successfully!');
         expect(stdout).toContain('✅ Test completed');
 
         // Verify Angular specific rules are generated

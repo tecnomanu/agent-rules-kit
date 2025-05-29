@@ -145,6 +145,12 @@ async function main() {
         return;
     }
 
+    // Welcome and introduction
+    cliService.showWelcome();
+
+    // Wait for user to press enter to continue
+    await cliService.askContinue();
+
     // Ask for the relative path to the project first
     const projectPath = await cliService.askProjectPath();
 
@@ -154,12 +160,203 @@ async function main() {
     // Format the rules directory path - always in .cursor/rules/rules-kit
     const rulesDir = stackService.formatRulesPath(projectPath);
 
+    // Initialize variables for collection user choices
+    let selectedStack = null;
+    let additionalOptions = {};
+    let includeGlobalRules = false;
+
+    // First question: Do you want rules for a specific stack?
+    const { wantStack } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'wantStack',
+            message: `${cliService.emoji.stack} Do you want to install rules for a specific stack?`,
+            default: true
+        }
+    ]);
+
+    if (wantStack) {
+        // Get available stacks from the service
+        const availableStacks = stackService.getAvailableStacks().map(stack => ({
+            name: stack.charAt(0).toUpperCase() + stack.slice(1), // Capitalize first letter
+            value: stack
+        }));
+
+        if (availableStacks.length === 0) {
+            cliService.error('No stacks found in kit-config.json or stacks directory');
+            process.exit(1);
+        }
+
+        // Ask for the stack to use
+        selectedStack = await cliService.askStack(availableStacks);
+
+        // Try to detect the stack version
+        const detectedVersion = stackService.detectStackVersion(selectedStack, appDirectory !== './' ? appDirectory : projectPath);
+        if (detectedVersion) {
+            cliService.info(`Detected ${selectedStack} version: ${detectedVersion}`);
+        }
+
+        // Load the appropriate stack service dynamically
+        const stackSpecificService = await loadStackService(selectedStack);
+
+        // Stack-specific questions
+        if (selectedStack === 'laravel') {
+            // Get available architectures for Laravel
+            const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
+            const architecture = await cliService.askArchitecture(architectures, selectedStack);
+
+            // Get available versions for Laravel
+            const versions = stackSpecificService.getAvailableVersions(selectedStack);
+            const version = await cliService.askVersion(versions, detectedVersion);
+
+            // Map specific version to version range if needed
+            const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
+
+            // Get formatted version name for display
+            const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
+
+            additionalOptions = {
+                architecture,
+                detectedVersion: version,
+                versionRange,
+                formattedVersionName
+            };
+        }
+        else if (selectedStack === 'nextjs') {
+            // Get available architectures for Next.js
+            const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
+            const architecture = await cliService.askArchitecture(architectures, selectedStack);
+
+            // Get available versions for Next.js
+            const versions = stackSpecificService.getAvailableVersions(selectedStack);
+            const version = await cliService.askVersion(versions, detectedVersion);
+
+            // Map specific version to version range if needed
+            const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
+
+            // Get formatted version name for display
+            const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
+
+            additionalOptions = {
+                architecture,
+                detectedVersion: version,
+                versionRange,
+                formattedVersionName
+            };
+        }
+        else if (selectedStack === 'react') {
+            // Get available architectures for React
+            const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
+            const architecture = await cliService.askArchitecture(architectures, selectedStack);
+
+            // Get available state management options
+            // TODO: In the future, get these from configuration too
+            const stateManagementOptions = [
+                'redux',
+                'redux-toolkit',
+                'context',
+                'react-query',
+                'zustand'
+            ];
+            const stateManagement = await cliService.askStateManagement(stateManagementOptions);
+
+            // Get available versions for React
+            const versions = stackSpecificService.getAvailableVersions(selectedStack);
+            const version = await cliService.askVersion(versions, detectedVersion);
+
+            // Map specific version to version range if needed
+            const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
+
+            // Get formatted version name for display
+            const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
+
+            additionalOptions = {
+                architecture,
+                stateManagement,
+                detectedVersion: version,
+                versionRange,
+                formattedVersionName
+            };
+        }
+        else if (selectedStack === 'angular') {
+            // Get available architectures for Angular
+            const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
+            const architecture = await cliService.askArchitecture(architectures, selectedStack);
+
+            // Ask if Angular signals should be included
+            const { includeSignals } = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'includeSignals',
+                    message: `${cliService.emoji.config} Include Angular Signals rules?`,
+                    default: true
+                }
+            ]);
+
+            // Get available versions for Angular
+            const versions = stackSpecificService.getAvailableVersions(selectedStack);
+            const version = await cliService.askVersion(versions, detectedVersion);
+
+            // Map specific version to version range if needed
+            const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
+
+            // Get formatted version name for display
+            const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
+
+            additionalOptions = {
+                architecture,
+                includeSignals,
+                detectedVersion: version,
+                versionRange,
+                formattedVersionName
+            };
+        } else {
+            // For other stacks, fetch available versions and architectures when available
+            const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
+            if (architectures.length > 0) {
+                additionalOptions.architecture = await cliService.askArchitecture(architectures, selectedStack);
+            }
+
+            const versions = stackSpecificService.getAvailableVersions(selectedStack);
+            if (versions.length > 0) {
+                const version = await cliService.askVersion(versions, detectedVersion);
+                const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
+                const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
+
+                additionalOptions = {
+                    ...additionalOptions,
+                    detectedVersion: version,
+                    versionRange,
+                    formattedVersionName
+                };
+            }
+        }
+    }
+
+    // Second question: Do you want global rules?
+    const { wantGlobalRules } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'wantGlobalRules',
+            message: `${cliService.emoji.global} Do you want to include global best practice rules?`,
+            default: true
+        }
+    ]);
+
+    includeGlobalRules = wantGlobalRules;
+
+    // If no stack and no global rules, exit
+    if (!selectedStack && !includeGlobalRules) {
+        cliService.info('💭 No rules selected for installation. See you later!');
+        process.exit(0);
+    }
+
     // Check if rules directory already exists and create backup if needed
     if (await baseService.directoryExistsAsync(rulesDir)) {
         const action = await cliService.askDirectoryAction(rulesDir);
 
         if (action === 'cancel') {
-            cliService.info('Operation cancelled by user');
+            cliService.info('❌ Operation canceled by user');
             process.exit(0);
         }
 
@@ -174,195 +371,8 @@ async function main() {
     // Ensure the rules directory exists
     await baseService.ensureDirectoryExistsAsync(rulesDir);
 
-    // First ask if global rules should be included
-    const includeGlobalRules = await cliService.askIncludeGlobalRules();
-
-    // If global rules are requested, copy them
-    if (includeGlobalRules) {
-        const globalMeta = {
-            projectPath: appDirectory,
-            cursorPath: projectPath,
-            debug: debugMode
-        };
-
-        const config = configService.getConfig();
-        await stackService.copyGlobalRules(rulesDir, globalMeta, config);
-        cliService.success('Global rules copied successfully!');
-    }
-
-    // Ask if user wants to add a specific stack
-    const { wantStack } = await inquirer.prompt([
-        {
-            type: 'confirm',
-            name: 'wantStack',
-            message: `${cliService.emoji.stack} Do you want to add rules for a specific stack?`,
-            default: false
-        }
-    ]);
-
-    // If no stack is wanted, we're done
-    if (!wantStack) {
-        cliService.success('Rules setup completed!');
-        return;
-    }
-
-    // Get available stacks from the service
-    const availableStacks = stackService.getAvailableStacks().map(stack => ({
-        name: stack.charAt(0).toUpperCase() + stack.slice(1), // Capitalize first letter
-        value: stack
-    }));
-
-    if (availableStacks.length === 0) {
-        cliService.error('No stacks found in the kit-config.json or stacks directory');
-        process.exit(1);
-    }
-
-    // Ask for the stack to use
-    const stack = await cliService.askStack(availableStacks);
-
-    // Try to detect the stack version
-    const detectedVersion = stackService.detectStackVersion(stack, appDirectory !== './' ? appDirectory : projectPath);
-    if (detectedVersion) {
-        cliService.info(`Detected ${stack} version: ${detectedVersion}`);
-    }
-
-    // Load the appropriate stack service dynamically
-    const stackSpecificService = await loadStackService(stack);
-
-    // Stack-specific questions
-    let additionalOptions = {};
-
-    if (stack === 'laravel') {
-        // Get available architectures for Laravel
-        const architectures = stackSpecificService.getAvailableArchitectures(stack);
-        const architecture = await cliService.askArchitecture(architectures, stack);
-
-        // Get available versions for Laravel
-        const versions = stackSpecificService.getAvailableVersions(stack);
-        const version = await cliService.askVersion(versions, detectedVersion);
-
-        // Map specific version to version range if needed
-        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
-
-        // Get formatted version name for display
-        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
-
-        additionalOptions = {
-            architecture,
-            detectedVersion: version,
-            versionRange,
-            formattedVersionName
-        };
-    }
-    else if (stack === 'nextjs') {
-        // Get available architectures for Next.js
-        const architectures = stackSpecificService.getAvailableArchitectures(stack);
-        const architecture = await cliService.askArchitecture(architectures, stack);
-
-        // Get available versions for Next.js
-        const versions = stackSpecificService.getAvailableVersions(stack);
-        const version = await cliService.askVersion(versions, detectedVersion);
-
-        // Map specific version to version range if needed
-        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
-
-        // Get formatted version name for display
-        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
-
-        additionalOptions = {
-            architecture,
-            detectedVersion: version,
-            versionRange,
-            formattedVersionName
-        };
-    }
-    else if (stack === 'react') {
-        // Get available architectures for React
-        const architectures = stackSpecificService.getAvailableArchitectures(stack);
-        const architecture = await cliService.askArchitecture(architectures, stack);
-
-        // Get available state management options
-        // TODO: In the future, get these from configuration too
-        const stateManagementOptions = [
-            'redux',
-            'redux-toolkit',
-            'context',
-            'react-query',
-            'zustand'
-        ];
-        const stateManagement = await cliService.askStateManagement(stateManagementOptions);
-
-        // Get available versions for React
-        const versions = stackSpecificService.getAvailableVersions(stack);
-        const version = await cliService.askVersion(versions, detectedVersion);
-
-        // Map specific version to version range if needed
-        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
-
-        // Get formatted version name for display
-        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
-
-        additionalOptions = {
-            architecture,
-            stateManagement,
-            detectedVersion: version,
-            versionRange,
-            formattedVersionName
-        };
-    }
-    else if (stack === 'angular') {
-        // Get available architectures for Angular
-        const architectures = stackSpecificService.getAvailableArchitectures(stack);
-        const architecture = await cliService.askArchitecture(architectures, stack);
-
-        // Ask if Angular signals should be included
-        const { includeSignals } = await inquirer.prompt([
-            {
-                type: 'confirm',
-                name: 'includeSignals',
-                message: `${cliService.emoji.config} Include Angular Signals rules?`,
-                default: true
-            }
-        ]);
-
-        // Get available versions for Angular
-        const versions = stackSpecificService.getAvailableVersions(stack);
-        const version = await cliService.askVersion(versions, detectedVersion);
-
-        // Map specific version to version range if needed
-        const versionRange = stackSpecificService.mapVersionToRange(stack, version);
-
-        // Get formatted version name for display
-        const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
-
-        additionalOptions = {
-            architecture,
-            includeSignals,
-            detectedVersion: version,
-            versionRange,
-            formattedVersionName
-        };
-    } else {
-        // For other stacks, fetch available versions and architectures when available
-        const architectures = stackSpecificService.getAvailableArchitectures(stack);
-        if (architectures.length > 0) {
-            additionalOptions.architecture = await cliService.askArchitecture(architectures, stack);
-        }
-
-        const versions = stackSpecificService.getAvailableVersions(stack);
-        if (versions.length > 0) {
-            const version = await cliService.askVersion(versions, detectedVersion);
-            const versionRange = stackSpecificService.mapVersionToRange(stack, version);
-            const formattedVersionName = stackSpecificService.getFormattedVersionName(stack, version);
-
-            additionalOptions = {
-                ...additionalOptions,
-                detectedVersion: version,
-                versionRange,
-                formattedVersionName
-            };
-        }
-    }
+    // Show installation summary
+    cliService.showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions);
 
     // Get the start time for measuring performance
     const startGeneration = Date.now();
@@ -374,7 +384,7 @@ async function main() {
     const meta = {
         projectPath: appDirectory,
         cursorPath: projectPath,
-        stack,
+        stack: selectedStack,
         debug: debugMode,
         ...additionalOptions
     };
@@ -383,21 +393,28 @@ async function main() {
     const config = configService.getConfig();
 
     try {
-        // Progress tracker variables
         let totalFiles = 0;
-        let processedFiles = 0;
 
-        // Count the total number of files to be generated (stack-specific only)
-        totalFiles = await stackService.countStackRules(meta);
+        // If global rules are requested, copy them
+        if (includeGlobalRules) {
+            const globalMeta = {
+                projectPath: appDirectory,
+                cursorPath: projectPath,
+                debug: debugMode
+            };
 
-        // Set up progress tracking
-        const updateProgress = () => {
-            processedFiles++;
-            cliService.updateProgress((processedFiles / totalFiles) * 100);
-        };
+            const globalCount = await stackService.copyGlobalRules(rulesDir, globalMeta, config);
+            totalFiles += globalCount;
+        }
 
-        // Generate stack-specific rules only (global rules already copied)
-        await stackService.generateRulesAsync(rulesDir, meta, config, updateProgress, false);
+        // If stack is selected, generate stack-specific rules
+        if (selectedStack) {
+            const stackCount = await stackService.countStackRules(meta);
+            totalFiles += stackCount;
+
+            // Generate stack-specific rules only (global rules already copied)
+            await stackService.generateRulesAsync(rulesDir, meta, config, () => { }, false);
+        }
 
         // End progress tracking
         cliService.completeProgress();
@@ -407,19 +424,8 @@ async function main() {
         const durationMs = endGeneration - startGeneration;
         const durationFormatted = (durationMs / 1000).toFixed(2);
 
-        // Create the summary and show it
-        cliService.success(`Stack rules generated successfully in ${durationFormatted}s!`);
-        cliService.info(`Generated ${totalFiles} stack rule files at ${chalk.bold(rulesDir)}`);
-
-        // Show additional information about the architecture if available
-        if (additionalOptions.architecture) {
-            cliService.info(`Architecture: ${chalk.bold(additionalOptions.architecture)}`);
-        }
-
-        // Show version information if available
-        if (additionalOptions.formattedVersionName) {
-            cliService.info(`Version: ${chalk.bold(additionalOptions.formattedVersionName)}`);
-        }
+        // Show success message
+        cliService.showSuccess(totalFiles, rulesDir, durationFormatted, selectedStack, additionalOptions);
 
         // Clean up cached templates to free memory
         fileService.clearCache();

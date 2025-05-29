@@ -7,4 +7,3 @@ docs/agent-process-log/**/*
 *.tar.*
 *.7z
 .history
-.trae/

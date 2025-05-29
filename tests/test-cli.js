@@ -231,27 +231,16 @@ async function testCLI() {
     const targetRules = path.join(process.cwd(), settings.root, '.cursor', 'rules', 'rules-kit');
     fs.ensureDirSync(targetRules);
 
-    // Copy global rules
+    // Copy global rules if requested
     if (settings.global) {
-        const globalDir = path.join(templatesDir, 'global');
-        const globalFolder = path.join(targetRules, 'global');
-        fs.ensureDirSync(globalFolder);
-
-        if (fs.existsSync(globalDir)) {
-            fs.readdirSync(globalDir).forEach(f => {
-                if (f.endsWith('.md')) {
-                    const srcFile = path.join(globalDir, f);
-                    const destFile = path.join(globalFolder, `${f}`.replace(/\.md$/, '.mdc'));
-                    const meta = {
-                        projectPath: settings.projectPath,
-                        cursorPath: settings.cursorPath,
-                        debug: settings.debug
-                    };
-                    fileService.wrapMdToMdc(srcFile, destFile, meta);
-                }
-            });
-            console.log(chalk.green(`✅ Applied global rules`));
-        }
+        const config = configService.getConfig();
+        const meta = {
+            projectPath: settings.projectPath,
+            cursorPath: settings.cursorPath,
+            debug: settings.debug
+        };
+        await stackService.copyGlobalRules(targetRules, meta, config);
+        console.log(chalk.green(`✅ Global rules copied successfully!`));
     }
 
     // Generate stack rules

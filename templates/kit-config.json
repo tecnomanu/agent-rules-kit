@@ -1,10 +1,13 @@
 {
 	"global": {
 		"always": [
+			"auto-test.md",
 			"best-practices.md",
 			"code-standards.md",
 			"file-guard.md",
-			"log-process.md"
+			"git-commit-guidelines.md",
+			"log-process.md",
+			"quality-assurance.md"
 		]
 	},
 	"laravel": {
