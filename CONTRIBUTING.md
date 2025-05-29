@@ -70,6 +70,7 @@ Before making changes, please familiarize yourself with our architecture and dev
 3. **[Rule Organization](docs/rule_organization.md)**: How rules are organized and structured
 4. **[Performance Guide](docs/performance-guide.md)**: Performance optimization recommendations
 5. **[CLI Documentation](docs/cli.md)**: Details about the CLI implementation
+6. **[MCP Tools Integration Guide](docs/mcp-tools-guide.md)**: Comprehensive guide for MCP tools development and usage
 
 ## Service Development
 
@@ -89,6 +90,69 @@ When creating new rules:
 2. Place rules in the appropriate directories based on their scope and application
 3. Update `kit-config.json` to register new rules
 4. Test the rules with the CLI to ensure proper generation
+
+## MCP Tools Development
+
+Agent Rules Kit v2.0+ includes comprehensive support for Model Context Protocol (MCP) tools. When contributing MCP tools:
+
+### Adding New MCP Tools
+
+1. **Create template directory structure**:
+
+    ```
+    templates/mcp-tools/your-tool/
+    ├── tool-usage.md          # Usage rules and guidelines
+    ├── best-practices.md      # Best practices specific to the tool
+    └── examples.md            # Common usage examples
+    ```
+
+2. **Register the tool in kit-config.json**:
+
+    ```json
+    "mcp_tools": {
+      "your-tool": {
+        "name": "Your Tool - Description",
+        "description": "Detailed description of what the tool does"
+      }
+    }
+    ```
+
+3. **Follow MCP documentation standards**:
+    - Include available tool functions
+    - Provide usage examples
+    - Document security considerations
+    - Add common workflow patterns
+
+### MCP Tool Documentation Guidelines
+
+Each MCP tool should include:
+
+-   **Basic Instructions**: How to initialize and use the tool
+-   **Available Functions**: Complete list of tool functions with parameters
+-   **Security Guidelines**: Access controls and safety considerations
+-   **Common Patterns**: Typical workflows and usage examples
+-   **Error Handling**: How to handle common error scenarios
+
+### Testing MCP Tools
+
+Test your MCP tool rules using the CLI:
+
+```bash
+# Test MCP tools generation
+pnpm run start
+# Select "Yes" for MCP tools
+# Choose your tool from the list
+# Verify generated rules in .cursor/rules/rules-kit/mcp-tools/
+```
+
+### MCP Service Development
+
+When extending the McpService class:
+
+1. **Add new methods** following the existing patterns
+2. **Implement proper error handling** with meaningful messages
+3. **Use batch processing** for better performance
+4. **Add comprehensive tests** in `tests/cli/services/mcp-service.test.js`
 
 ## Pull Request Process
 

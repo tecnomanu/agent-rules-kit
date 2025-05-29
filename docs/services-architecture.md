@@ -94,6 +94,40 @@ Handles stack-agnostic operations:
 -   **copySignalsRules**: Copies rules for Angular Signals (optional)
 -   **copyVersionOverlay**: Applies version-specific rules (v14-15, v16-17)
 
+### McpService (New in v2.0)
+
+Manages Model Context Protocol (MCP) tools integration:
+
+-   **getAvailableMcpTools**: Retrieves available MCP tools from configuration
+-   **copyMcpToolsRules**: Copies selected MCP tool rules with batch processing
+-   **countMcpToolsRules**: Counts files to be generated for selected tools
+-   **validateMcpTools**: Validates selected tools against available options
+-   **pathExistsAsync**: Utility for asynchronous path existence checking
+-   **ensureDirectoryExistsAsync**: Utility for asynchronous directory creation
+
+#### MCP Tools Integration
+
+The McpService enables the new MCP tools functionality:
+
+```javascript
+// Multi-tool selection and processing
+const selectedMcpTools = ['pampa', 'github', 'memory'];
+const mcpCount = await mcpService.copyMcpToolsRules(
+	rulesDir,
+	selectedMcpTools,
+	meta,
+	config
+);
+```
+
+Key features:
+
+-   **Multi-select interface**: Users can choose multiple MCP tools
+-   **Batch processing**: Efficient handling of multiple tool rule sets
+-   **Validation**: Ensures selected tools are available and valid
+-   **Separation of concerns**: MCP rules are independent from stack rules
+-   **Asynchronous operations**: Non-blocking file operations for better performance
+
 ## Architecture Implementation
 
 ### Dynamic Service Loading

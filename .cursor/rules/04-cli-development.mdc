@@ -14,7 +14,8 @@ When you modify the CLI or add new stack templates:
      * `file-service.js` - File operations and template processing
      * `config-service.js` - Configuration and constants management
      * `stack-service.js` - Common stack functionality
-     * Stack-specific services (e.g., `nextjs-service.js`, `laravel-service.js`)
+     * `mcp/mcp-service.js` - MCP tools integration (v2.0+)
+     * Stack-specific services in `stack/` directory (e.g., `stack/nextjs-service.js`, `stack/laravel-service.js`)
    * Respect `templates/kit-config.json` for configuration.
    * Add/adjust helper scripts in `version-detector.js`.
 
@@ -29,12 +30,21 @@ When you modify the CLI or add new stack templates:
      * `architectures` for stack-specific architectures
      * `pattern_rules` if needed.
 
-3. **Template variables**
+3. **MCP Tools (v2.0+)**
+   * Create `templates/mcp-tools/<tool>/` with tool-specific rules.
+   * Add tool usage patterns and best practices.
+   * Update `kit-config.json` in `mcp_tools` section:
+     * `name` - Display name for the tool
+     * `description` - Detailed description of functionality
+   * Test multi-select functionality in CLI.
+
+4. **Template variables**
    * Use placeholders like `{projectPath}`, `{detectedVersion}`, `{versionRange}`, `{stack}` in templates.
    * These will be automatically replaced when generating rules.
 
-4. **Docs**
+5. **Docs**
    * Document new behaviour in `README.md` & `/docs/cli.md`.
+   * Update `/docs/mcp-tools-guide.md` for MCP tools changes.
    * Change `Implementation Status` block with percent progress of current implementations and add new if is a new implementation.
 
 After changes, run:
