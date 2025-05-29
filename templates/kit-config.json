@@ -295,6 +295,14 @@
 			"3": {
 				"name": "Astro 3",
 				"range_name": "v3"
+			},
+			"4": {
+				"name": "Astro 4",
+				"range_name": "v4"
+			},
+			"5": {
+				"name": "Astro 5",
+				"range_name": "v5"
 			}
 		},
 		"architectures": {
