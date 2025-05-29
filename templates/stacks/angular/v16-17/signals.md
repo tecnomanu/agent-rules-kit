@@ -1,7 +1,7 @@
 ---
-description: Guidelines for using Angular Signals in Angular 16-17
-globs: <root>/src/**/*.ts
-alwaysApply: false
+description: Guidelines for using Angular Signals for reactive state management in Angular 16+.
+globs: <root>/src/app/**/*.ts # Relevant for signal usage
+alwaysApply: true # Applies if v16+ is detected
 ---
 
 # Angular Signals (Angular 16-17)
