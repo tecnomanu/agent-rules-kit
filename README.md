@@ -1,4 +1,4 @@
-# Agent Rules Kit v1
+# Agent Rules Kit v2
 
 <p align="center">
   <img src="assets/banner_agent_rules_kit.jpg" alt="Agent Rules Kit Logo" width="729" />
