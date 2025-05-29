@@ -45,44 +45,19 @@ https://github.com/user-attachments/assets/8e91d651-c15f-4892-a250-684ab60d8594
 
 ## 🚀 Quick Start
 
-### Installation
-
-#### Option 1: Run directly (Recommended)
-
-No installation needed, run directly with:
-
 ```bash
+# Install and run interactively
 npx agent-rules-kit
-# or
-pnpx agent-rules-kit
+
+# The CLI will guide you through:
+# 1. 📁 Project path selection
+# 2. 📚 Stack and architecture choice (optional)
+# 3. 🌐 Global best practices (recommended)
+# 4. 🔧 MCP tools selection (multiple tools supported)
+# 5. ⚡ Automatic rule generation
 ```
 
-#### Option 2: Global installation
-
-```bash
-npm install -g agent-rules-kit
-# Then run
-agent-rules-kit
-```
-
-#### Option 3: Development/Contribution
-
-```bash
-git clone https://github.com/tecnomanu/agent-rules-kit.git
-cd agent-rules-kit
-pnpm install
-pnpm start
-```
-
-### Basic Usage
-
-Run the command in your project root:
-
-```bash
-npx agent-rules-kit
-```
-
-Follow the interactive instructions to select the stack, architecture, and other options.
+Your rules will be generated in `.cursor/rules/rules-kit/` and automatically detected by Cursor!
 
 ### Available Options
 
@@ -208,18 +183,13 @@ MCP is an open standard that enables AI applications to securely connect to data
 
 Agent Rules Kit now includes specialized rules for popular MCP tools to help AI agents use them effectively:
 
--   **🔍 PAMPA**: Semantic code search and project memory system
--   **🐙 GitHub**: Repository management and file operations
--   **🧠 Memory**: Persistent knowledge storage across sessions
--   **📁 Filesystem**: Secure file operations with access controls
--   **📝 Git**: Repository operations and version control
+-   **🔍 PAMPA**: Semantic code search and project memory system with usage patterns and best practices
+-   **🐙 GitHub**: Repository management with secure file operations and API integration guidelines
+-   **🧠 Memory**: Persistent knowledge storage and retrieval across sessions
+-   **📁 Filesystem**: Secure file operations with configurable access controls
+-   **🔀 Git**: Repository operations, commit history analysis, and version control workflows
 
-These tools provide AI agents with practical, workflow-focused rules for using MCP servers effectively. Each tool includes:
-
--   **Basic Instructions**: When and how to use each MCP function
--   **Available Tools**: Complete function reference with parameters
--   **Strategy Guidelines**: Best practices for agent workflows
--   **Error Handling**: Common issues and solutions
+**New in v2.0**: You can now select multiple MCP tools during installation, allowing you to combine different tools based on your project needs. Each tool includes practical usage rules focused on agent workflows and best practices.
 
 ## 🎯 Featured: Pampa Semantic Code Search
 
@@ -232,3 +202,14 @@ Pampa is our own AI-powered semantic code search tool designed specifically for 
 -   **🔌 MCP Integration**: Built-in MCP server for seamless AI integration
 
 Perfect for AI agents to quickly understand and navigate any codebase!
+
+## ✨ Key Features
+
+-   **🎯 Multi-Stack Support**: 15+ frameworks including Laravel, Next.js, React, Angular, Vue, and more
+-   **🏗️ Architecture-Aware**: Specialized rules for different architectural patterns (MVC, DDD, Hexagonal, etc.)
+-   **📦 Version Detection**: Automatic framework version detection with version-specific optimizations
+-   **🌐 Global Best Practices**: Universal coding standards and quality assurance rules
+-   **🔧 MCP Tools Integration**: Multi-select support for popular Model Context Protocol tools (PAMPA, GitHub, Memory, Filesystem, Git)
+-   **⚡ Performance Optimized**: Efficient rule generation with progress tracking and memory management
+-   **🔄 Smart Updates**: Backup existing rules and merge configurations intelligently
+-   **🎨 Beautiful CLI**: Interactive interface with helpful prompts and clear feedback

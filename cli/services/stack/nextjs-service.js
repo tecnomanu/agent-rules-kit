@@ -1,10 +1,10 @@
 /**
- * Next.js Service para Agent Rules Kit
- * Maneja operaciones específicas del stack Next.js
+ * Next.js Service for Agent Rules Kit
+ * Manages Next.js specific rules and configurations
  */
 import chalk from 'chalk';
 import path from 'path';
-import { BaseService } from './base-service.js';
+import { BaseService } from '../base-service.js';
 
 /**
  * Servicio específico para el stack Next.js

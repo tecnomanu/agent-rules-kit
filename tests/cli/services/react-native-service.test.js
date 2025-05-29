@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { ReactNativeService } from '../../../cli/services/react-native-service.js'; // Adjust path as needed
 import path from 'path';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { ReactNativeService } from '../../../cli/services/stack/react-native-service.js'; // Adjust path as needed
 
 // Mocks
 const mockFileService = {

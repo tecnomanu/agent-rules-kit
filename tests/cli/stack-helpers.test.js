@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfigService } from '../../cli/services/config-service.js';
 import { FileService } from '../../cli/services/file-service.js';
-import { StackService } from '../../cli/services/stack-service.js';
+import { StackService } from '../../cli/services/stack/stack-service.js';
 
 // Mock dependencies first
 vi.mock('fs-extra', () => {

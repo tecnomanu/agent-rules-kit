@@ -16,7 +16,8 @@ import { BaseService } from './services/base-service.js';
 import { CliService } from './services/cli-service.js';
 import { ConfigService } from './services/config-service.js';
 import { FileService } from './services/file-service.js';
-import { StackService } from './services/stack-service.js';
+import { McpService } from './services/mcp/mcp-service.js';
+import { StackService } from './services/stack/stack-service.js';
 
 // Path configuration
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,12 @@ const stackService = new StackService({
     fileService,
     templatesDir
 });
+const mcpService = new McpService({
+    debug: debugMode,
+    configService,
+    fileService,
+    templatesDir
+});
 
 // Map to store dynamically loaded stack services
 const stackServices = new Map();
@@ -56,7 +63,7 @@ async function loadStackService(stack) {
 
     try {
         // Try to dynamically import the required service
-        const servicePath = `./services/${stack}-service.js`;
+        const servicePath = `./services/stack/${stack}-service.js`;
 
         try {
             const serviceModule = await import(servicePath);
@@ -373,7 +380,7 @@ async function main() {
     ]);
 
     if (wantMcpTools) {
-        const availableMcpTools = configService.getAvailableMcpTools();
+        const availableMcpTools = mcpService.getAvailableMcpTools();
 
         if (availableMcpTools.length > 0) {
             const { mcpTools } = await inquirer.prompt([
@@ -458,7 +465,7 @@ async function main() {
 
         // If MCP tools are selected, copy them
         if (selectedMcpTools.length > 0) {
-            const mcpCount = await stackService.copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config);
+            const mcpCount = await mcpService.copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config);
             totalFiles += mcpCount;
         }
 

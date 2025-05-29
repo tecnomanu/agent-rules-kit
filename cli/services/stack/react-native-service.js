@@ -4,7 +4,7 @@
  */
 import chalk from 'chalk';
 import path from 'path';
-import { BaseService } from './base-service.js';
+import { BaseService } from '../base-service.js';
 
 /**
  * Service specific to the React Native stack

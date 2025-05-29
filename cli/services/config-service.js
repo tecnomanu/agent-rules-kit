@@ -262,19 +262,4 @@ export class ConfigService extends BaseService {
         this.debugLog(`Loaded configuration with ${Object.keys(kitConfig).length} stack entries`);
         return kitConfig;
     }
-
-    /**
-     * Gets available MCP tools from configuration
-     * @returns {Array<Object>} List of available MCP tools with key, name, and description
-     */
-    getAvailableMcpTools() {
-        const config = this.loadKitConfig(this.templatesDir);
-        const mcpTools = config.mcp_tools || {};
-
-        return Object.keys(mcpTools).map(key => ({
-            key,
-            name: mcpTools[key].name,
-            description: mcpTools[key].description
-        }));
-    }
 } 
