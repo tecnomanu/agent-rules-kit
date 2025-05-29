@@ -1,3 +1,12 @@
+# [1.12.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.11.1...v1.12.0) (2025-05-29)
+
+
+### Features
+
+* ✨ add complete MCP (Model Context Protocol) support - Add comprehensive MCP stack with 6 SDKs (Python, TypeScript, Java, Kotlin, C#, Swift) - Implement base architecture concepts and best practices guides - Create server/client/toolkit architecture options - Add complete SDK-specific implementation guides - Update README with MCP documentation and 100% implementation status - Add kit-config.json support for SDK-as-version approach - Successfully tested with Python and TypeScript SDKs - All 129 tests passing, no regressions ([58500de](https://github.com/tecnomanu/agent-rules-kit/commit/58500de45c69ff1bb91f9aef6da1de227f45b903))
+* ✨ add Pampa semantic code search support - Add Pampa as simple stack with no version complexity - Include semantic search concepts and MCP integration rules - Create installation guide for AI agents - Add comprehensive usage patterns and best practices - Update README with Pampa documentation and 100% status - All 129 tests passing, fully functional ([6d043d1](https://github.com/tecnomanu/agent-rules-kit/commit/6d043d160d8d670a1d581dc4329c1a76db300ec2))
+* 🎉 add MCP Tools support and upgrade to v2.0.0 - Add comprehensive MCP tools integration with 5 popular tools (PAMPA, GitHub, Memory, Filesystem, Git) - Create short, practical usage rules focused on agent workflows - Implement checkbox selection for multiple MCP tools - Add new mcp_tools configuration section in kit-config.json - Update CLI with MCP tools selection and installation flow - Add copyMcpToolsRules method to StackService - Update README with MCP Tools Integration section - Upgrade to version 2.0.0 for major feature addition - All 129 tests passing, fully functional BREAKING CHANGE: This introduces a new major feature set with MCP tools support, representing a significant expansion of the Agent Rules Kit capabilities. ([1497ae2](https://github.com/tecnomanu/agent-rules-kit/commit/1497ae2862399f6c36c83f55f220b561b5b8741c))
+
 ## [1.11.1](https://github.com/tecnomanu/agent-rules-kit/compare/v1.11.0...v1.11.1) (2025-05-29)
 
 
