@@ -133,22 +133,26 @@ We've completely redesigned the internal architecture to provide a more maintain
 
 <p align="center">
 
-| Stack                                                                                                                                         | Status                                | Features                                                                                                                       |
-| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                  | ![100%](https://progress-bar.dev/100) | Complete SDK coverage (Python, TypeScript, Java, Kotlin, C#, Swift), server/client patterns, architecture concepts             |
-| <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>           | ![100%](https://progress-bar.dev/100) | Multiple architectures, version detection, casting rules                                                                       |
-| <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>                 | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs                                                              |
-| <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>            | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs                                                            |
-| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>                 | ![95%](https://progress-bar.dev/95)   | Architecture options, state management, testing guidelines, version-specific guidance (v18 concurrent features)                |
-| <img src="https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" width="100"/> | ![25%](https://progress-bar.dev/25)   | Base rules (architecture, best practices, styling, naming, navigation, platform code, state, testing, version info)            |
-| <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/>         | ![95%](https://progress-bar.dev/95)   | App & Pages router support, version detection, testing docs, version-specific guidance (v13 API routes, v14 Server Components) |
-| <img src="https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte" width="100"/>              | ![70%](https://progress-bar.dev/70)   | Component organization, runes (v5), lifecycle, state management                                                                |
-| <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go" width="100"/>                          | ![75%](https://progress-bar.dev/75)   | Multiple architectures, project structure, error handling patterns                                                             |
-| <img src="https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="SvelteKit" width="100"/>        | ![70%](https://progress-bar.dev/70)   | Routing system, layouts, SSR/CSR strategies, form actions                                                                      |
-| <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>                 | ![60%](https://progress-bar.dev/60)   | Content collections, static/dynamic content, integration guides                                                                |
-| <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>           | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                                                                                        |
-| <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>              | ![75%](https://progress-bar.dev/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                         |
-| <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                    | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                                                                                      |
+| Stack                                                                                                                                            | Status                                | Features                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                     | ![100%](https://progress-bar.dev/100) | Complete SDK coverage (Python, TypeScript, Java, Kotlin, C#, Swift), server/client patterns, architecture concepts             |
+| <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>              | ![100%](https://progress-bar.dev/100) | Multiple architectures, version detection, casting rules                                                                       |
+| <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>                    | ![100%](https://progress-bar.dev/100) | Testing guidelines, architectural patterns, version-specific docs                                                              |
+| <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>               | ![100%](https://progress-bar.dev/100) | Best practices, file operations, code standards, extensibility docs                                                            |
+| <img src="https://img.shields.io/badge/Pampa-FF6B35?style=for-the-badge&logo=search&logoColor=white" alt="Pampa" width="100"/>                   | ![100%](https://progress-bar.dev/100) | Semantic code search, AI agent integration, MCP support, multi-language indexing                                               |
+| <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>                    | ![95%](https://progress-bar.dev/95)   | Architecture options, state management, testing guidelines, version-specific guidance (v18 concurrent features)                |
+| <img src="https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" width="100"/>    | ![25%](https://progress-bar.dev/25)   | Base rules (architecture, best practices, styling, naming, navigation, platform code, state, testing, version info)            |
+| <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" width="100"/>            | ![95%](https://progress-bar.dev/95)   | App & Pages router support, version detection, testing docs, version-specific guidance (v13 API routes, v14 Server Components) |
+| <img src="https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte" width="100"/>                 | ![70%](https://progress-bar.dev/70)   | Component organization, runes (v5), lifecycle, state management                                                                |
+| <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go" width="100"/>                             | ![75%](https://progress-bar.dev/75)   | Multiple architectures, project structure, error handling patterns                                                             |
+| <img src="https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="SvelteKit" width="100"/>           | ![70%](https://progress-bar.dev/70)   | Routing system, layouts, SSR/CSR strategies, form actions                                                                      |
+| <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>                    | ![60%](https://progress-bar.dev/60)   | Content collections, static/dynamic content, integration guides                                                                |
+| <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>              | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                                                                                        |
+| <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>                 | ![75%](https://progress-bar.dev/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                         |
+| <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                       | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                                                                                      |
+| <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" width="100"/> | ![100%](https://progress-bar.dev/100) | Standard, Reactive, Microservices                                                                                              |
+| <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                     | ![100%](https://progress-bar.dev/100) | Python, TypeScript, Java, Kotlin, C#, Swift                                                                                    |
+| <img src="https://img.shields.io/badge/Pampa-FF2D20?style=for-the-badge&logo=pampa&logoColor=white" alt="Pampa" width="100"/>                    | ![100%](https://progress-bar.dev/100) | Latest                                                                                                                         |
 
 </p>
 
@@ -186,6 +190,7 @@ Choose from a wide range of technology stacks:
 | **Express.js**                      | 4                                           | Standard, REST, GraphQL               |
 | **Spring Boot**                     | 2, 3                                        | Standard, Reactive, Microservices     |
 | **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
+| **🆕 Pampa**                        | Latest                                      | Standard                              |
 
 ### 🔥 Featured: Model Context Protocol (MCP)
 
@@ -200,3 +205,15 @@ MCP is an open standard that enables AI applications to securely connect to data
 -   **🍎 Swift SDK**: Modern Swift with actors and memory safety
 
 Choose your SDK as a "version" when setting up MCP rules!
+
+### 🎯 Featured: Pampa Semantic Code Search
+
+Pampa is our own AI-powered semantic code search tool designed specifically for AI agents:
+
+-   **🔍 Semantic Search**: Understand code meaning, not just syntax
+-   **🤖 AI Agent Optimized**: Built specifically for AI agent workflows
+-   **🌍 Multi-Language**: Python, TypeScript, Java, Go, PHP, and more
+-   **🚀 Simple Setup**: No versions, no complex config - just install and use
+-   **🔌 MCP Integration**: Built-in MCP server for seamless AI integration
+
+Perfect for AI agents to quickly understand and navigate any codebase!

@@ -10,12 +10,12 @@ Adopt **Conventional Commits** with emojis for quick context:
 
 | Type     | Emoji | Example                                 |
 | -------- | ----- | --------------------------------------- |
-| feat     | ✨    | `✨ feat(api): add user authentication` |
-| fix      | 🐛    | `🐛 fix(payment): handle timeout error` |
-| docs     | 📝    | `📝 docs(readme): clarify setup`        |
-| refactor | ♻️    | `♻️ refactor(core): extract helper`     |
-| test     | ✅    | `✅ test(utils): edge cases for parser` |
-| chore    | 🔧    | `🔧 chore(ci): bump node version`       |
+| feat     | ✨    | `feat(api): ✨ add user authentication` |
+| fix      | 🐛    | `fix(payment): 🐛 handle timeout error` |
+| docs     | 📝    | `docs(readme): 📝 clarify setup`        |
+| refactor | ♻️    | `refactor(core): ♻️ extract helper`     |
+| test     | ✅    | `test(utils): ✅ edge cases for parser` |
+| chore    | 🔧    | `chore(ci): 🔧 bump node version`       |
 
 **Versioning**
 

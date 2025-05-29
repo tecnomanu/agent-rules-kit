@@ -373,5 +373,38 @@
 				"Package.swift"
 			]
 		}
+	},
+	"pampa": {
+		"default_architecture": "standard",
+		"version_ranges": {
+			"latest": {
+				"name": "Pampa Latest",
+				"range_name": "latest"
+			}
+		},
+		"globs": [
+			"<root>/**/*.py",
+			"<root>/**/*.ts",
+			"<root>/**/*.js",
+			"<root>/**/*.java",
+			"<root>/**/*.kt",
+			"<root>/**/*.cs",
+			"<root>/**/*.swift",
+			"<root>/**/*.go",
+			"<root>/**/*.php",
+			"<root>/**/*.rb",
+			"<root>/**/*.cpp",
+			"<root>/**/*.c",
+			"<root>/**/*.h"
+		],
+		"architectures": {
+			"standard": {
+				"name": "Standard Pampa Setup",
+				"globs": ["<root>/**/*"]
+			}
+		},
+		"pattern_rules": {
+			"version_detection": [".pampa/", "pampa.yml", "pampa.yaml"]
+		}
 	}
 }
