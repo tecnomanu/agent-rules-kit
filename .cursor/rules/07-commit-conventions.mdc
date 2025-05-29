@@ -53,10 +53,10 @@ feat: 🎉 very long message with breaking change info all in one line BREAKING 
 ### AI Assistant Commits:
 ```bash
 # For Claude/Sonnet
-git commit --author="Claude AI <claude.ai@assistant.local>" -m "feat: ✨ add feature"
+git commit --author="Agent AI <agent.ai@assistant.local>" -m "feat: ✨ add feature"
 
 # For Cursor AI
-git commit --author="Cursor AI <cursor.ai@assistant.local>" -m "fix: 🐛 resolve issue"
+git commit --author="Agent AI <agent.ai@assistant.local>" -m "fix: 🐛 resolve issue"
 ```
 
 ### Human Developer Commits:
