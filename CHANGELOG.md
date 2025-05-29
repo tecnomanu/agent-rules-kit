@@ -1,3 +1,11 @@
+# [1.9.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.8.0...v1.9.0) (2025-05-29)
+
+
+### Features
+
+* Add generic-service module for testing ([80e103b](https://github.com/tecnomanu/agent-rules-kit/commit/80e103bd851d56edc0e6ebd14557bf7658f28723))
+* Add generic-service module for testing ([2bb0f31](https://github.com/tecnomanu/agent-rules-kit/commit/2bb0f31ee9b7d2c0390114fa2b4fabc26c6bd5cd))
+
 # [1.8.0](https://github.com/tecnomanu/agent-rules-kit/compare/v1.7.0...v1.8.0) (2025-05-25)
 
 
