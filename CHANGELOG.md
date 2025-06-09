@@ -1,3 +1,16 @@
+# [2.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.2.0...v2.3.0) (2025-06-09)
+
+
+### Bug Fixes
+
+* 🐛 complete version-info.md templates and add Astro version detection ([deea278](https://github.com/tecnomanu/agent-rules-kit/commit/deea27861a003b67bf0d7f2fc9e1c5d80a2c4135))
+
+
+### Features
+
+* ✨ add Astro v4 and v5 template support with comprehensive feature guides ([b6a375b](https://github.com/tecnomanu/agent-rules-kit/commit/b6a375beee7268330ad38b11b572e57683c4392e))
+* ✨ refactor service architecture with stack-specific version detection ([9024409](https://github.com/tecnomanu/agent-rules-kit/commit/902440958fcb055c24305773a75642f1f8867726))
+
 # [2.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.1.0...v2.2.0) (2025-05-29)
 
 
