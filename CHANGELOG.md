@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.1.0...v2.2.0) (2025-05-29)
+
+
+### Features
+
+* :fire: update go rules ([0706a37](https://github.com/tecnomanu/agent-rules-kit/commit/0706a379e6512783a0365f25f91b2a77bef9c6fc))
+
 # [2.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.0.0...v2.1.0) (2025-05-29)
 
 ### Features
