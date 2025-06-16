@@ -1,6 +1,6 @@
 ---
 description: Naming conventions for Nuxt applications
-globs: <root>/app.vue,<root>/components/**/*.{vue,ts,js}
+globs: <root>/app.vue,<root>/components/**/*.vue,<root>/components/**/*.ts,<root>/components/**/*.js
 alwaysApply: false
 ---
 

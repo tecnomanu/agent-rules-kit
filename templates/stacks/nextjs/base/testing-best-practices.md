@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for Next.js applications
-globs: <root>/app/**/*.{ts,tsx},<root>/src/**/*.{ts,tsx},<root>/pages/api/**/*.ts,<root>/tests/**/*.{ts,tsx}
+globs: <root>/app/**/*.ts,<root>/app/**/*.tsx,<root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/pages/api/**/*.ts,<root>/tests/**/*.ts,<root>/tests/**/*.tsx
 alwaysApply: false
 ---
 

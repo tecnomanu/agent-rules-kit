@@ -1,6 +1,6 @@
 ---
 description: Atomic Design architecture for React applications
-globs: <root>/src/**/*.{ts,tsx,js,jsx}
+globs: <root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/src/**/*.js,<root>/src/**/*.jsx
 alwaysApply: false
 ---
 

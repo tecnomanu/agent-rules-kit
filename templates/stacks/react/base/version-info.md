@@ -1,6 +1,6 @@
 ---
 description: Version information for React applications
-globs: <root>/package.json,<root>/src/**/*.{ts,tsx,js,jsx}
+globs: <root>/package.json,<root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/src/**/*.js,<root>/src/**/*.jsx
 alwaysApply: true
 ---
 

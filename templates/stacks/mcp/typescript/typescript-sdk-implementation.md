@@ -1,11 +1,5 @@
 ---
-globs:
-    [
-        '<root>/**/*.ts',
-        '<root>/**/*.js',
-        '<root>/package.json',
-        '<root>/tsconfig.json',
-    ]
+globs: <root>/**/*.ts,<root>/**/*.js,<root>/package.json,<root>/tsconfig.json
 alwaysApply: false
 ---
 

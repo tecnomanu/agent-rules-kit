@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.py', '<root>/pyproject.toml', '<root>/requirements.txt']
+globs: <root>/**/*.py,<root>/pyproject.toml,<root>/requirements.txt
 alwaysApply: false
 ---
 

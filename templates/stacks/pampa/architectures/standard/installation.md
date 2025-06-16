@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*']
+globs: <root>/**/*
 alwaysApply: false
 ---
 

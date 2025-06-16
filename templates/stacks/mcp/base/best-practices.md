@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.{py,ts,js,java,kt,cs,swift}']
+globs: <root>/**/*.py,<root>/**/*.ts,<root>/**/*.js,<root>/**/*.java,<root>/**/*.kt,<root>/**/*.cs,<root>/**/*.swift
 alwaysApply: false
 ---
 

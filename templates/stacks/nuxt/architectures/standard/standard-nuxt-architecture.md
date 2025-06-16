@@ -1,6 +1,6 @@
 ---
 description: Standard Architecture for Nuxt applications
-globs: <root>/nuxt.config.{js,ts},<root>/pages/**/*.{vue,js,ts},<root>/components/**/*.{vue,js,ts}
+globs: <root>/nuxt.config.js,<root>/nuxt.config.ts,<root>/pages/**/*.vue,<root>/pages/**/*.js,<root>/pages/**/*.ts,<root>/components/**/*.vue,<root>/components/**/*.js,<root>/components/**/*.ts
 alwaysApply: false
 ---
 
