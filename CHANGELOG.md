@@ -1,3 +1,11 @@
+# [2.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.3.0...v2.4.0) (2025-06-16)
+
+
+### Features
+
+* add command options and agent instructions ([fe0fa6f](https://github.com/tecnomanu/agent-rules-kit/commit/fe0fa6f59c9ea621f871e972710598bc5628e70b))
+* **cli:** add auto-install flag ([9bf8337](https://github.com/tecnomanu/agent-rules-kit/commit/9bf83370a0b2574acd4d053a7f092cbd1a6d928e))
+
 # [2.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.2.0...v2.3.0) (2025-06-09)
 
 
