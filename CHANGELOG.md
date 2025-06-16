@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.0...v2.4.1) (2025-06-16)
+
+
+### Bug Fixes
+
+* replace root placeholder in docs ([9a4d750](https://github.com/tecnomanu/agent-rules-kit/commit/9a4d750dd2acd6f70b23b08f13e988ac638a5bbf))
+
 # [2.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.3.0...v2.4.0) (2025-06-16)
 
 
