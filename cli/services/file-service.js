@@ -245,9 +245,12 @@ export class FileService extends BaseService {
             delete frontMatter.debug;
 
             // Normalize projectPath for glob replacements
-            const projectPathPrefix = (frontMatter.projectPath === '.' || frontMatter.projectPath === '')
-                ? ''
-                : frontMatter.projectPath + '/';
+            let projectPathPrefix = frontMatter.projectPath || './';
+            if (projectPathPrefix === '.') {
+                projectPathPrefix = './';
+            }
+            // Remove trailing slash and ensure one at the end
+            projectPathPrefix = projectPathPrefix.replace(/\/$/, '') + '/';
 
             // Ensure projectPath is correctly set for template replacement
             if (!frontMatter.projectPath || frontMatter.projectPath === '.') {
@@ -348,6 +351,14 @@ export class FileService extends BaseService {
                 }
             }
 
+            // Replace <root> placeholders in any existing globs
+            if (frontMatter.globs) {
+                frontMatter.globs = frontMatter.globs
+                    .split(',')
+                    .map(g => g.trim().replace(/<root>\//g, projectPathPrefix))
+                    .join(',');
+            }
+
             // Process all template placeholders in markdown content
             const processedMd = this.processTemplateVariables(contentWithoutFrontMatter, frontMatter);
 
@@ -428,9 +439,12 @@ export class FileService extends BaseService {
         delete frontMatter.debug;
 
         // Normalize projectPath for glob replacements
-        const projectPathPrefix = (frontMatter.projectPath === '.' || frontMatter.projectPath === '')
-            ? ''
-            : frontMatter.projectPath + '/';
+        let projectPathPrefix = frontMatter.projectPath || './';
+        if (projectPathPrefix === '.') {
+            projectPathPrefix = './';
+        }
+        // Remove trailing slash and ensure one at the end
+        projectPathPrefix = projectPathPrefix.replace(/\/$/, '') + '/';
 
         // Ensure projectPath is correctly set for template replacement
         if (!frontMatter.projectPath || frontMatter.projectPath === '.') {
@@ -528,7 +542,15 @@ export class FileService extends BaseService {
                         }
                     }
                 }
+                }
             }
+
+        // Replace <root> placeholders in any existing globs
+        if (frontMatter.globs) {
+            frontMatter.globs = frontMatter.globs
+                .split(',')
+                .map(g => g.trim().replace(/<root>\//g, projectPathPrefix))
+                .join(',');
         }
 
         // Process all template placeholders in markdown content
