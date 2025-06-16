@@ -28,7 +28,7 @@ describe('Test CLI Integration', () => {
     });
 
     test('should generate Laravel rules correctly', async () => {
-        const command = `node ${testCliPath} --stack=laravel --version=11 --architecture=standard --root=${testOutputDir}`;
+        const command = `node "${testCliPath}" --stack=laravel --version=11 --architecture=standard --root=${testOutputDir}`;
 
         const { stdout, stderr } = await execAsync(command);
 
@@ -59,7 +59,7 @@ describe('Test CLI Integration', () => {
     }, 10000);
 
     test('should generate Angular rules correctly', async () => {
-        const command = `node ${testCliPath} --stack=angular --version=14 --architecture=standard --root=${testOutputDir}`;
+        const command = `node "${testCliPath}" --stack=angular --version=14 --architecture=standard --root=${testOutputDir}`;
 
         const { stdout, stderr } = await execAsync(command);
 
@@ -82,7 +82,7 @@ describe('Test CLI Integration', () => {
     }, 10000);
 
     test('should generate only global rules when no stack specified', async () => {
-        const command = `node ${testCliPath} --no-global=false --stack='' --root=${testOutputDir}`;
+        const command = `node "${testCliPath}" --no-global=false --stack='' --root=${testOutputDir}`;
 
         try {
             await execAsync(command);
@@ -100,7 +100,7 @@ describe('Test CLI Integration', () => {
     }, 10000);
 
     test('should handle invalid stack gracefully', async () => {
-        const command = `node ${testCliPath} --stack=invalidstack --version=1 --root=${testOutputDir}`;
+        const command = `node "${testCliPath}" --stack=invalidstack --version=1 --root=${testOutputDir}`;
 
         try {
             await execAsync(command);
@@ -111,7 +111,7 @@ describe('Test CLI Integration', () => {
     }, 10000);
 
     test('should generate rules with debug output', async () => {
-        const command = `node ${testCliPath} --stack=laravel --version=11 --root=${testOutputDir} --debug`;
+        const command = `node "${testCliPath}" --stack=laravel --version=11 --root=${testOutputDir} --debug`;
 
         const { stdout, stderr } = await execAsync(command);
 
