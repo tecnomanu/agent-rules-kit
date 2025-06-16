@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.swift', '<root>/Package.swift', '<root>/*.xcodeproj']
+globs: <root>/**/*.swift,<root>/Package.swift,<root>/*.xcodeproj
 alwaysApply: false
 ---
 

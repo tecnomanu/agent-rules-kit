@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.cs', '<root>/*.csproj', '<root>/*.sln']
+globs: <root>/**/*.cs,<root>/*.csproj,<root>/*.sln
 alwaysApply: false
 ---
 

@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.kt', '<root>/build.gradle.kts', '<root>/build.gradle']
+globs: <root>/**/*.kt,<root>/build.gradle.kts,<root>/build.gradle
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Testing best practices for React applications
-globs: <root>/src/**/*.{ts,tsx,js,jsx},<root>/tests/**/*.{ts,tsx,js,jsx}
+globs: <root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/src/**/*.js,<root>/src/**/*.jsx,<root>/tests/**/*.ts,<root>/tests/**/*.tsx,<root>/tests/**/*.js,<root>/tests/**/*.jsx
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Version information for Nuxt applications
-globs: <root>/nuxt.config.{js,ts},<root>/package.json
+globs: <root>/nuxt.config.js,<root>/nuxt.config.ts,<root>/package.json
 alwaysApply: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Best practices for React applications
-globs: <root>/src/**/*.{ts,tsx,js,jsx},<root>/components/**/*.{ts,tsx,js,jsx}
+globs: <root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/src/**/*.js,<root>/src/**/*.jsx,<root>/components/**/*.ts,<root>/components/**/*.tsx,<root>/components/**/*.js,<root>/components/**/*.jsx
 alwaysApply: false
 ---
 

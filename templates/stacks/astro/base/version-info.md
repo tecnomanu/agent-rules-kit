@@ -1,6 +1,6 @@
 ---
 description: Version information for Astro applications
-globs: <root>/src/**/*.astro,<root>/src/**/*.{md,mdx},<root>/package.json,<root>/astro.config.{js,mjs,ts}
+globs: <root>/src/**/*.astro,<root>/src/**/*.md,<root>/src/**/*.mdx,<root>/package.json,<root>/astro.config.js,<root>/astro.config.mjs,<root>/astro.config.ts
 alwaysApply: true
 ---
 

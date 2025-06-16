@@ -1,5 +1,5 @@
 ---
-globs: ['<root>/**/*.java', '<root>/pom.xml', '<root>/build.gradle']
+globs: <root>/**/*.java,<root>/pom.xml,<root>/build.gradle
 alwaysApply: false
 ---
 

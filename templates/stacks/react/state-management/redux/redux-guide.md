@@ -1,6 +1,6 @@
 ---
 description: Guide for using Redux state management in React applications
-globs: <root>/src/**/*.{ts,tsx,js,jsx}
+globs: <root>/src/**/*.ts,<root>/src/**/*.tsx,<root>/src/**/*.js,<root>/src/**/*.jsx
 alwaysApply: false
 ---
 
