@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.1...v2.4.2) (2025-06-16)
+
+
+### Bug Fixes
+
+* expand globs in templates ([0e45d84](https://github.com/tecnomanu/agent-rules-kit/commit/0e45d84cbd2c281ad254e885378bf6008f897595))
+
 ## [2.4.1](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.0...v2.4.1) (2025-06-16)
 
 
