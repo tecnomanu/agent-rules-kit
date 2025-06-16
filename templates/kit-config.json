@@ -96,34 +96,58 @@
 			}
 		}
 	},
-	"nestjs": {
-		"default_architecture": "standard",
-		"version_ranges": {
-			"9": {
-				"name": "NestJS 9-10",
-				"range_name": "v9-10"
-			},
-			"10": {
-				"name": "NestJS 9-10",
-				"range_name": "v9-10"
-			}
-		},
-		"architectures": {
-			"standard": {
-				"name": "Standard Architecture",
-				"globs": ["<root>/src/**/*.ts"]
-			},
-			"ddd": {
-				"name": "Domain-Driven Design",
-				"globs": ["<root>/src/**/*.ts"]
-			}
-		}
-	},
-	"react": {
-		"default_architecture": "standard",
-		"version_ranges": {
-			"17": {
-				"name": "React 17",
+        "nestjs": {
+                "default_architecture": "standard",
+                "version_ranges": {
+                        "9": {
+                                "name": "NestJS 9-10",
+                                "range_name": "v9-10"
+                        },
+                        "10": {
+                                "name": "NestJS 9-10",
+                                "range_name": "v9-10"
+                        }
+                },
+                "architectures": {
+                        "standard": {
+                                "name": "Standard Architecture",
+                                "globs": ["<root>/src/**/*.ts"]
+                        },
+                        "ddd": {
+                                "name": "Domain-Driven Design",
+                                "globs": ["<root>/src/**/*.ts"]
+                        }
+                }
+        },
+        "nodejs": {
+                "default_architecture": "standard",
+                "version_ranges": {
+                        "18": {
+                                "name": "Node.js 18",
+                                "range_name": "v18"
+                        },
+                        "20": {
+                                "name": "Node.js 20",
+                                "range_name": "v20"
+                        }
+                },
+                "globs": [
+                        "<root>/src/**/*.{js,ts}",
+                        "<root>/**/*.js",
+                        "<root>/**/*.ts"
+                ],
+                "architectures": {
+                        "standard": {
+                                "name": "Standard Node.js Architecture",
+                                "globs": ["<root>/src/**/*.{js,ts}"]
+                        }
+                }
+        },
+        "react": {
+                "default_architecture": "standard",
+                "version_ranges": {
+                        "17": {
+                                "name": "React 17",
 				"range_name": "v17"
 			},
 			"18": {

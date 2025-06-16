@@ -221,6 +221,7 @@ MCP tools rules work alongside your stack-specific rules:
 | <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>                    | ![60%](https://progress-bar.dev/60)   | Content collections, static/dynamic content, integration guides                                                                |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>              | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                                                                                        |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>                 | ![75%](https://progress-bar.dev/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                         |
+| <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" width="100"/>              | ![20%](https://progress-bar.dev/20)   | Base project structure, best practices, naming, testing |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                       | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                                                                                      |
 | <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" width="100"/> | ![100%](https://progress-bar.dev/100) | Standard, Reactive, Microservices                                                                                              |
 
@@ -257,6 +258,7 @@ Choose from a wide range of technology stacks:
 | **Go**                              | 1.20, 1.21, 1.22                            | Standard, DDD, Hexagonal              |
 | **Django**                          | 4, 5                                        | MVT, API, Full-Stack                  |
 | **FastAPI**                         | 0.100+                                      | Standard, Async, Microservices        |
+| **Node.js**                         | 18, 20 | Standard                              |
 | **Express.js**                      | 4                                           | Standard, REST, GraphQL               |
 | **Spring Boot**                     | 2, 3                                        | Standard, Reactive, Microservices     |
 | **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
