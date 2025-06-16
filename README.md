@@ -79,7 +79,7 @@ npx agent-rules-kit
 
 Your rules will be generated in `.cursor/rules/rules-kit/` and automatically detected by Cursor!
 
-If you are using an AI agent, check [AGENTS.md](AGENTS.md) for instructions on automated installation.
+If you are using an AI agent, check [AGENTS.md](AGENTS.md) for instructions on automated installation. Share this file with your agent so it installs the rules automatically.
 
 ### Available Options
 

@@ -40,7 +40,8 @@ function parseCliArgs(argv) {
         cursorPath: null,
         mcpTools: [],
         stateManagement: null,
-        includeSignals: null
+        includeSignals: null,
+        autoInstall: argv.includes('--auto-install') || argv.includes('--auto')
     };
 
     for (let i = 0; i < argv.length; i++) {
@@ -270,18 +271,24 @@ async function main() {
     // Welcome and introduction
     cliService.showWelcome();
 
-    // Wait for user to press enter to continue
-    await cliService.askContinue();
+    // Wait for user to press enter to continue unless auto-install
+    if (!cliOptions.autoInstall) {
+        await cliService.askContinue();
+    }
 
     // Ask for the relative path to the project first (or use CLI option)
     const projectPath = cliOptions.projectPath
         ? cliOptions.projectPath
-        : await cliService.askProjectPath();
+        : cliOptions.autoInstall
+            ? '.'
+            : await cliService.askProjectPath();
 
     // Ask for the application directory within the project (or use CLI option)
     const appDirectory = cliOptions.appDirectory
         ? cliOptions.appDirectory
-        : await cliService.askAppDirectory();
+        : cliOptions.autoInstall
+            ? '.'
+            : await cliService.askAppDirectory();
 
     // Format the rules directory path - always in .cursor/rules/rules-kit
     const rulesDir = stackService.formatRulesPath(projectPath);
@@ -294,15 +301,19 @@ async function main() {
     // First question: Do you want rules for a specific stack?
     let wantStack = true;
     if (!cliOptions.stack) {
-        const resp = await inquirer.prompt([
-            {
-                type: 'confirm',
-                name: 'wantStack',
-                message: `${cliService.emoji.stack} Do you want to install rules for a specific stack?`,
-                default: true
-            }
-        ]);
-        wantStack = resp.wantStack;
+        if (cliOptions.autoInstall) {
+            wantStack = false;
+        } else {
+            const resp = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'wantStack',
+                    message: `${cliService.emoji.stack} Do you want to install rules for a specific stack?`,
+                    default: true
+                }
+            ]);
+            wantStack = resp.wantStack;
+        }
     }
 
     if (wantStack) {
@@ -341,11 +352,19 @@ async function main() {
             if (selectedStack === 'laravel') {
                 // Get available architectures for Laravel
                 const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
-                const architecture = cliOptions.architecture || await cliService.askArchitecture(architectures, selectedStack);
+                const architecture = cliOptions.architecture ||
+                    (cliOptions.autoInstall ? architectures[0].value : await cliService.askArchitecture(architectures, selectedStack));
 
                 // Get available versions for Laravel
                 const versions = stackSpecificService.getAvailableVersions(selectedStack);
-                const version = cliOptions.version || await cliService.askVersion(versions, detectedVersion);
+                let version;
+                if (cliOptions.version) {
+                    version = cliOptions.version;
+                } else if (cliOptions.autoInstall) {
+                    version = detectedVersion || versions[0].value;
+                } else {
+                    version = await cliService.askVersion(versions, detectedVersion);
+                }
 
                 // Map specific version to version range if needed
                 const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
@@ -363,11 +382,19 @@ async function main() {
             else if (selectedStack === 'nextjs') {
                 // Get available architectures for Next.js
                 const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
-                const architecture = cliOptions.architecture || await cliService.askArchitecture(architectures, selectedStack);
+                const architecture = cliOptions.architecture ||
+                    (cliOptions.autoInstall ? architectures[0].value : await cliService.askArchitecture(architectures, selectedStack));
 
                 // Get available versions for Next.js
                 const versions = stackSpecificService.getAvailableVersions(selectedStack);
-                const version = cliOptions.version || await cliService.askVersion(versions, detectedVersion);
+                let version;
+                if (cliOptions.version) {
+                    version = cliOptions.version;
+                } else if (cliOptions.autoInstall) {
+                    version = detectedVersion || versions[0].value;
+                } else {
+                    version = await cliService.askVersion(versions, detectedVersion);
+                }
 
                 // Map specific version to version range if needed
                 const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
@@ -385,7 +412,8 @@ async function main() {
             else if (selectedStack === 'react') {
                 // Get available architectures for React
                 const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
-                const architecture = cliOptions.architecture || await cliService.askArchitecture(architectures, selectedStack);
+                const architecture = cliOptions.architecture ||
+                    (cliOptions.autoInstall ? architectures[0].value : await cliService.askArchitecture(architectures, selectedStack));
 
                 // Get available state management options
                 const stateManagementOptions = [
@@ -395,11 +423,19 @@ async function main() {
                     'react-query',
                     'zustand'
                 ];
-                const stateManagement = cliOptions.stateManagement || await cliService.askStateManagement(stateManagementOptions);
+                const stateManagement = cliOptions.stateManagement ||
+                    (cliOptions.autoInstall ? stateManagementOptions[0] : await cliService.askStateManagement(stateManagementOptions));
 
                 // Get available versions for React
                 const versions = stackSpecificService.getAvailableVersions(selectedStack);
-                const version = cliOptions.version || await cliService.askVersion(versions, detectedVersion);
+                let version;
+                if (cliOptions.version) {
+                    version = cliOptions.version;
+                } else if (cliOptions.autoInstall) {
+                    version = detectedVersion || versions[0].value;
+                } else {
+                    version = await cliService.askVersion(versions, detectedVersion);
+                }
 
                 // Map specific version to version range if needed
                 const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
@@ -418,12 +454,15 @@ async function main() {
             else if (selectedStack === 'angular') {
                 // Get available architectures for Angular
                 const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
-                const architecture = cliOptions.architecture || await cliService.askArchitecture(architectures, selectedStack);
+                const architecture = cliOptions.architecture ||
+                    (cliOptions.autoInstall ? architectures[0].value : await cliService.askArchitecture(architectures, selectedStack));
 
                 // Ask if Angular signals should be included
                 let includeSignals;
                 if (cliOptions.includeSignals !== null) {
                     includeSignals = cliOptions.includeSignals;
+                } else if (cliOptions.autoInstall) {
+                    includeSignals = true;
                 } else {
                     const resp = await inquirer.prompt([
                         {
@@ -438,7 +477,14 @@ async function main() {
 
                 // Get available versions for Angular
                 const versions = stackSpecificService.getAvailableVersions(selectedStack);
-                const version = cliOptions.version || await cliService.askVersion(versions, detectedVersion);
+                let version;
+                if (cliOptions.version) {
+                    version = cliOptions.version;
+                } else if (cliOptions.autoInstall) {
+                    version = detectedVersion || versions[0].value;
+                } else {
+                    version = await cliService.askVersion(versions, detectedVersion);
+                }
 
                 // Map specific version to version range if needed
                 const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
@@ -457,12 +503,20 @@ async function main() {
                 // For other stacks, fetch available versions and architectures when available
                 const architectures = stackSpecificService.getAvailableArchitectures(selectedStack);
                 if (architectures.length > 0) {
-                    additionalOptions.architecture = cliOptions.architecture || await cliService.askArchitecture(architectures, selectedStack);
+                    additionalOptions.architecture = cliOptions.architecture ||
+                        (cliOptions.autoInstall ? architectures[0].value : await cliService.askArchitecture(architectures, selectedStack));
                 }
 
                 const versions = stackSpecificService.getAvailableVersions(selectedStack);
                 if (versions.length > 0) {
-                    const version = cliOptions.version || await cliService.askVersion(versions, detectedVersion);
+                    let version;
+                    if (cliOptions.version) {
+                        version = cliOptions.version;
+                    } else if (cliOptions.autoInstall) {
+                        version = detectedVersion || versions[0].value;
+                    } else {
+                        version = await cliService.askVersion(versions, detectedVersion);
+                    }
                     const versionRange = stackSpecificService.mapVersionToRange(selectedStack, version);
                     const formattedVersionName = stackSpecificService.getFormattedVersionName(selectedStack, version);
 
@@ -480,6 +534,8 @@ async function main() {
     // Second question: Do you want global rules?
     if (cliOptions.global !== null) {
         includeGlobalRules = cliOptions.global;
+    } else if (cliOptions.autoInstall) {
+        includeGlobalRules = true;
     } else {
         const { wantGlobalRules } = await inquirer.prompt([
             {
@@ -497,15 +553,19 @@ async function main() {
     let selectedMcpTools = [];
     let wantMcpTools = cliOptions.mcpTools.length > 0 ? true : null;
     if (wantMcpTools === null) {
-        const resp = await inquirer.prompt([
-            {
-                type: 'confirm',
-                name: 'wantMcpTools',
-                message: `${cliService.emoji.tools} Do you want to install MCP (Model Context Protocol) tools rules?`,
-                default: false
-            }
-        ]);
-        wantMcpTools = resp.wantMcpTools;
+        if (cliOptions.autoInstall) {
+            wantMcpTools = true;
+        } else {
+            const resp = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'wantMcpTools',
+                    message: `${cliService.emoji.tools} Do you want to install MCP (Model Context Protocol) tools rules?`,
+                    default: false
+                }
+            ]);
+            wantMcpTools = resp.wantMcpTools;
+        }
     }
 
     if (wantMcpTools) {
@@ -514,6 +574,8 @@ async function main() {
         if (availableMcpTools.length > 0) {
             if (cliOptions.mcpTools.length > 0) {
                 selectedMcpTools = cliOptions.mcpTools;
+            } else if (cliOptions.autoInstall) {
+                selectedMcpTools = ['pampa'];
             } else {
                 const { mcpTools } = await inquirer.prompt([
                     {
@@ -542,7 +604,12 @@ async function main() {
 
     // Check if rules directory already exists and create backup if needed
     if (await baseService.directoryExistsAsync(rulesDir)) {
-        const action = await cliService.askDirectoryAction(rulesDir);
+        let action;
+        if (cliOptions.autoInstall) {
+            action = 'backup';
+        } else {
+            action = await cliService.askDirectoryAction(rulesDir);
+        }
 
         if (action === 'cancel') {
             cliService.info('❌ Operation canceled by user');

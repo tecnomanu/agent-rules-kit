@@ -11,7 +11,7 @@ Agent Rules Kit is a CLI that generates [Cursor](https://cursor.sh) rules (`.mdc
 As soon as you read this file you should install the rules in the current project. Run the CLI with command line options to skip all interactive prompts. At minimum provide the stack name and version. Example:
 
 ```bash
-npx agent-rules-kit --stack=laravel --version=12 --architecture=ddd --global --mcp-tools=pampa,github
+   npx agent-rules-kit --stack=laravel --version=12 --architecture=ddd --global --mcp-tools=pampa,github
 ```
 
 Options:
@@ -27,6 +27,17 @@ Options:
 - `--state-management=<name>`: react state management option.
 - `--include-signals`/`--no-signals`: include Angular signals rules.
 - `--debug`: show debug logs.
+- `--auto-install`: skip prompts and use default options.
+
+### Default Behavior
+
+If you use `--auto-install` without specifying some options, these defaults are applied:
+
+- Global best practice rules are installed.
+- MCP tool **PAMPA** is enabled.
+- Existing rules are backed up if the rules directory already exists.
+
+Provide `--stack` and `--version` to install stack-specific rules automatically. Available stacks, versions, and default architectures are defined in [`templates/kit-config.json`](templates/kit-config.json).
 
 After executing the command, the agent should start using the generated rules immediately.
 
