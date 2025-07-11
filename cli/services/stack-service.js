@@ -884,7 +884,7 @@ export class StackService extends BaseService {
                 const archFiles = await fs.promises.readdir(archDir);
                 for (const file of archFiles) {
                     if (file.endsWith('.md')) {
-                        const baseName = file;
+                        const baseName = `architecture-${architecture}-${file}`;
                         if (!trackedFiles.has(baseName)) {
                             trackedFiles.set(baseName, []);
                         }
@@ -1172,7 +1172,7 @@ export class StackService extends BaseService {
             if (await this.pathExistsAsync(archDir)) {
                 const archFiles = await fs.promises.readdir(archDir);
                 archFiles.filter(file => file.endsWith('.md')).forEach(file => {
-                    trackedFiles.add(file);
+                    trackedFiles.add(`architecture-${architecture}-${file}`);
                 });
             }
         }
