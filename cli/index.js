@@ -26,6 +26,12 @@ const templatesDir = path.join(__dirname, '../templates');
 // Parse command line arguments
 const args = process.argv.slice(2);
 
+if (args[0] === 'install') {
+  const { runInstall } = await import('./install.js');
+  await runInstall(args.slice(1));
+  process.exit(0);
+}
+
 function parseCliArgs(argv) {
     const opts = {
         debug: argv.includes('--debug'),

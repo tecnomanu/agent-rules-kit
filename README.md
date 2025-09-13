@@ -300,3 +300,28 @@ Perfect for AI agents to quickly understand and navigate any codebase!
 -   **⚡ Performance Optimized**: Efficient rule generation with progress tracking and memory management
 -   **🔄 Smart Updates**: Backup existing rules and merge configurations intelligently
 -   **🎨 Beautiful CLI**: Interactive interface with helpful prompts and clear feedback
+
+## Multi-IDE Installation
+
+Agent Rules Kit can install existing rules into several IDEs and agents using the new `install` command. Pass the desired IDE with `--target` (or the alias `--ide`) to skip the interactive selector:
+
+```bash
+npx agent-rules-kit install --target=cursor   # or --ide=cursor
+```
+
+### Supported targets
+
+| Target | Path | Extension | Front matter |
+| --- | --- | --- | --- |
+| Cursor | `.cursor/rules/` | `.mdc` | yes |
+| VS Code / GitHub Copilot | `.github/copilot-instructions.md` | `.md` | no |
+| Windsurf | `.windsurf/rules/` | `.md` | no |
+| Windsurf (legacy) | `.windsurfrules` | `.md` | no |
+| Continue | `.continue/rules/` | `.md` | yes |
+| Zed | `./.rules` | `.rules` | no |
+| Claude Code | `CLAUDE.md` | `.md` | no |
+| Gemini Code | `GEMINI.md` | `.md` | no |
+| OpenAI Codex | `AGENTS.md` | `.md` | no |
+| Cline | `.clinerules` | `.md` | no |
+
+The command detects `.mdc` files in your project (default `./rules`) and writes them in the format required by the chosen target.
