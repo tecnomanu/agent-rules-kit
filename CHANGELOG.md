@@ -1,3 +1,11 @@
+## [3.2.2](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.1...v3.2.2) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 merge remote changes from semantic-release ([5d09c12](https://github.com/tecnomanu/agent-rules-kit/commit/5d09c129af456fd509044d5be408e41127a7a474))
+* 🐛 update project description to reflect multi-IDE support ([b315cd5](https://github.com/tecnomanu/agent-rules-kit/commit/b315cd5204463e51a7e79adde2026bcf3ac7c9de))
+
 ## [3.2.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.0...v3.2.1) (2025-09-14)
 
 
