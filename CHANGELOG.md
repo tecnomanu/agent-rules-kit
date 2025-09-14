@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.3.0...v3.3.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 correct README implementation status to match actual codebase ([e9dd292](https://github.com/tecnomanu/agent-rules-kit/commit/e9dd292911d7ec9a71462673716da78796c98b83))
+
 # [3.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.3...v3.3.0) (2025-09-14)
 
 
