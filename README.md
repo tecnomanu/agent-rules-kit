@@ -230,7 +230,6 @@ MCP tools rules work alongside your stack-specific rules:
 -   Svelte (v3-5)
 -   SvelteKit (v1-2)
 -   Astro
--   Generic (for any project)
 
 ## Implementation Status
 
@@ -242,7 +241,6 @@ MCP tools rules work alongside your stack-specific rules:
 | <img src="https://img.shields.io/badge/MCP-0066CC?style=for-the-badge&logo=protocol&logoColor=white" alt="MCP" width="100"/>                     | ![100%](https://progress-bar.xyz/100) | Complete SDK coverage (Python, TypeScript, Java, Kotlin, C#, Swift), server/client patterns, architecture concepts              |
 | <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" width="100"/>              | ![100%](https://progress-bar.xyz/100) | Multiple architectures, version detection, casting rules                                                                        |
 | <img src="https://img.shields.io/badge/Nuxt-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt" width="100"/>                    | ![100%](https://progress-bar.xyz/100) | Testing guidelines, architectural patterns, version-specific docs                                                               |
-| <img src="https://img.shields.io/badge/Generic-4B32C3?style=for-the-badge&logo=dev.to&logoColor=white" alt="Generic" width="100"/>               | ![100%](https://progress-bar.xyz/100) | Best practices, file operations, code standards, extensibility docs                                                             |
 | <img src="https://img.shields.io/badge/Pampa-FF6B35?style=for-the-badge&logo=search&logoColor=white" alt="Pampa" width="100"/>                   | ![100%](https://progress-bar.xyz/100) | Semantic code search, AI agent integration, MCP support, multi-language indexing                                                |
 | <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" width="100"/>                    | ![95%](https://progress-bar.xyz/95)   | Architecture options, state management, testing guidelines, version-specific guidance (v18 concurrent features)                 |
 | <img src="https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" width="100"/>    | ![25%](https://progress-bar.xyz/25)   | Base rules (architecture, best practices, styling, naming, navigation, platform code, state, testing, version info)             |
@@ -255,7 +253,6 @@ MCP tools rules work alongside your stack-specific rules:
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>                 | ![75%](https://progress-bar.xyz/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                          |
 | <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" width="100"/>              | ![20%](https://progress-bar.xyz/20)   | Base project structure, best practices, naming, testing                                                                         |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                       | ![45%](https://progress-bar.xyz/45)   | Testing guidelines, architecture concepts                                                                                       |
-| <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" width="100"/> | ![100%](https://progress-bar.xyz/100) | Standard, Reactive, Microservices                                                                                               |
 
 </p>
 
@@ -279,20 +276,16 @@ Choose from a wide range of technology stacks:
 
 | Stack                               | SDKs/Versions                               | Architectures                         |
 | ----------------------------------- | ------------------------------------------- | ------------------------------------- |
-| **Laravel**                         | 8, 9, 10, 11                                | Standard, DDD, Hexagonal              |
-| **Next.js**                         | 12, 13, 14, 15                              | App Router, Pages Router              |
-| **Angular**                         | 12, 13, 14, 15, 16, 17, 18                  | Standard, Standalone, Micro-frontends |
-| **React**                           | 16, 17, 18, 19                              | Standard, Hooks, Concurrent           |
+| **Laravel**                         | 8, 9, 10, 11, 12                            | Standard, DDD, Hexagonal              |
+| **Next.js**                         | 12, 13, 14                                  | App Router, Pages Router              |
+| **Angular**                         | 14, 15, 16, 17                              | Standard, Standalone, Micro-frontends |
+| **React**                           | 17, 18                                      | Standard, Hooks, Concurrent           |
 | **Vue.js**                          | 2, 3                                        | Options API, Composition API, Nuxt    |
-| **Astro**                           | 3, 4                                        | Static, SSR, Hybrid                   |
+| **Astro**                           | 2, 3, 4, 5                                  | Static, SSR, Hybrid                   |
 | **React Native**                    | 0.70, 0.71, 0.72, 0.73, 0.74                | Standard, Expo                        |
 | **NestJS**                          | 8, 9, 10                                    | Standard, Microservices, GraphQL      |
 | **Go**                              | 1.20, 1.21, 1.22                            | Standard, DDD, Hexagonal              |
-| **Django**                          | 4, 5                                        | MVT, API, Full-Stack                  |
-| **FastAPI**                         | 0.100+                                      | Standard, Async, Microservices        |
 | **Node.js**                         | 18, 20                                      | Standard                              |
-| **Express.js**                      | 4                                           | Standard, REST, GraphQL               |
-| **Spring Boot**                     | 2, 3                                        | Standard, Reactive, Microservices     |
 | **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
 | **🆕 Pampa**                        | Latest                                      | Standard                              |
 
