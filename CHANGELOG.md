@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.0...v3.2.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 improve CLI UX by moving IDE selection before path questions ([c12b3b5](https://github.com/tecnomanu/agent-rules-kit/commit/c12b3b5e74d9c40e0eb6e81eb8250aed341635e4))
+
 # [3.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.1.1...v3.2.0) (2025-09-14)
 
 
