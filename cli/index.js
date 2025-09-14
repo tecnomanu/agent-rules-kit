@@ -26,12 +26,6 @@ const templatesDir = path.join(__dirname, '../templates');
 // Parse command line arguments
 const args = process.argv.slice(2);
 
-if (args[0] === 'install') {
-  const { runInstall } = await import('./install.js');
-  await runInstall(args.slice(1));
-  process.exit(0);
-}
-
 function parseCliArgs(argv) {
     const opts = {
         debug: argv.includes('--debug'),
@@ -47,7 +41,8 @@ function parseCliArgs(argv) {
         mcpTools: [],
         stateManagement: null,
         includeSignals: null,
-        autoInstall: argv.includes('--auto-install') || argv.includes('--auto')
+        autoInstall: argv.includes('--auto-install') || argv.includes('--auto'),
+        ide: null
     };
 
     for (let i = 0; i < argv.length; i++) {
@@ -128,6 +123,14 @@ function parseCliArgs(argv) {
         }
         if (arg === '--no-signals') {
             opts.includeSignals = false;
+            continue;
+        }
+        if (arg.startsWith('--ide=')) {
+            opts.ide = arg.split('=')[1];
+            continue;
+        }
+        if (arg === '--ide' && i + 1 < argv.length) {
+            opts.ide = argv[++i];
             continue;
         }
     }
@@ -221,6 +224,94 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
 /**
+ * IDE configurations for different targets
+ */
+const IDE_CONFIGS = {
+    cursor: {
+        name: 'Cursor',
+        multiple: true,
+        dir: '.cursor/rules/rules-kit',
+        extension: '.mdc',
+        keepFrontMatter: true
+    },
+    vscode: {
+        name: 'VS Code / GitHub Copilot',
+        multiple: false,
+        file: '.github/copilot-instructions.md',
+        extension: '.md',
+        keepFrontMatter: false
+    },
+    windsurf: {
+        name: 'Windsurf',
+        multiple: true,
+        dir: '.windsurf/rules',
+        extension: '.md',
+        keepFrontMatter: false
+    },
+    continue: {
+        name: 'Continue',
+        multiple: true,
+        dir: '.continue/rules',
+        extension: '.md',
+        keepFrontMatter: true
+    },
+    zed: {
+        name: 'Zed',
+        multiple: false,
+        file: '.rules',
+        extension: '.rules',
+        keepFrontMatter: false
+    },
+    claude: {
+        name: 'Claude Code',
+        multiple: false,
+        file: 'CLAUDE.md',
+        extension: '.md',
+        keepFrontMatter: false
+    },
+    gemini: {
+        name: 'Gemini Code',
+        multiple: false,
+        file: 'GEMINI.md',
+        extension: '.md',
+        keepFrontMatter: false
+    },
+    codex: {
+        name: 'OpenAI Codex',
+        multiple: false,
+        file: 'AGENTS.md',
+        extension: '.md',
+        keepFrontMatter: false
+    },
+    cline: {
+        name: 'Cline',
+        multiple: false,
+        file: '.clinerules',
+        extension: '.md',
+        keepFrontMatter: false
+    }
+};
+
+/**
+ * Format rules directory path based on selected IDE
+ * @param {string} ide - Selected IDE
+ * @param {string} projectPath - Project path
+ * @returns {string} - Rules directory path
+ */
+function formatRulesDirForIde(ide, projectPath) {
+    const config = IDE_CONFIGS[ide];
+    if (!config) {
+        throw new Error(`Unknown IDE: ${ide}`);
+    }
+
+    if (config.multiple) {
+        return path.join(projectPath, config.dir);
+    } else {
+        return path.join(projectPath, path.dirname(config.file));
+    }
+}
+
+/**
  * Display project information
  */
 function showProjectInfo() {
@@ -296,8 +387,37 @@ async function main() {
             ? '.'
             : await cliService.askAppDirectory();
 
-    // Format the rules directory path - always in .cursor/rules/rules-kit
-    const rulesDir = stackService.formatRulesPath(projectPath);
+    // Ask for IDE selection (or use CLI option)
+    let selectedIde = cliOptions.ide;
+    if (!selectedIde) {
+        if (cliOptions.autoInstall) {
+            selectedIde = 'cursor'; // Default to Cursor in auto-install
+        } else {
+            const { ide } = await inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'ide',
+                    message: `${cliService.emoji.config} Select IDE/Agent for rules installation:`,
+                    choices: [
+                        { name: 'Cursor', value: 'cursor' },
+                        { name: 'VS Code / GitHub Copilot', value: 'vscode' },
+                        { name: 'Windsurf', value: 'windsurf' },
+                        { name: 'Continue', value: 'continue' },
+                        { name: 'Zed', value: 'zed' },
+                        { name: 'Claude Code', value: 'claude' },
+                        { name: 'Gemini Code', value: 'gemini' },
+                        { name: 'OpenAI Codex', value: 'codex' },
+                        { name: 'Cline', value: 'cline' }
+                    ],
+                    default: 'cursor'
+                }
+            ]);
+            selectedIde = ide;
+        }
+    }
+
+    // Format the rules directory path based on selected IDE
+    const rulesDir = formatRulesDirForIde(selectedIde, projectPath);
 
     // Initialize variables for collection user choices
     let selectedStack = null;
@@ -608,13 +728,28 @@ async function main() {
         process.exit(0);
     }
 
-    // Check if rules directory already exists and create backup if needed
-    if (await baseService.directoryExistsAsync(rulesDir)) {
+    // Check if target already exists and create backup if needed
+    const ideConfig = IDE_CONFIGS[selectedIde];
+    let needsBackup = false;
+    let targetPath = '';
+
+    if (ideConfig.multiple) {
+        // Multi-file IDE: check if rules directory exists
+        targetPath = rulesDir;
+        needsBackup = await baseService.directoryExistsAsync(rulesDir);
+    } else {
+        // Single-file IDE: check if specific file exists
+        targetPath = path.join(projectPath, ideConfig.file);
+        needsBackup = await fs.pathExists(targetPath);
+    }
+
+    if (needsBackup) {
         let action;
         if (cliOptions.autoInstall) {
             action = 'backup';
         } else {
-            action = await cliService.askDirectoryAction(rulesDir);
+            const targetName = ideConfig.multiple ? path.basename(targetPath) : ideConfig.file;
+            action = await cliService.askFileAction(targetName, ideConfig.multiple);
         }
 
         if (action === 'cancel') {
@@ -623,9 +758,14 @@ async function main() {
         }
 
         if (action === 'backup') {
-            const backupDir = await stackService.createBackupAsync(rulesDir);
-            if (backupDir) {
-                cliService.backupCreated(rulesDir, backupDir);
+            let backupPath;
+            if (ideConfig.multiple) {
+                backupPath = await stackService.createBackupAsync(targetPath);
+            } else {
+                backupPath = await createFileBackup(targetPath);
+            }
+            if (backupPath) {
+                cliService.backupCreated(targetPath, backupPath);
             }
         }
     }
@@ -634,7 +774,7 @@ async function main() {
     await baseService.ensureDirectoryExistsAsync(rulesDir);
 
     // Show installation summary
-    cliService.showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools);
+    cliService.showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools, selectedIde);
 
     // Get the start time for measuring performance
     const startGeneration = Date.now();
@@ -656,32 +796,90 @@ async function main() {
 
     try {
         let totalFiles = 0;
+        const ideConfig = IDE_CONFIGS[selectedIde];
 
-        // If global rules are requested, copy them
-        if (includeGlobalRules) {
-            const globalMeta = {
-                projectPath: appDirectory,
-                cursorPath: cliOptions.cursorPath || projectPath,
-                debug: debugMode
-            };
+        if (ideConfig.multiple) {
+            // Multi-file IDE (Cursor, Windsurf, Continue) - generate individual files
+            // Use existing logic but adjust file extension and front matter
 
-            const globalCount = await stackService.copyGlobalRules(rulesDir, globalMeta, config);
-            totalFiles += globalCount;
-        }
+            // If global rules are requested, copy them
+            if (includeGlobalRules) {
+                const globalMeta = {
+                    projectPath: appDirectory,
+                    cursorPath: cliOptions.cursorPath || projectPath,
+                    debug: debugMode
+                };
 
-        // If MCP tools are selected, copy them
-        if (selectedMcpTools.length > 0) {
-            const mcpCount = await mcpService.copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config);
-            totalFiles += mcpCount;
-        }
+                const globalCount = await stackService.copyGlobalRules(rulesDir, globalMeta, config);
+                totalFiles += globalCount;
 
-        // If stack is selected, generate stack-specific rules
-        if (selectedStack) {
-            const stackCount = await stackService.countStackRules(meta);
-            totalFiles += stackCount;
+                // Convert files to appropriate format if not Cursor
+                if (selectedIde !== 'cursor') {
+                    await convertRulesForIde(path.join(rulesDir, 'global'), ideConfig);
+                }
+            }
 
-            // Generate stack-specific rules only (global rules already copied)
-            await stackService.generateRulesAsync(rulesDir, meta, config, () => { }, false);
+            // If MCP tools are selected, copy them
+            if (selectedMcpTools.length > 0) {
+                const mcpCount = await mcpService.copyMcpToolsRules(rulesDir, selectedMcpTools, meta, config);
+                totalFiles += mcpCount;
+
+                // Convert files to appropriate format if not Cursor
+                if (selectedIde !== 'cursor') {
+                    await convertRulesForIde(path.join(rulesDir, 'mcp-tools'), ideConfig);
+                }
+            }
+
+            // If stack is selected, generate stack-specific rules
+            if (selectedStack) {
+                const stackCount = await stackService.countStackRules(meta);
+                totalFiles += stackCount;
+
+                // Generate stack-specific rules only (global rules already copied)
+                await stackService.generateRulesAsync(rulesDir, meta, config, () => { }, false);
+
+                // Convert files to appropriate format if not Cursor
+                if (selectedIde !== 'cursor') {
+                    await convertRulesForIde(path.join(rulesDir, selectedStack), ideConfig);
+                }
+            }
+        } else {
+            // Single-file IDE (VS Code, Zed, Claude, etc.) - consolidate all rules
+            // First generate in temp directory as .mdc files
+            const tempDir = path.join(projectPath, '.temp-rules');
+            await fs.ensureDir(tempDir);
+
+            try {
+                // Generate all rules in temp directory
+                if (includeGlobalRules) {
+                    const globalMeta = {
+                        projectPath: appDirectory,
+                        cursorPath: cliOptions.cursorPath || projectPath,
+                        debug: debugMode
+                    };
+                    await stackService.copyGlobalRules(tempDir, globalMeta, config);
+                }
+
+                if (selectedMcpTools.length > 0) {
+                    await mcpService.copyMcpToolsRules(tempDir, selectedMcpTools, meta, config);
+                }
+
+                if (selectedStack) {
+                    await stackService.generateRulesAsync(tempDir, meta, config, () => { }, false);
+                }
+
+                // Collect all generated files and consolidate
+                const allRules = await collectGeneratedRules(tempDir);
+                const consolidatedContent = consolidateRulesForSingleFile(allRules, ideConfig);
+
+                const outputPath = path.join(projectPath, ideConfig.file);
+                await fs.outputFile(outputPath, consolidatedContent, 'utf8');
+                totalFiles = 1;
+
+            } finally {
+                // Clean up temp directory
+                await fs.remove(tempDir);
+            }
         }
 
         // End progress tracking
@@ -693,7 +891,7 @@ async function main() {
         const durationFormatted = (durationMs / 1000).toFixed(2);
 
         // Show success message
-        cliService.showSuccess(totalFiles, rulesDir, durationFormatted, selectedStack, additionalOptions);
+        cliService.showSuccess(totalFiles, rulesDir, durationFormatted, selectedStack, additionalOptions, selectedIde);
 
         // Clean up cached templates to free memory
         fileService.clearCache();
@@ -707,6 +905,143 @@ async function main() {
         }
 
         process.exit(1);
+    }
+}
+
+/**
+ * Convert rules in a directory to appropriate format for IDE
+ * @param {string} rulesDir - Directory containing .mdc files
+ * @param {Object} ideConfig - IDE configuration
+ */
+async function convertRulesForIde(rulesDir, ideConfig) {
+    if (!(await fs.pathExists(rulesDir))) {
+        return;
+    }
+
+    const files = await fs.readdir(rulesDir);
+    const mdcFiles = files.filter(f => f.endsWith('.mdc'));
+
+    for (const file of mdcFiles) {
+        const filePath = path.join(rulesDir, file);
+        let content = await fs.readFile(filePath, 'utf8');
+
+        // Remove front matter if IDE doesn't support it
+        if (!ideConfig.keepFrontMatter && content.startsWith('---')) {
+            const endIndex = content.indexOf('\n---', 3);
+            if (endIndex !== -1) {
+                content = content.slice(endIndex + 4).replace(/^\n+/, '');
+            }
+        }
+
+        // Change extension if needed
+        if (ideConfig.extension !== '.mdc') {
+            const newFileName = file.replace('.mdc', ideConfig.extension);
+            const newFilePath = path.join(rulesDir, newFileName);
+            await fs.writeFile(newFilePath, content, 'utf8');
+            await fs.remove(filePath); // Remove old .mdc file
+        }
+    }
+}
+
+/**
+ * Collect all generated rules from temp directory
+ * @param {string} tempDir - Temporary directory with generated rules
+ * @returns {Promise<Array>} - Array of rule objects
+ */
+async function collectGeneratedRules(tempDir) {
+    const rules = [];
+
+    // Recursively find all .mdc files
+    const findMdcFiles = async (dir) => {
+        const entries = await fs.readdir(dir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+
+            if (entry.isDirectory()) {
+                await findMdcFiles(fullPath);
+            } else if (entry.name.endsWith('.mdc')) {
+                const content = await fs.readFile(fullPath, 'utf8');
+                const relativePath = path.relative(tempDir, fullPath);
+
+                rules.push({
+                    filename: entry.name,
+                    path: relativePath,
+                    content: content,
+                    title: entry.name.replace('.mdc', '')
+                });
+            }
+        }
+    };
+
+    if (await fs.pathExists(tempDir)) {
+        await findMdcFiles(tempDir);
+    }
+
+    return rules;
+}
+
+/**
+ * Consolidate rules into a single file content
+ * @param {Array} rules - Array of rule objects
+ * @param {Object} ideConfig - IDE configuration
+ * @returns {string} - Consolidated content
+ */
+function consolidateRulesForSingleFile(rules, ideConfig) {
+    const processedRules = rules.map(rule => {
+        let content = rule.content;
+
+        // Remove front matter if IDE doesn't support it
+        if (!ideConfig.keepFrontMatter && content.startsWith('---')) {
+            const endIndex = content.indexOf('\n---', 3);
+            if (endIndex !== -1) {
+                content = content.slice(endIndex + 4).replace(/^\n+/, '');
+            }
+        }
+
+        return {
+            title: rule.title || rule.filename.replace(/\.(md|mdc)$/, ''),
+            body: content
+        };
+    });
+
+    // Sort rules by category (global, stack, mcp-tools)
+    processedRules.sort((a, b) => {
+        const getCategory = (rule) => {
+            if (rule.path && rule.path.includes('global')) return 0;
+            if (rule.path && rule.path.includes('mcp-tools')) return 2;
+            return 1; // stack rules
+        };
+        return getCategory(a) - getCategory(b);
+    });
+
+    // Create index and sections
+    const index = processedRules.map((r, i) => `${i + 1}. ${r.title}`).join('\n');
+    const sections = processedRules.map(r => `## ${r.title}\n\n${r.body}`).join('\n\n');
+
+    return `# Agent Rules\n\n${index}\n\n${sections}\n`;
+}
+
+/**
+ * Create backup of a single file
+ * @param {string} filePath - Path to file to backup
+ * @returns {Promise<string|null>} - Path to backup file or null if failed
+ */
+async function createFileBackup(filePath) {
+    try {
+        if (!(await fs.pathExists(filePath))) {
+            return null;
+        }
+
+        const date = new Date();
+        const timestamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}${String(date.getMinutes()).padStart(2, '0')}`;
+        const backupPath = `${filePath}.backup-${timestamp}`;
+
+        await fs.copy(filePath, backupPath);
+        return backupPath;
+    } catch (error) {
+        console.error(`Failed to create file backup: ${error.message}`);
+        return null;
     }
 }
 
