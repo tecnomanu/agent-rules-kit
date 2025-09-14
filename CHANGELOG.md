@@ -1,3 +1,10 @@
+# [3.7.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.6.0...v3.7.0) (2025-09-14)
+
+
+### Features
+
+* ✨ complete Angular, Next.js and React documentation files ([b69fecf](https://github.com/tecnomanu/agent-rules-kit/commit/b69fecff8376e17f24b6fc5bceaeef9456a47d58))
+
 # [3.6.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.5.0...v3.6.0) (2025-09-14)
 
 
