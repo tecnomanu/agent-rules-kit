@@ -300,6 +300,30 @@ export class CliService extends BaseService {
     }
 
     /**
+     * Asks the user what to do when a file or directory exists
+     * @param {string} targetName - File or directory name
+     * @param {boolean} isDirectory - Whether the target is a directory
+     * @returns {Promise<string>} The selected action (backup/replace/cancel)
+     */
+    async askFileAction(targetName, isDirectory = false) {
+        const targetType = isDirectory ? 'directory' : 'file';
+        const { action } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'action',
+                message: `${this.emoji.warning} The ${targetType} ${chalk.yellow(targetName)} already exists. What would you like to do?`,
+                choices: [
+                    { name: `Create backup before continuing`, value: 'backup' },
+                    { name: `Replace existing ${targetType} (no backup)`, value: 'replace' },
+                    { name: 'Cancel operation', value: 'cancel' }
+                ],
+                default: 'backup'
+            }
+        ]);
+        return action;
+    }
+
+    /**
      * Shows a notification that a backup was created
      * @param {string} originalDir - Original directory path
      * @param {string} backupDir - Backup directory path
@@ -372,8 +396,9 @@ export class CliService extends BaseService {
      * @param {boolean} includeGlobalRules - Whether to include global rules
      * @param {object} additionalOptions - Additional configuration options
      * @param {Array<string>} selectedMcpTools - Selected MCP tools
+     * @param {string} selectedIde - Selected IDE
      */
-    showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools = []) {
+    showInstallationSummary(selectedStack, includeGlobalRules, additionalOptions, selectedMcpTools = [], selectedIde = 'cursor') {
         console.log(chalk.bold.cyan('\n📋 Installation Summary:\n'));
 
         if (includeGlobalRules) {
@@ -413,6 +438,9 @@ export class CliService extends BaseService {
             console.log(chalk.gray('❌ MCP tools: No'));
         }
 
+        // Show IDE selection
+        console.log(chalk.green(`✅ Target IDE: ${selectedIde.charAt(0).toUpperCase() + selectedIde.slice(1)}`));
+
         console.log(); // Add spacing
     }
 
@@ -423,8 +451,9 @@ export class CliService extends BaseService {
      * @param {string} duration - Duration in seconds
      * @param {string} selectedStack - Selected stack
      * @param {object} additionalOptions - Additional configuration options
+     * @param {string} selectedIde - Selected IDE
      */
-    showSuccess(totalFiles, rulesDir, duration, selectedStack, additionalOptions) {
+    showSuccess(totalFiles, rulesDir, duration, selectedStack, additionalOptions, selectedIde = 'cursor') {
         console.log(chalk.bold.green('\n🎉 Installation completed successfully!\n'));
 
         console.log(chalk.white(`📊 Files generated: ${chalk.bold(totalFiles)}`));
@@ -445,8 +474,12 @@ export class CliService extends BaseService {
 
         console.log(chalk.bold.yellow('\n📚 Next steps:'));
         console.log(chalk.white('  1. Rules are now active in your project'));
-        console.log(chalk.white('  2. Cursor AI will use these rules automatically'));
-        console.log(chalk.white('  3. You can edit rules in .cursor/rules/rules-kit/'));
+        console.log(chalk.white(`  2. ${selectedIde.charAt(0).toUpperCase() + selectedIde.slice(1)} AI will use these rules automatically`));
+        if (selectedIde === 'cursor') {
+            console.log(chalk.white('  3. You can edit rules in .cursor/rules/rules-kit/'));
+        } else {
+            console.log(chalk.white(`  3. Rules are installed for ${selectedIde.charAt(0).toUpperCase() + selectedIde.slice(1)}`));
+        }
         console.log(chalk.white('  4. To update, run: npx agent-rules-kit --update\n'));
 
         console.log(chalk.bold.green('✨ Happy coding! ✨\n'));

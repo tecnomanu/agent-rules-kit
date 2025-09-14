@@ -65,21 +65,45 @@ https://github.com/user-attachments/assets/8e91d651-c15f-4892-a250-684ab60d8594
 
 ## 🚀 Quick Start
 
+### Interactive Installation
+
 ```bash
 # Install and run interactively
 npx agent-rules-kit
 
 # The CLI will guide you through:
 # 1. 📁 Project path selection
-# 2. 📚 Stack and architecture choice (optional)
-# 3. 🌐 Global best practices (recommended)
-# 4. 🔧 MCP tools selection (multiple tools supported)
-# 5. ⚡ Automatic rule generation
+# 2. 🎯 IDE selection (Cursor, VS Code, Claude, etc.)
+# 3. 📚 Stack and architecture choice (optional)
+# 4. 🌐 Global best practices (recommended)
+# 5. 🔧 MCP tools selection (multiple tools supported)
+# 6. ⚡ Automatic rule generation
 ```
 
-Your rules will be generated in `.cursor/rules/rules-kit/` and automatically detected by Cursor!
+### Command Line Installation
 
-If you are using an AI agent, check [AGENTS.md](AGENTS.md) for instructions on automated installation. Share this file with your agent so it installs the rules automatically.
+For automated or scripted installations, use command line arguments to skip interactive prompts:
+
+```bash
+# Basic installation with auto-detection
+npx agent-rules-kit --stack=laravel --version=12 --global --auto-install
+
+# Full configuration example
+npx agent-rules-kit --stack=nextjs --version=14 --architecture=app --global --mcp-tools=pampa,github --ide=cursor
+
+# For different IDEs
+npx agent-rules-kit --stack=react --version=18 --ide=vscode    # VS Code
+npx agent-rules-kit --stack=laravel --version=12 --ide=claude  # Claude
+npx agent-rules-kit --stack=angular --version=17 --ide=windsurf # Windsurf
+```
+
+**📖 For complete CLI options and examples, see [AGENTS.md](AGENTS.md)**
+
+Your rules will be generated in the appropriate location for your chosen IDE and automatically detected!
+
+### AI Agent Integration
+
+If you are using an AI agent, check [AGENTS.md](AGENTS.md) for comprehensive instructions on automated installation. Share this file with your agent so it installs the rules automatically with the correct options.
 
 ### Available Options
 
@@ -223,7 +247,7 @@ MCP tools rules work alongside your stack-specific rules:
 | <img src="https://img.shields.io/badge/Astro-0D0D0D?style=for-the-badge&logo=astro&logoColor=white" alt="Astro" width="100"/>                    | ![60%](https://progress-bar.dev/60)   | Content collections, static/dynamic content, integration guides                                                                |
 | <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" width="100"/>              | ![55%](https://progress-bar.dev/55)   | Signals support, base project structure                                                                                        |
 | <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" width="100"/>                 | ![75%](https://progress-bar.dev/75)   | Standard and Microservices architectures, NestJS 9.x and 10.x features                                                         |
-| <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" width="100"/>              | ![20%](https://progress-bar.dev/20)   | Base project structure, best practices, naming, testing |
+| <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" width="100"/>              | ![20%](https://progress-bar.dev/20)   | Base project structure, best practices, naming, testing                                                                        |
 | <img src="https://img.shields.io/badge/Vue-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue" width="100"/>                       | ![45%](https://progress-bar.dev/45)   | Testing guidelines, architecture concepts                                                                                      |
 | <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" width="100"/> | ![100%](https://progress-bar.dev/100) | Standard, Reactive, Microservices                                                                                              |
 
@@ -260,7 +284,7 @@ Choose from a wide range of technology stacks:
 | **Go**                              | 1.20, 1.21, 1.22                            | Standard, DDD, Hexagonal              |
 | **Django**                          | 4, 5                                        | MVT, API, Full-Stack                  |
 | **FastAPI**                         | 0.100+                                      | Standard, Async, Microservices        |
-| **Node.js**                         | 18, 20 | Standard                              |
+| **Node.js**                         | 18, 20                                      | Standard                              |
 | **Express.js**                      | 4                                           | Standard, REST, GraphQL               |
 | **Spring Boot**                     | 2, 3                                        | Standard, Reactive, Microservices     |
 | **🆕 MCP (Model Context Protocol)** | Python, TypeScript, Java, Kotlin, C#, Swift | Server, Client, Toolkit               |
@@ -300,3 +324,28 @@ Perfect for AI agents to quickly understand and navigate any codebase!
 -   **⚡ Performance Optimized**: Efficient rule generation with progress tracking and memory management
 -   **🔄 Smart Updates**: Backup existing rules and merge configurations intelligently
 -   **🎨 Beautiful CLI**: Interactive interface with helpful prompts and clear feedback
+
+## Multi-IDE Installation
+
+Agent Rules Kit can install existing rules into several IDEs and agents using the new `install` command. Pass the desired IDE with `--target` (or the alias `--ide`) to skip the interactive selector:
+
+```bash
+npx agent-rules-kit install --target=cursor   # or --ide=cursor
+```
+
+### Supported targets
+
+| Target                   | Path                              | Extension | Front matter |
+| ------------------------ | --------------------------------- | --------- | ------------ |
+| Cursor                   | `.cursor/rules/`                  | `.mdc`    | yes          |
+| VS Code / GitHub Copilot | `.github/copilot-instructions.md` | `.md`     | no           |
+| Windsurf                 | `.windsurf/rules/`                | `.md`     | no           |
+| Windsurf (legacy)        | `.windsurfrules`                  | `.md`     | no           |
+| Continue                 | `.continue/rules/`                | `.md`     | yes          |
+| Zed                      | `./.rules`                        | `.rules`  | no           |
+| Claude Code              | `CLAUDE.md`                       | `.md`     | no           |
+| Gemini Code              | `GEMINI.md`                       | `.md`     | no           |
+| OpenAI Codex             | `AGENTS.md`                       | `.md`     | no           |
+| Cline                    | `.clinerules`                     | `.md`     | no           |
+
+The command detects `.mdc` files in your project (default `./rules`) and writes them in the format required by the chosen target.
