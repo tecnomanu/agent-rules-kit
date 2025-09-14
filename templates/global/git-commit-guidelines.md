@@ -149,9 +149,9 @@ Automatic commits (semantic-release, bots, CI/CD):
 
 This project has experienced accidental major version bumps due to incorrect `BREAKING CHANGE:` usage:
 
-- **v3.0.0**: Accidentally triggered by incorrect `BREAKING CHANGE:` in commit
-- **v3.0.1**: Another accidental major bump  
-- **Current version**: v3.3.1+ (continuing from accidental major versions)
+-   **v3.0.0**: Accidentally triggered by incorrect `BREAKING CHANGE:` in commit
+-   **v3.0.1**: Another accidental major bump
+-   **Current version**: v3.3.1+ (continuing from accidental major versions)
 
 ### 🎯 Lessons Learned:
 
@@ -162,9 +162,9 @@ This project has experienced accidental major version bumps due to incorrect `BR
 
 ### 🔒 Current Policy:
 
-- **Default to `fix:`** for improvements and corrections
-- **Use `feat:`** only for clear new functionality  
-- **Avoid `BREAKING CHANGE:`** unless users must modify their code to continue using the project
+-   **Default to `fix:`** for improvements and corrections
+-   **Use `feat:`** only for clear new functionality
+-   **Avoid `BREAKING CHANGE:`** unless users must modify their code to continue using the project
 
 ## BREAKING CHANGE Best Practices (Use Sparingly)
 

@@ -1,7 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Add pnpm to PATH
-export PATH="$HOME/Library/pnpm:$PATH"
-
 pnpm test
