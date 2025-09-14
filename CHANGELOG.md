@@ -1,3 +1,10 @@
+# [3.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.3.1...v3.4.0) (2025-09-14)
+
+
+### Features
+
+* ✨ complete stack documentation with missing core files ([71abfa8](https://github.com/tecnomanu/agent-rules-kit/commit/71abfa86dedada1ff1faad6d33c0e269afecdef2))
+
 ## [3.3.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.3.0...v3.3.1) (2025-09-14)
 
 
