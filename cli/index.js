@@ -326,9 +326,9 @@ function showProjectInfo() {
     console.log('='.repeat(50));
 
     console.log(`\n${chalk.green('📝 Description:')}`);
-    console.log('  Bootstrap Cursor rules (.mdc) for AI agent-guided projects.');
-    console.log('  This tool helps you generate and maintain project-specific rules');
-    console.log('  for multiple frameworks and architectures.');
+    console.log('  CLI tool to bootstrap AI agent rules for multiple IDEs and frameworks.');
+    console.log('  Generates optimized rules for Cursor, VS Code, Claude, and 6+ other AI coding assistants.');
+    console.log('  This tool helps you generate and maintain project-specific rules for multiple frameworks and architectures.');
 
     // Show supported stacks with versions and architectures
     console.log(`\n${chalk.green('📚 Supported Stacks:')} (${availableStacks.length} total)`);
