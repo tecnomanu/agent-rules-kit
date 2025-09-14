@@ -1,3 +1,10 @@
+## [3.2.3](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.2...v3.2.3) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 update progress bar URLs from progress-bar.dev to progress-bar.xyz ([ebeddc6](https://github.com/tecnomanu/agent-rules-kit/commit/ebeddc64468512e15a8e10a515228b497ac4b436))
+
 ## [3.2.2](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.1...v3.2.2) (2025-09-14)
 
 
