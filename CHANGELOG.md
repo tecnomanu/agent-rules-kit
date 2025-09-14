@@ -1,3 +1,16 @@
+# [3.0.0](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.2...v3.0.0) (2025-09-14)
+
+
+### Features
+
+* ✨ integrate IDE selector into main CLI ([5fd646d](https://github.com/tecnomanu/agent-rules-kit/commit/5fd646d677b2736d373a96c80d58657eac2f7cef))
+* add ide alias for install target ([38a9136](https://github.com/tecnomanu/agent-rules-kit/commit/38a9136e35336cb3949c999e223423da6b353baa))
+
+
+### BREAKING CHANGES
+
+* Removed separate 'install' command - IDE selection now integrated into main CLI flow
+
 ## [2.4.2](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.1...v2.4.2) (2025-06-16)
 
 
