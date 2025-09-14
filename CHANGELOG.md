@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.0.1...v3.1.0) (2025-09-14)
+
+
+### Features
+
+* ✨ enhance --info command with comprehensive details ([cab9b08](https://github.com/tecnomanu/agent-rules-kit/commit/cab9b08744b514ffbd3dce430ab4557f0513170b))
+
 ## [3.0.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.0.0...v3.0.1) (2025-09-14)
 
 
