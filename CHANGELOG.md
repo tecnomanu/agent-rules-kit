@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.4.1...v3.5.0) (2025-09-14)
+
+
+### Features
+
+* ✨ complete React Native and Vue best practices documentation ([1d35d69](https://github.com/tecnomanu/agent-rules-kit/commit/1d35d69f3eb2cdcfba5adaafd07c5ddd62414d2c))
+
 ## [3.4.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.4.0...v3.4.1) (2025-09-14)
 
 
