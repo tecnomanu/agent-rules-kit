@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.0.0...v3.0.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 revert incorrect version bump to v3.0.0 ([65cf80d](https://github.com/tecnomanu/agent-rules-kit/commit/65cf80d295a21967f78a4d7549e07e8fbd5ab614))
+
 ## [2.4.2](https://github.com/tecnomanu/agent-rules-kit/compare/v2.4.1...v2.4.2) (2025-06-16)
 
 ### Bug Fixes
