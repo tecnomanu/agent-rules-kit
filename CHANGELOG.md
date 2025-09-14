@@ -1,3 +1,10 @@
+# [3.8.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.7.0...v3.8.0) (2025-09-14)
+
+
+### Features
+
+* ✨ complete Node.js and React Native stacks to 100% ([c56c004](https://github.com/tecnomanu/agent-rules-kit/commit/c56c0045df121ce9fb38e49047a02764c92211bb))
+
 # [3.7.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.6.0...v3.7.0) (2025-09-14)
 
 

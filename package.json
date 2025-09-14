@@ -1,6 +1,6 @@
 {
 	"name": "agent-rules-kit",
-	"version": "3.7.0",
+	"version": "3.8.0",
 	"description": "CLI tool to bootstrap AI agent rules for multiple IDEs and frameworks. Generates optimized rules for Cursor, VS Code, Claude, and 6+ other AI coding assistants.",
 	"type": "module",
 	"bin": {
