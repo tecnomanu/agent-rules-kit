@@ -1,3 +1,10 @@
+## [3.8.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.8.0...v3.8.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 improve markdown formatting in version-info files ([d2a72e1](https://github.com/tecnomanu/agent-rules-kit/commit/d2a72e19c2f26511bf1838d3213b6b5967fbbeb7))
+
 # [3.8.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.7.0...v3.8.0) (2025-09-14)
 
 
