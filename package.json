@@ -1,7 +1,7 @@
 {
 	"name": "agent-rules-kit",
 	"version": "3.1.0",
-	"description": "Bootstrap of **Cursor** rules (`.mdc`) and mirror documentation (`.md`) for AI agent-guided projects.",
+	"description": "CLI tool to bootstrap AI agent rules for multiple IDEs and frameworks. Generates optimized rules for Cursor, VS Code, Claude, and 6+ other AI coding assistants.",
 	"type": "module",
 	"bin": {
 		"agent-rules-kit": "cli/index.js"
