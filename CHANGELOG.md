@@ -1,3 +1,10 @@
+# [3.6.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.5.0...v3.6.0) (2025-09-14)
+
+
+### Features
+
+* ✨ update IDE selector terminal screenshot ([1699590](https://github.com/tecnomanu/agent-rules-kit/commit/169959084abd441ec6d519b16bbba8a5edffe34f))
+
 # [3.5.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.4.1...v3.5.0) (2025-09-14)
 
 
