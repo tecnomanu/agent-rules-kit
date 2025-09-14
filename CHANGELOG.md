@@ -1,3 +1,11 @@
+## [3.4.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.4.0...v3.4.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 🐛 merge remote changes and finalize commit guidelines improvements ([e8a4591](https://github.com/tecnomanu/agent-rules-kit/commit/e8a4591a70d9c00e5497c31b9f449b5a9aa17fc4))
+* 🐛 strengthen git commit guidelines to prevent accidental major versions ([3a254c2](https://github.com/tecnomanu/agent-rules-kit/commit/3a254c20576ec987fa550bf79877838cabcee4d0))
+
 # [3.4.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.3.1...v3.4.0) (2025-09-14)
 
 
