@@ -231,14 +231,26 @@ export class CliService extends BaseService {
 
     /**
      * Asks the user for the relative path of the project
+     * @param {string} selectedIde - The selected IDE
+     * @param {object} ideConfig - IDE configuration object
      * @returns {Promise<string>} The relative path of the project
      */
-    async askProjectPath() {
+    async askProjectPath(selectedIde, ideConfig) {
+        // Adapt the message based on the IDE
+        let directoryReference = 'project root';
+        if (ideConfig.multiple && ideConfig.dir) {
+            // For multi-file IDEs, mention the specific directory
+            directoryReference = `${ideConfig.dir} directory`;
+        } else if (ideConfig.file) {
+            // For single-file IDEs, mention it's relative to the file location
+            directoryReference = `${ideConfig.file} file location`;
+        }
+
         const { projectPath } = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'projectPath',
-                message: `${this.emoji.file} Relative path to your project (if not in the root) from .cursor directory:`,
+                message: `${this.emoji.file} Relative path to your project (if not in the root) from ${directoryReference}:`,
                 default: '.'
             }
         ]);

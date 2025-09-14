@@ -1,51 +1,76 @@
 ---
-description: 
+description:
 globs: cli/**/*,templates/**/*,kit-config.json,README.md
 alwaysApply: false
 ---
+
 # CLI development & Rule generation
 
 When you modify the CLI or add new stack templates:
 
 1. **CLI**
-   * Update prompts in `cli/index.js`.
-   * Organize services in appropriate files in `cli/services/`:
-     * `base-service.js` - Base functionality shared across all services
-     * `file-service.js` - File operations and template processing
-     * `config-service.js` - Configuration and constants management
-     * `stack-service.js` - Common stack functionality
-     * `mcp/mcp-service.js` - MCP tools integration (v2.0+)
-     * Stack-specific services in `stack/` directory (e.g., `stack/nextjs-service.js`, `stack/laravel-service.js`)
-   * Respect `templates/kit-config.json` for configuration.
-   * Add/adjust helper scripts in `version-detector.js`.
+
+    - Update prompts in `cli/index.js`.
+    - Organize services in appropriate files in `cli/services/`:
+        - `base-service.js` - Base functionality shared across all services
+        - `file-service.js` - File operations and template processing
+        - `config-service.js` - Configuration and constants management
+        - `stack-service.js` - Common stack functionality
+        - `mcp/mcp-service.js` - MCP tools integration (v2.0+)
+        - Stack-specific services in `stack/` directory (e.g., `stack/nextjs-service.js`, `stack/laravel-service.js`)
+    - Respect `templates/kit-config.json` for configuration.
+    - Add/adjust helper scripts in `version-detector.js`.
 
 2. **New stacks or architectures**
-   * Create `templates/stacks/<stack>/base/` with generic rules.
-   * Create `templates/stacks/<stack>/architectures/<arch_name>/` with architecture-specific rules.
-   * Add overlay folders `v<major>/` for breaking changes only.
-   * Update `kit-config.json`:
-     * `globs`
-     * `version_ranges`
-     * `default_architecture`
-     * `architectures` for stack-specific architectures
-     * `pattern_rules` if needed.
+
+    - Create `templates/stacks/<stack>/base/` with generic rules.
+    - Create `templates/stacks/<stack>/architectures/<arch_name>/` with architecture-specific rules.
+    - Add overlay folders `v<major>/` for breaking changes only.
+    - Update `kit-config.json`:
+        - `globs`
+        - `version_ranges`
+        - `default_architecture`
+        - `architectures` for stack-specific architectures
+        - `pattern_rules` if needed.
 
 3. **MCP Tools (v2.0+)**
-   * Create `templates/mcp-tools/<tool>/` with tool-specific rules.
-   * Add tool usage patterns and best practices.
-   * Update `kit-config.json` in `mcp_tools` section:
-     * `name` - Display name for the tool
-     * `description` - Detailed description of functionality
-   * Test multi-select functionality in CLI.
+
+    - Create `templates/mcp-tools/<tool>/` with tool-specific rules.
+    - Add tool usage patterns and best practices.
+    - Update `kit-config.json` in `mcp_tools` section:
+        - `name` - Display name for the tool
+        - `description` - Detailed description of functionality
+    - Test multi-select functionality in CLI.
 
 4. **Template variables**
-   * Use placeholders like `{projectPath}`, `{detectedVersion}`, `{versionRange}`, `{stack}` in templates.
-   * These will be automatically replaced when generating rules.
+
+    - Use placeholders like `{projectPath}`, `{detectedVersion}`, `{versionRange}`, `{stack}` in templates.
+    - These will be automatically replaced when generating rules.
 
 5. **Docs**
-   * Document new behaviour in `README.md` & `/docs/cli.md`.
-   * Update `/docs/mcp-tools-guide.md` for MCP tools changes.
-   * Change `Implementation Status` block with percent progress of current implementations and add new if is a new implementation.
+
+    - Document new behaviour in `README.md` & `/docs/cli.md`.
+    - Update `/docs/mcp-tools-guide.md` for MCP tools changes.
+    - Change `Implementation Status` block with percent progress of current implementations and add new if is a new implementation.
+
+6. **CLI Testing**
+    - Always use `--auto` or `--auto-install` when testing CLI commands to avoid interactive prompts
+    - Test different IDEs with specific flags:
+
+        ```bash
+        # Test with auto-install (no prompts)
+        node cli/index.js --stack=laravel --version=12 --global --auto
+
+        # Test different IDEs
+        node cli/index.js --stack=react --version=18 --ide=claude --auto
+        node cli/index.js --stack=nextjs --version=14 --ide=vscode --auto
+        ```
+
+    - Verify file generation in correct directories:
+        - Cursor: `.cursor/rules/rules-kit/`
+        - Claude: `CLAUDE.md`
+        - VS Code: `.github/copilot-instructions.md`
+    - Test backup functionality for existing files
 
 After changes, run:
 

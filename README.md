@@ -39,7 +39,7 @@
   <img src="assets/terminal_select_ide.png" alt="Agent Rules Kit IDE Selector" width="800" />
 </p>
 
-*Choose from 9 supported IDEs including Cursor, VS Code/GitHub Copilot, Windsurf, Continue, Claude, and more.*
+_Choose from 9 supported IDEs including Cursor, VS Code/GitHub Copilot, Windsurf, Continue, Claude, and more._
 
 ## What is Agent Rules Kit?
 

@@ -318,31 +318,31 @@ function showProjectInfo() {
     // Get available stacks dynamically from the service
     const availableStacks = stackService.getAvailableStacks();
     const config = configService.loadKitConfig(templatesDir);
-    
+
     // Get available MCP tools
     const mcpTools = mcpService.getAvailableMcpTools();
-    
+
     console.log(`\n${chalk.bold('Agent Rules Kit')} ${chalk.blue(`v${version}`)}`);
     console.log('='.repeat(50));
-    
+
     console.log(`\n${chalk.green('📝 Description:')}`);
     console.log('  Bootstrap Cursor rules (.mdc) for AI agent-guided projects.');
     console.log('  This tool helps you generate and maintain project-specific rules');
     console.log('  for multiple frameworks and architectures.');
-    
+
     // Show supported stacks with versions and architectures
     console.log(`\n${chalk.green('📚 Supported Stacks:')} (${availableStacks.length} total)`);
     availableStacks.forEach(stack => {
         const stackConfig = config[stack] || {};
         const versions = stackConfig.version_ranges ? Object.keys(stackConfig.version_ranges) : [];
         const architectures = stackService.getAvailableArchitectures(stack);
-        
+
         console.log(`\n  ${chalk.bold(stack.toUpperCase())}`);
-        
+
         if (versions.length > 0) {
             console.log(`    🏷️  Versions: ${versions.join(', ')}`);
         }
-        
+
         if (architectures.length > 0) {
             const archNames = architectures.map(arch => arch.value).join(', ');
             console.log(`    🏗️  Architectures: ${archNames}`);
@@ -351,23 +351,23 @@ function showProjectInfo() {
             }
         }
     });
-    
+
     // Show supported MCP tools
     console.log(`\n${chalk.green('🔧 MCP Tools:')} (${mcpTools.length} available)`);
     mcpTools.forEach(tool => {
         console.log(`  • ${chalk.bold(tool.name)}`);
         console.log(`    ${tool.description}`);
     });
-    
+
     // Show supported IDEs
     console.log(`\n${chalk.green('🎯 Supported IDEs:')} (${Object.keys(IDE_CONFIGS).length} targets)`);
     Object.entries(IDE_CONFIGS).forEach(([key, config]) => {
-        const formatInfo = config.multiple 
-            ? `Multiple files in ${config.dir}` 
+        const formatInfo = config.multiple
+            ? `Multiple files in ${config.dir}`
             : `Single file: ${config.file}`;
         console.log(`  • ${chalk.bold(config.name)} (${key}): ${formatInfo}`);
     });
-    
+
     console.log(`\n${chalk.green('💡 Usage Examples:')}`);
     console.log('  npx agent-rules-kit                    # Interactive mode');
     console.log('  npx agent-rules-kit --info              # Show this information');
@@ -375,15 +375,15 @@ function showProjectInfo() {
     console.log('  npx agent-rules-kit --stack=laravel     # Direct stack installation');
     console.log('  npx agent-rules-kit --ide=vscode        # Target specific IDE');
     console.log('  npx agent-rules-kit --global --auto     # Global rules only');
-    
+
     console.log(`\n${chalk.green('🔗 Links:')}`);
     console.log('  Repository: https://github.com/tecnomanu/agent-rules-kit');
     console.log('  Documentation: https://github.com/tecnomanu/agent-rules-kit/blob/main/README.md');
     console.log('  Agent Guide: https://github.com/tecnomanu/agent-rules-kit/blob/main/AGENTS.md');
-    
+
     console.log(`\n${chalk.green('👨‍💻 Author:')}`);
     console.log('  Manuel Bruña');
-    
+
     console.log('\n' + '='.repeat(50));
 }
 
@@ -413,21 +413,7 @@ async function main() {
         await cliService.askContinue();
     }
 
-    // Ask for the relative path to the project first (or use CLI option)
-    const projectPath = cliOptions.projectPath
-        ? cliOptions.projectPath
-        : cliOptions.autoInstall
-            ? '.'
-            : await cliService.askProjectPath();
-
-    // Ask for the application directory within the project (or use CLI option)
-    const appDirectory = cliOptions.appDirectory
-        ? cliOptions.appDirectory
-        : cliOptions.autoInstall
-            ? '.'
-            : await cliService.askAppDirectory();
-
-    // Ask for IDE selection (or use CLI option)
+    // Ask for IDE selection FIRST (or use CLI option)
     let selectedIde = cliOptions.ide;
     if (!selectedIde) {
         if (cliOptions.autoInstall) {
@@ -455,6 +441,24 @@ async function main() {
             selectedIde = ide;
         }
     }
+
+    // Get IDE configuration to adapt path questions
+    const selectedIdeConfig = IDE_CONFIGS[selectedIde];
+
+    // Ask for the relative path to the project (or use CLI option)
+    // Adapt the question based on the selected IDE
+    const projectPath = cliOptions.projectPath
+        ? cliOptions.projectPath
+        : cliOptions.autoInstall
+            ? '.'
+            : await cliService.askProjectPath(selectedIde, selectedIdeConfig);
+
+    // Ask for the application directory within the project (or use CLI option)
+    const appDirectory = cliOptions.appDirectory
+        ? cliOptions.appDirectory
+        : cliOptions.autoInstall
+            ? '.'
+            : await cliService.askAppDirectory();
 
     // Format the rules directory path based on selected IDE
     const rulesDir = formatRulesDirForIde(selectedIde, projectPath);
