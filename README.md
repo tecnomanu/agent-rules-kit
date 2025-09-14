@@ -31,13 +31,19 @@
   </a>
 </p>
 
-> Bootstrap **Cursor** rules (`.mdc`) for AI agent-guided projects. This tool helps you generate and maintain project-specific rules for multiple frameworks and architectures.
+> CLI tool to bootstrap AI agent rules for multiple IDEs and frameworks. Generates optimized rules for Cursor, VS Code, Claude, and 6+ other AI coding assistants.
+
+## 🎯 IDE Selection Interface
+
+<p align="center">
+  <img src="assets/terminal_select_ide.png" alt="Agent Rules Kit IDE Selector" width="800" />
+</p>
+
+*Choose from 9 supported IDEs including Cursor, VS Code/GitHub Copilot, Windsurf, Continue, Claude, and more.*
 
 ## What is Agent Rules Kit?
 
-Agent Rules Kit is a CLI tool that facilitates the installation and configuration of rules for Cursor AI, the
-AI-powered IDE. The rules help AI agents better understand the structure, patterns, and best practices of
-different technology stacks.
+Agent Rules Kit is a CLI tool that facilitates the installation and configuration of rules for multiple AI-powered IDEs and coding assistants. The rules help AI agents better understand the structure, patterns, and best practices of different technology stacks, generating optimized configurations for each supported IDE.
 
 ## 🎧 Audio Introduction
 
