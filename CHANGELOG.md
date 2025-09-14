@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.3...v3.3.0) (2025-09-14)
+
+
+### Features
+
+* ✨ add styling and state management documentation for React, Vue, and Svelte ([8fe670c](https://github.com/tecnomanu/agent-rules-kit/commit/8fe670c6f91185ec9046790175112a8d6348ff9c))
+
 ## [3.2.3](https://github.com/tecnomanu/agent-rules-kit/compare/v3.2.2...v3.2.3) (2025-09-14)
 
 
