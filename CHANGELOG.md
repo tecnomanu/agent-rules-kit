@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.1.0...v3.1.1) (2025-09-14)
+
+
+### Bug Fixes
+
+* 📝 update package description to reflect multi-IDE support ([bfa34ed](https://github.com/tecnomanu/agent-rules-kit/commit/bfa34edf82fb06831131b42a9449b4fbcf7c6638))
+
 # [3.1.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.0.1...v3.1.0) (2025-09-14)
 
 
