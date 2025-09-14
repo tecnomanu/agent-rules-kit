@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/tecnomanu/agent-rules-kit/compare/v3.1.1...v3.2.0) (2025-09-14)
+
+
+### Features
+
+* ✨ add IDE selector interface screenshot to README ([3f2eec6](https://github.com/tecnomanu/agent-rules-kit/commit/3f2eec68d0e262471c8bb0e59f75165a18b66b40))
+
 ## [3.1.1](https://github.com/tecnomanu/agent-rules-kit/compare/v3.1.0...v3.1.1) (2025-09-14)
 
 
