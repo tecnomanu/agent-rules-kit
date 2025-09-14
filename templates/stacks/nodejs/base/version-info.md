@@ -12,23 +12,25 @@ This project is using Node.js **{detectedVersion}**. This guide covers version-s
 
 ### Current LTS Versions
 
-- **Node.js 18.x** (LTS until April 2025)
-  - ES2022 support
-  - Fetch API built-in
-  - Web Streams API
-  - Test runner (experimental)
+-   **Node.js 18.x** (LTS until April 2025)
 
-- **Node.js 20.x** (LTS until April 2026)
-  - ES2023 support
-  - Stable Test runner
-  - Permission Model
-  - Single Executable Applications
+    -   ES2022 support
+    -   Fetch API built-in
+    -   Web Streams API
+    -   Test runner (experimental)
 
-- **Node.js 22.x** (Current, LTS from October 2024)
-  - ES2024 support
-  - V8 12.x engine
-  - Enhanced performance
-  - Improved diagnostics
+-   **Node.js 20.x** (LTS until April 2026)
+
+    -   ES2023 support
+    -   Stable Test runner
+    -   Permission Model
+    -   Single Executable Applications
+
+-   **Node.js 22.x** (Current, LTS from October 2024)
+    -   ES2024 support
+    -   V8 12.x engine
+    -   Enhanced performance
+    -   Improved diagnostics
 
 ## Version Detection
 
@@ -63,9 +65,9 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 
 describe('Math operations', () => {
-  test('addition', () => {
-    assert.strictEqual(2 + 2, 4);
-  });
+	test('addition', () => {
+		assert.strictEqual(2 + 2, 4);
+	});
 });
 ```
 
@@ -88,10 +90,10 @@ process.permission.has('fs.read', '/path/to/file');
 
 ```json
 {
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  }
+	"engines": {
+		"node": ">=18.0.0",
+		"npm": ">=8.0.0"
+	}
 }
 ```
 
@@ -99,13 +101,13 @@ process.permission.has('fs.read', '/path/to/file');
 
 ```json
 {
-  "scripts": {
-    "test": "node --test",
-    "test:watch": "node --test --watch",
-    "test:coverage": "node --test --experimental-test-coverage",
-    "start": "node --env-file=.env server.js",
-    "dev": "node --watch server.js"
-  }
+	"scripts": {
+		"test": "node --test",
+		"test:watch": "node --test --watch",
+		"test:coverage": "node --test --experimental-test-coverage",
+		"start": "node --env-file=.env server.js",
+		"dev": "node --watch server.js"
+	}
 }
 ```
 
@@ -171,10 +173,10 @@ CMD ["node", "server.js"]
 
 ### Node.js 20+ Optimizations
 
-- **V8 Engine**: Improved JavaScript execution
-- **Memory Usage**: Better garbage collection
-- **Startup Time**: Faster application initialization
-- **HTTP Performance**: Enhanced HTTP/2 and HTTP/3 support
+-   **V8 Engine**: Improved JavaScript execution
+-   **Memory Usage**: Better garbage collection
+-   **Startup Time**: Faster application initialization
+-   **HTTP Performance**: Enhanced HTTP/2 and HTTP/3 support
 
 ## Security Updates
 
@@ -191,12 +193,12 @@ nvm use --lts
 
 ## Compatibility Matrix
 
-| Feature | Node 18 | Node 20 | Node 22 |
-|---------|---------|---------|---------|
-| Fetch API | ✅ | ✅ | ✅ |
-| Test Runner | 🧪 | ✅ | ✅ |
-| Web Streams | ✅ | ✅ | ✅ |
-| Permission Model | ❌ | ✅ | ✅ |
-| Single Executable | ❌ | 🧪 | ✅ |
+| Feature           | Node 18 | Node 20 | Node 22 |
+| ----------------- | ------- | ------- | ------- |
+| Fetch API         | ✅      | ✅      | ✅      |
+| Test Runner       | 🧪      | ✅      | ✅      |
+| Web Streams       | ✅      | ✅      | ✅      |
+| Permission Model  | ❌      | ✅      | ✅      |
+| Single Executable | ❌      | 🧪      | ✅      |
 
 Use `node --version` to verify your runtime version and refer to the [Node.js release schedule](https://nodejs.org/en/about/releases) for maintenance dates.

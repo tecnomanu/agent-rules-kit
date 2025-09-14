@@ -12,15 +12,16 @@ This project is using React Native **{detectedVersion}**. This guide covers vers
 
 ### Current Stable Versions
 
-- **React Native 0.72.x** (Stable)
-  - New Architecture (Fabric + TurboModules) stable
-  - Improved performance and stability
-  - Better TypeScript support
+-   **React Native 0.72.x** (Stable)
 
-- **React Native 0.73.x** (Latest)
-  - Bridgeless mode improvements
-  - Enhanced Metro bundler
-  - Better Hermes integration
+    -   New Architecture (Fabric + TurboModules) stable
+    -   Improved performance and stability
+    -   Better TypeScript support
+
+-   **React Native 0.73.x** (Latest)
+    -   Bridgeless mode improvements
+    -   Enhanced Metro bundler
+    -   Better Hermes integration
 
 ## Version Detection
 
@@ -37,19 +38,21 @@ cat package.json | grep "react-native"
 ## Platform Requirements
 
 ### iOS Requirements
-- iOS 12.4+ (React Native 0.72+)
-- iOS 13.0+ (React Native 0.73+)
+
+-   iOS 12.4+ (React Native 0.72+)
+-   iOS 13.0+ (React Native 0.73+)
 
 ### Android Requirements
-- API 21+ (Android 5.0+) for React Native 0.72+
-- API 23+ (Android 6.0+) for React Native 0.73+
+
+-   API 21+ (Android 5.0+) for React Native 0.72+
+-   API 23+ (Android 6.0+) for React Native 0.73+
 
 ## Node.js Compatibility
 
-| React Native | Node.js | NPM |
-|--------------|---------|-----|
-| 0.72.x | 16.x - 18.x | 8.x+ |
-| 0.73.x | 16.x - 20.x | 8.x+ |
+| React Native | Node.js     | NPM  |
+| ------------ | ----------- | ---- |
+| 0.72.x       | 16.x - 18.x | 8.x+ |
+| 0.73.x       | 16.x - 20.x | 8.x+ |
 
 ## Upgrade Guide
 
@@ -67,18 +70,18 @@ npx react-native upgrade 0.73.0
 
 ```javascript
 // android/gradle.properties
-newArchEnabled=true
+newArchEnabled = true;
 
 // ios/Podfile
-ENV['RCT_NEW_ARCH_ENABLED'] = '1'
+ENV['RCT_NEW_ARCH_ENABLED'] = '1';
 ```
 
 ## Compatibility Matrix
 
-| Feature | 0.72.x | 0.73.x |
-|---------|--------|--------|
-| New Architecture | ✅ | ✅ |
-| Bridgeless Mode | 🧪 | ✅ |
-| Hermes Default | ✅ | ✅ |
+| Feature          | 0.72.x | 0.73.x |
+| ---------------- | ------ | ------ |
+| New Architecture | ✅     | ✅     |
+| Bridgeless Mode  | 🧪     | ✅     |
+| Hermes Default   | ✅     | ✅     |
 
 Use `npx react-native --version` to verify your runtime version and refer to the [React Native releases](https://github.com/facebook/react-native/releases) for updates.
